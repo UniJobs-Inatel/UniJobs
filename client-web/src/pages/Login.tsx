@@ -8,6 +8,7 @@ import './Login.css';
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
 
   const handleLogin = () => {
 
@@ -73,12 +74,12 @@ const Login: React.FC = () => {
                 placeholder="Entre com sua senha"
                 className="input-field"
               />
-              <Label htmlFor="password">Confirmar senha:</Label>
+              <Label htmlFor="confirm-pass">Confirmar senha:</Label>
               <Input
                 type="password"
-                id="password-confirm"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="confirm-pass"
+                value={confirmPass}
+                onChange={(e) => setConfirmPass(e.target.value)}
                 placeholder="Confirme sua senha"
                 className="input-field"
               />
