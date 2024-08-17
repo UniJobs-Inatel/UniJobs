@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 import AppRoutes from './routes/Routes';
 
 const App: React.FC = () => (
@@ -7,4 +7,15 @@ const App: React.FC = () => (
   </div>
 );
 
-export default App;
+export default App;*/
+
+import { router } from "@/router/index";
+import { RouterProvider } from "react-router-dom";
+
+export function App() {
+  return (
+    <main>
+      <RouterProvider router={router} />
+    </main>
+  );
+}
