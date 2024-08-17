@@ -2,87 +2,92 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; // Supondo que Tabs e Tab sejam fornecidos pela Shadcn
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import './Login.css';
 
 const Login: React.FC = () => {
-  //const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
+
   };
 
   const handleRegister = () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
-    // Adicione lógica para cadastro
+    
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <Tabs defaultValue="login" className="mb-6">
-          <TabsList >
+    <div className="login-container">
+      <div className="login-card">
+        <Tabs defaultValue="login" className="tabs">
+          <TabsList>
             <TabsTrigger value="login">Entrar</TabsTrigger>
             <TabsTrigger value="register">Cadastrar-se</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <>
-              <h1 className="mb-6 text-2xl font-bold text-center">Login</h1>
-              <Label htmlFor="email">Email:</Label>
+              <h1 className="title">Entrar</h1>
+              <Label htmlFor="email">E-mail:</Label>
               <Input
                 type="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="mb-4"
+                placeholder="Entre com seu e-mail"
+                className="input-field"
               />
-              <Label htmlFor="password">Password:</Label>
+              <Label htmlFor="password">Senha:</Label>
               <Input
                 type="password"
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="mb-4"
+                placeholder="Entre com sua senha"
+                className="input-field"
               />
-              <Button onClick={handleLogin} className="w-full">
-                Login
+              <Button onClick={handleLogin} className="full-width-button">
+                Entrar
               </Button>
             </>
           </TabsContent>
 
           <TabsContent value="register">
             <>
-              <h1 className="mb-6 text-2xl font-bold text-center">Cadastrar-se</h1>
-              <Label htmlFor="email">Email:</Label>
+              <h1 className="title">Cadastrar-se</h1>
+              <Label htmlFor="email">E-mail:</Label>
               <Input
                 type="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="mb-4"
+                placeholder="Entre com seu e-mail"
+                className="input-field"
               />
-              <Label htmlFor="password">Password:</Label>
+              <Label htmlFor="password">Senha:</Label>
               <Input
                 type="password"
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="mb-4"
+                placeholder="Entre com sua senha"
+                className="input-field"
               />
-              <Button onClick={handleRegister} className="w-full">
-                Register
+              <Label htmlFor="password">Confirmar senha:</Label>
+              <Input
+                type="password"
+                id="password-confirm"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Confirme sua senha"
+                className="input-field"
+              />
+              <Button onClick={handleRegister} className="full-width-button">
+                Cadastrar-se
               </Button>
             </>
           </TabsContent>
         </Tabs>
-
       </div>
     </div>
   );
