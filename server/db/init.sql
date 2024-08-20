@@ -1,122 +1,122 @@
 CREATE DATABASE IF NOT EXISTS tcc;
 USE tcc;
 
--- Table: usuario
-CREATE TABLE usuario (
+-- Table: user
+CREATE TABLE user (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     status ENUM('created', 'confirmed', 'complete') NOT NULL,
-    type ENUM('aluno', 'faculdade', 'empresa') NOT NULL
+    type ENUM('student', 'college', 'company') NOT NULL
 );
 
--- Table: aluno
-CREATE TABLE aluno (
+-- Table: student
+CREATE TABLE student (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    sobrenome VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
     cpf VARCHAR(11) NOT NULL UNIQUE,
-    usuario_id INT UNSIGNED,
-    faculdade_id INT UNSIGNED,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE,
-    FOREIGN KEY (faculdade_id) REFERENCES faculdade(id) ON DELETE SET NULL
+    user_id INT UNSIGNED,
+    college_id INT UNSIGNED,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE SET NULL
 );
 
--- Table: experiencia
-CREATE TABLE experiencia (
+-- Table: experience
+CREATE TABLE experience (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    tipo ENUM('profissional', 'academica') NOT NULL,
-    descricao TEXT NOT NULL,
-    aluno_id INT UNSIGNED,
-    FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE
+    type ENUM('professional', 'academic') NOT NULL,
+    description TEXT NOT NULL,
+    student_id INT UNSIGNED,
+    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE
 );
 
--- Table: empresa
-CREATE TABLE empresa (
+-- Table: company
+CREATE TABLE company (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
     cnpj VARCHAR(14) NOT NULL UNIQUE,
-    area_atuacao VARCHAR(100) NOT NULL,
-    site_contato VARCHAR(255),
-    usuario_id INT UNSIGNED,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
+    field_of_activity VARCHAR(100) NOT NULL,
+    contact_website VARCHAR(255),
+    user_id INT UNSIGNED,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- Table: faculdade
-CREATE TABLE faculdade (
+-- Table: college
+CREATE TABLE college (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL
 );
 
--- Table: emailValido
-CREATE TABLE emailValido (
+-- Table: validEmail
+CREATE TABLE validEmail (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    final VARCHAR(100) NOT NULL,
-    faculdade_id INT UNSIGNED,
-    FOREIGN KEY (faculdade_id) REFERENCES faculdade(id) ON DELETE CASCADE
+    domain VARCHAR(100) NOT NULL,
+    college_id INT UNSIGNED,
+    FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE CASCADE
 );
 
--- Table: area
-CREATE TABLE area (
+-- Table: field
+CREATE TABLE field (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    area ENUM('ti', 'engenharias', 'exatas', 'humanas', 'business', 'saude', 'artes', 'agraria', 'direito', 'educacao') NOT NULL
+    field ENUM('it', 'engineering', 'exact_sciences', 'humanities', 'business', 'health', 'arts', 'agriculture', 'law', 'education') NOT NULL
 );
 
--- Table: cursos
-CREATE TABLE cursos (
+-- Table: courses
+CREATE TABLE courses (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    area_id INT UNSIGNED,
-    nome VARCHAR(100) NOT NULL,
-    faculdade_id INT UNSIGNED,
-    FOREIGN KEY (area_id) REFERENCES area(id) ON DELETE CASCADE,
-    FOREIGN KEY (faculdade_id) REFERENCES faculdade(id) ON DELETE CASCADE
+    field_id INT UNSIGNED,
+    name VARCHAR(100) NOT NULL,
+    college_id INT UNSIGNED,
+    FOREIGN KEY (field_id) REFERENCES field(id) ON DELETE CASCADE,
+    FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE CASCADE
 );
 
--- Table: vaga
-CREATE TABLE vaga (
+-- Table: job
+CREATE TABLE job (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome_da_vaga VARCHAR(100) NOT NULL,
-    descricao TEXT NOT NULL,
-    local VARCHAR(100) NOT NULL,
-    tipo ENUM('freelance', 'trainee', 'clt', 'pj', 'estagio') NOT NULL,
-    horas_semanais INT NOT NULL,
-    modalidade ENUM('presencial', 'hibrido', 'homeoffice') NOT NULL,
-    beneficios TEXT,
-    faixa_salarial VARCHAR(100),
-    requisitos TEXT NOT NULL,
-    area_id INT UNSIGNED,
-    FOREIGN KEY (area_id) REFERENCES area(id) ON DELETE CASCADE
+    job_name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    type ENUM('freelance', 'trainee', 'clt', 'pj', 'internship') NOT NULL,
+    weekly_hours INT NOT NULL,
+    mode ENUM('on_site', 'hybrid', 'remote') NOT NULL,
+    benefits TEXT,
+    salary_range VARCHAR(100),
+    requirements TEXT NOT NULL,
+    field_id INT UNSIGNED,
+    FOREIGN KEY (field_id) REFERENCES field(id) ON DELETE CASCADE
 );
 
--- Table: servico
-CREATE TABLE servico (
+-- Table: service
+CREATE TABLE service (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT NOT NULL,
-    preco DECIMAL(10, 2) NOT NULL,
-    faculdade_id INT UNSIGNED,
-    aluno_id INT UNSIGNED,
-    FOREIGN KEY (faculdade_id) REFERENCES faculdade(id) ON DELETE SET NULL,
-    FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE
+    name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    college_id INT UNSIGNED,
+    student_id INT UNSIGNED,
+    FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE SET NULL,
+    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE
 );
 
--- Table: publicacaoDeVaga
-CREATE TABLE publicacaoDeVaga (
+-- Table: jobPublication
+CREATE TABLE jobPublication (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    vaga_id INT UNSIGNED,
-    faculdade_id INT UNSIGNED,
-    empresa_id INT UNSIGNED,
-    FOREIGN KEY (vaga_id) REFERENCES vaga(id) ON DELETE CASCADE,
-    FOREIGN KEY (faculdade_id) REFERENCES faculdade(id) ON DELETE SET NULL,
-    FOREIGN KEY (empresa_id) REFERENCES empresa(id) ON DELETE CASCADE
+    job_id INT UNSIGNED,
+    college_id INT UNSIGNED,
+    company_id INT UNSIGNED,
+    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
+    FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE SET NULL,
+    FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
--- Table: vagasFavoritas
-CREATE TABLE vagasFavoritas (
+-- Table: favoriteJobs
+CREATE TABLE favoriteJobs (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    vaga_id INT UNSIGNED,
-    aluno_id INT UNSIGNED,
-    FOREIGN KEY (vaga_id) REFERENCES vaga(id) ON DELETE CASCADE,
-    FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE
+    job_id INT UNSIGNED,
+    student_id INT UNSIGNED,
+    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE
 );
