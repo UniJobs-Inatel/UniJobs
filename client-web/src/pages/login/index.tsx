@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import './index.css';
 
 const loginSchema = z.object({
   email: z.string().nonempty('O e-mail é obrigatório').email('E-mail inválido'),
@@ -54,25 +53,25 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <Tabs defaultValue="login" className="tabs">
+    <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg min-h-[28rem] max-h-[40rem]">
+        <Tabs defaultValue="login" className="mb-6">
           <TabsList>
             <TabsTrigger value="login">Entrar</TabsTrigger>
             <TabsTrigger value="register">Cadastrar-se</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <form onSubmit={handleSubmit(handleLogin)}>
-              <h1 className="title">Entrar</h1>
+              <h1 className="mb-6 text-2xl font-bold text-center">Entrar</h1>
               <Label htmlFor="email">E-mail:</Label>
               <Input
                 type="email"
                 id="email"
                 {...register('email')}
                 placeholder="Entre com seu e-mail"
-                className="input-field"
+                className="mb-4"
               />
-              {errors.email && <p className="error-message">{errors.email.message}</p>}
+              {errors.email && <p className="text-red-500">{errors.email.message}</p>}
               
               <Label htmlFor="password">Senha:</Label>
               <Input
@@ -80,11 +79,11 @@ const Login: React.FC = () => {
                 id="password"
                 {...register('password')}
                 placeholder="Entre com sua senha"
-                className="input-field"
+                className="mb-4"
               />
-              {errors.password && <p className="error-message">{errors.password.message}</p>}
+              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
               
-              <Button type="submit" className="full-width-button">
+              <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
                 Entrar
               </Button>
             </form>
@@ -92,16 +91,16 @@ const Login: React.FC = () => {
 
           <TabsContent value="register">
             <form onSubmit={handleRegisterSubmit(handleRegister)}>
-              <h1 className="title">Cadastrar-se</h1>
+              <h1 className="mb-6 text-2xl font-bold text-center">Cadastrar-se</h1>
               <Label htmlFor="email">E-mail:</Label>
               <Input
                 type="email"
                 id="email"
                 {...registerRegisterForm('email')}
                 placeholder="Entre com seu e-mail"
-                className="input-field"
+                className="mb-4"
               />
-              {registerErrors.email && <p className="error-message">{registerErrors.email.message}</p>}
+              {registerErrors.email && <p className="text-red-500">{registerErrors.email.message}</p>}
               
               <Label htmlFor="password">Senha:</Label>
               <Input
@@ -109,9 +108,9 @@ const Login: React.FC = () => {
                 id="password"
                 {...registerRegisterForm('password')}
                 placeholder="Entre com sua senha"
-                className="input-field"
+                className="mb-4"
               />
-              {registerErrors.password && <p className="error-message">{registerErrors.password.message}</p>}
+              {registerErrors.password && <p className="text-red-500">{registerErrors.password.message}</p>}
               
               <Label htmlFor="confirm-pass">Confirmar senha:</Label>
               <Input
@@ -119,11 +118,11 @@ const Login: React.FC = () => {
                 id="confirm-pass"
                 {...registerRegisterForm('confirmPass')}
                 placeholder="Confirme sua senha"
-                className="input-field"
+                className="mb-4"
               />
-              {registerErrors.confirmPass && <p className="error-message">{registerErrors.confirmPass.message}</p>}
+              {registerErrors.confirmPass && <p className="text-red-500">{registerErrors.confirmPass.message}</p>}
               
-              <Button type="submit" className="full-width-button">
+              <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
                 Cadastrar-se
               </Button>
             </form>
