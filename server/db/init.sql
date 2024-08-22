@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS tcc;
-USE tcc;
+CREATE DATABASE IF NOT EXISTS unijobs;
+USE unijobs;
 
 -- Table: user
 CREATE TABLE user (
