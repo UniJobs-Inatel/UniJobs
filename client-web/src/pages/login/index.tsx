@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const loginSchema = z.object({
@@ -57,14 +56,14 @@ const Login: React.FC = () => {
       <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg min-h-[28rem] max-h-[40rem]">
         <Tabs defaultValue="login" className="mb-6">
           <TabsList>
-            <TabsTrigger value="login">Entrar</TabsTrigger>
-            <TabsTrigger value="register">Cadastrar-se</TabsTrigger>
+            <TabsTrigger className='text-primary'  value="login">Entrar</TabsTrigger>
+            <TabsTrigger className='text-primary'  value="register">Cadastrar-se</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <form onSubmit={handleSubmit(handleLogin)}>
-              <h1 className="mb-6 text-2xl font-bold text-center">Entrar</h1>
-              <Label htmlFor="email">E-mail:</Label>
+              <h1 className="mb-6 text-2xl font-bold text-center text-primary">Entrar</h1>
               <Input
+              label='E-mail:'
                 type="email"
                 id="email"
                 {...register('email')}
@@ -73,8 +72,8 @@ const Login: React.FC = () => {
               />
               {errors.email && <p className="text-red-500">{errors.email.message}</p>}
               
-              <Label htmlFor="password">Senha:</Label>
               <Input
+              label='Senha:'
                 type="password"
                 id="password"
                 {...register('password')}
@@ -83,7 +82,7 @@ const Login: React.FC = () => {
               />
               {errors.password && <p className="text-red-500">{errors.password.message}</p>}
               
-              <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
+              <Button type="submit" className="w-full text-white bg-primary">
                 Entrar
               </Button>
             </form>
@@ -91,9 +90,9 @@ const Login: React.FC = () => {
 
           <TabsContent value="register">
             <form onSubmit={handleRegisterSubmit(handleRegister)}>
-              <h1 className="mb-6 text-2xl font-bold text-center">Cadastrar-se</h1>
-              <Label htmlFor="email">E-mail:</Label>
+              <h1 className="mb-6 text-2xl font-bold text-center text-primary">Cadastrar-se</h1>
               <Input
+              label='E-mail:'
                 type="email"
                 id="email"
                 {...registerRegisterForm('email')}
@@ -102,8 +101,8 @@ const Login: React.FC = () => {
               />
               {registerErrors.email && <p className="text-red-500">{registerErrors.email.message}</p>}
               
-              <Label htmlFor="password">Senha:</Label>
               <Input
+              label='Senha:'
                 type="password"
                 id="password"
                 {...registerRegisterForm('password')}
@@ -112,8 +111,8 @@ const Login: React.FC = () => {
               />
               {registerErrors.password && <p className="text-red-500">{registerErrors.password.message}</p>}
               
-              <Label htmlFor="confirm-pass">Confirmar senha:</Label>
               <Input
+              label='Confirmar senha:'
                 type="password"
                 id="confirm-pass"
                 {...registerRegisterForm('confirmPass')}
@@ -122,7 +121,7 @@ const Login: React.FC = () => {
               />
               {registerErrors.confirmPass && <p className="text-red-500">{registerErrors.confirmPass.message}</p>}
               
-              <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
+              <Button type="submit" className="w-full text-white bg-primary">
                 Cadastrar-se
               </Button>
             </form>
