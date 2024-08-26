@@ -1,5 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../entities/user.entity';
+import { Student } from '../entities/student.entity';
+import { Experience } from '../entities/experience.entity';
+import { Company } from '../entities/company.entity';
+import { College } from '../entities/college.entity';
+import { ValidEmail } from '../entities/valid-email.entity';
+import { Field } from '../entities/field.entity';
+import { Course } from '../entities/course.entity';
+import { Job } from '../entities/job.entity';
+import { Service } from '../entities/service.entity';
+import { JobPublication } from '../entities/job-publication.entity';
+import { FavoriteJobs } from '../entities/favorite-jobs.entity';
+import { Verification } from 'src/entities/verification.entity';
 
 @Module({
   imports: [
@@ -10,7 +23,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      entities: [
+        User,
+        Student,
+        Experience,
+        Company,
+        College,
+        ValidEmail,
+        Field,
+        Course,
+        Job,
+        Service,
+        JobPublication,
+        FavoriteJobs,
+        Verification,
+      ],
       synchronize: true, // Set to 'false' in production
     }),
   ],
