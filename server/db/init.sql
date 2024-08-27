@@ -46,7 +46,8 @@ CREATE TABLE company (
 -- Table: college
 CREATE TABLE college (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    company_id INT UNSIGNED,
+    FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
 -- Table: validEmail
