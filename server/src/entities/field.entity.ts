@@ -25,8 +25,9 @@ export class Field {
   field: string;
 
   @OneToMany(() => Course, (course) => course.field)
-  course: Course[];
+  courses: Course[];
 
   @OneToMany(() => Job, (job) => job.field)
   jobs: Job[];
 }
+

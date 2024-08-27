@@ -15,7 +15,8 @@ export class Verification {
   @Column()
   verificationCode: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
 }
+

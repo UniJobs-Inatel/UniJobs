@@ -10,11 +10,12 @@ export class Course {
   @Column()
   name: string;
 
-  @ManyToOne(() => Field, (field) => field.course, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Field, (field) => field.courses, { onDelete: 'CASCADE' })
   field: Field;
 
-  @ManyToOne(() => College, (college) => college.course, {
+  @ManyToOne(() => College, (college) => college.courses, {
     onDelete: 'CASCADE',
   })
   college: College;
 }
+
