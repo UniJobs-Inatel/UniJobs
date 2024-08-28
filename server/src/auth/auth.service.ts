@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -17,7 +21,18 @@ export class AuthService {
     private mailService: MailService,
   ) {}
 
-  async register(email: string, password: string, type: string): Promise<void> {
+  async register(
+    email: string,
+    password: string,
+    type: string,
+  ): Promise<{ message: string; verificationLink: string }> {
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (existingUser) {
+      throw new ConflictException('Email already registered.');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = this.userRepository.create({
@@ -35,8 +50,14 @@ export class AuthService {
     });
     await this.verificationRepository.save(verification);
 
-    const verificationUrl = `https://puginarug.com/verify?code=${verificationCode}`;
+    const verificationUrl = `http://localhost:4000/api/auth/verify?code=${verificationCode}`;
+
     await this.mailService.sendVerificationEmail(user.email, verificationUrl);
+
+    return {
+      message: 'User created successfully',
+      verificationLink: verificationUrl,
+    };
   }
 
   async verifyAccount(verificationCode: string): Promise<void> {

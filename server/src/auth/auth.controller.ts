@@ -1,4 +1,13 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Res,
+  BadRequestException,
+  Post,
+  Body,
+} from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -10,12 +19,24 @@ export class AuthController {
     @Body('email') email: string,
     @Body('password') password: string,
     @Body('type') type: string,
-  ): Promise<void> {
+  ): Promise<{ message: string; verificationLink: string }> {
     return this.authService.register(email, password, type);
   }
 
-  @Post('verify')
-  async verifyAccount(@Body('code') code: string): Promise<void> {
-    return this.authService.verifyAccount(code);
+  @Get('verify')
+  async verifyAccount(
+    @Query('code') code: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      await this.authService.verifyAccount(code);
+      res.redirect('http://localhost:4000/api');
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        res.status(400).send('Invalid verification code');
+      } else {
+        throw error;
+      }
+    }
   }
 }
