@@ -3,6 +3,9 @@ import { DatabaseModule } from './database/database.module'; // Adjust the path 
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { MailService } from './mail/mail.service';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -10,8 +13,10 @@ import { AppService } from './app.service';
       isGlobal: true,
     }),
     DatabaseModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MailService],
 })
 export class AppModule {}
