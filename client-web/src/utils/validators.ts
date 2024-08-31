@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Validates a CPF number. Built to use with Zod.
  *
@@ -24,3 +26,40 @@ export const cpfValidator = (cpf: string): boolean => {
   
     return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10];
   };
+
+
+  /**
+ * Define a default required message to a zod type.
+ *
+ * @param message default message to string
+ */
+export const requiredString = (message: string = 'Campo obrigatório') => z.string().min(1, { message });
+
+/**
+* Define a default required message to a zod type.
+*
+* @param message default message to number
+*/
+export const requiredNumber = (message: string = 'Campo obrigatório') => z.number({ invalid_type_error: message });
+
+
+/**
+* Validate string date in dd/mm/yyyy format.
+*
+* @param dateString date in string format.
+*/
+export const isValidDate = (dateString: string) => {
+  const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+  if (!regex.test(dateString)) {
+    return false;
+  }
+  
+  const [day, month, year] = dateString.split('/').map(Number);
+  const date = new Date(year, month - 1, day);
+  
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+};
