@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS tcc;
-USE tcc;
+CREATE DATABASE IF NOT EXISTS unijobs;
+USE unijobs;
 
 -- Table: user
 CREATE TABLE user (
@@ -46,7 +46,8 @@ CREATE TABLE company (
 -- Table: college
 CREATE TABLE college (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    company_id INT UNSIGNED,
+    FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
 -- Table: validEmail
@@ -63,8 +64,8 @@ CREATE TABLE field (
     field ENUM('it', 'engineering', 'exact_sciences', 'humanities', 'business', 'health', 'arts', 'agriculture', 'law', 'education') NOT NULL
 );
 
--- Table: courses
-CREATE TABLE courses (
+-- Table: course
+CREATE TABLE course (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     field_id INT UNSIGNED,
     name VARCHAR(100) NOT NULL,
@@ -119,4 +120,12 @@ CREATE TABLE favoriteJobs (
     student_id INT UNSIGNED,
     FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE
+);
+
+-- Table: verification
+CREATE TABLE verification (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    verificationCode VARCHAR(36) NOT NULL,
+    user_id INT UNSIGNED,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );

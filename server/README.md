@@ -1,73 +1,174 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# UniJobs Server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project is a NestJS backend application that uses MySQL as the database. The application is containerized using Docker, allowing for easy setup and deployment.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Prerequisites
 
-## Description
+Before running the application, ensure that you have Docker and Docker Compose installed on your machine.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Installation Guide
 
-## Installation
+### Install Docker
+
+#### On Linux
+
+1. **Update your package index:**
+
+   ```bash
+   sudo apt-get update
+   ```
+
+2. **Install necessary packages:**
+
+   ```bash
+   sudo apt-get install \
+     ca-certificates \
+     curl \
+     gnupg \
+     lsb-release
+   ```
+
+3. **Add Docker’s official GPG key:**
+
+   ```bash
+   sudo mkdir -p /etc/apt/keyrings
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+   ```
+
+4. **Set up the Docker repository:**
+
+   ```bash
+   echo \
+     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+     $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   ```
+
+5. **Install Docker Engine:**
+
+   ```bash
+   sudo apt-get update
+   sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+   ```
+
+6. **Verify the Docker installation:**
+
+   ```bash
+   sudo docker --version
+   ```
+
+7. **Install Docker Compose:**
+
+   Docker Compose is included in the Docker installation as of Docker 1.27.0. You can verify its installation with:
+
+   ```bash
+   docker-compose --version
+   ```
+
+#### On Windows
+
+1. **Download Docker Desktop:**
+
+   Download Docker Desktop for Windows from [Docker's official website](https://www.docker.com/products/docker-desktop).
+
+2. **Install Docker Desktop:**
+
+   - Run the installer.
+   - During the installation process, ensure that the "Install required Windows components for WSL 2" option is selected.
+   - Follow the on-screen instructions to complete the installation.
+
+3. **Enable WSL 2:**
+
+   Docker Desktop on Windows uses WSL 2 (Windows Subsystem for Linux) to run containers. Make sure WSL 2 is enabled:
+
+   - Open PowerShell as Administrator.
+   - Run the following command to set WSL 2 as the default version:
+
+     ```bash
+     wsl --set-default-version 2
+     ```
+
+   - If WSL is not installed, you can install it by running:
+
+     ```bash
+     wsl --install
+     ```
+
+4. **Install a Linux Distribution:**
+
+   - When you first set up WSL, you will need to choose a Linux distribution from the Microsoft Store (e.g., Ubuntu). Follow the on-screen instructions to complete the setup.
+
+5. **Start Docker Desktop:**
+
+   - After installation, Docker Desktop should start automatically. If not, start it manually.
+   - Ensure Docker is running by checking the Docker icon in the system tray.
+
+6. **Verify the Docker installation:**
+
+   Open a terminal (PowerShell or Command Prompt) and run:
+
+   ```bash
+   docker --version
+   docker-compose --version
+   ```
+
+   Ensure both commands return the version number, indicating that Docker and Docker Compose are installed.
+
+7. **Using Git Bash or PowerShell:**
+
+   You can run Docker Compose commands either using **PowerShell** or **Git Bash** (if you have Git for Windows installed). Both work well, but Git Bash provides a more Unix-like command-line experience.
+
+### Clone the Repository
 
 ```bash
-$ yarn install
+git clone https://github.com/marialuizasr/TCC.git
+cd server
 ```
 
-## Running the app
+### Set Up Environment Variables
 
-```bash
-# development
-$ yarn run start
+1. Create a `.env` file in the root directory of your project:
 
-# watch mode
-$ yarn run start:dev
+   ```plaintext
+   MYSQL_ROOT_PASSWORD=TCC_2024_INATEL@
+   MYSQL_DATABASE=unijobs
 
-# production mode
-$ yarn run start:prod
-```
+   DATABASE_HOST=mysql
+   DATABASE_PORT=3306
+   DATABASE_USER=root
+   DATABASE_PASSWORD=TCC_2024_INATEL@
+   DATABASE_NAME=unijobs
+   ```
 
-## Test
+### Running the Backend
 
-```bash
-# unit tests
-$ yarn run test
+1. **Build and run the containers:**
 
-# e2e tests
-$ yarn run test:e2e
+   - Open a terminal (PowerShell or Git Bash) and navigate to your project directory.
+   - Run the following command:
 
-# test coverage
-$ yarn run test:cov
-```
+   ```bash
+   docker-compose up --build
+   ```
 
-## Support
+   This command will:
+   - Build the Docker images for both the MySQL database and the NestJS application.
+   - Start the containers with the correct environment variables.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+2. **Access the Application:**
 
-## Stay in touch
+   The NestJS application will be running on [http://localhost:4000/api](http://localhost:4000/api).
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+3. **Shut down the containers:**
 
-## License
+   When you're done, you can stop the containers with:
 
-Nest is [MIT licensed](LICENSE).
+   ```bash
+   docker-compose down
+   ```
+
+   or by simply pressing ctrl + c in the terminal where the containers are running.
+
+### Additional Notes
+
+- If you encounter any issues with MySQL not starting correctly, check that your `.env` file does not contain the `MYSQL_USER` and `MYSQL_PASSWORD` variables set for the root user. These should be removed.
+- For production, remember to set `synchronize: false` in your `TypeOrmModule` configuration to prevent accidental data loss.
