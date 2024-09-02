@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../entities/user.entity';
 import { Verification } from '../entities/verification.entity';
 import { MailService } from '../mail/mail.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +21,7 @@ export class AuthService {
     @InjectRepository(Verification)
     private verificationRepository: Repository<Verification>,
     private mailService: MailService,
+    private jwtService: JwtService,
   ) {}
 
   async register(
@@ -75,5 +78,64 @@ export class AuthService {
     await this.userRepository.save(user);
 
     await this.verificationRepository.remove(verification);
+  }
+
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      // Removendo esse lint para essa linha para poder remover password do usuário antes do return
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
+  async login(
+    user: any,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      type: user.type,
+      status: user.status,
+    };
+    return {
+      accessToken: this.jwtService.sign(payload),
+      refreshToken: this.generateRefreshToken(user.id),
+    };
+  }
+
+  generateRefreshToken(userId: number): string {
+    const payload = { sub: userId };
+    return this.jwtService.sign(payload, { expiresIn: '7d' });
+  }
+
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+
+      if (!payload.sub) {
+        throw new UnauthorizedException(
+          'Invalid token: No user ID in token payload',
+        );
+      }
+
+      const user = await this.userRepository.findOne({
+        where: { id: payload.sub },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException(
+          'Invalid refresh token: User not found',
+        );
+      }
+
+      return this.login(user);
+    } catch (error) {
+      throw new UnauthorizedException('Error validating refresh token');
+    }
   }
 }
