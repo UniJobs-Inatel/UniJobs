@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from './database/database.module'; // Adjust the path as needed
+import { DevModule } from './dev/dev.module';
+import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,6 +16,7 @@ import { UserModule } from './user/user.module';
     DatabaseModule,
     AuthModule,
     UserModule,
+    DevModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],
