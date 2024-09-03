@@ -7,19 +7,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const ExperienceForm = () => {
-  const experienceSchema = z.object({
-    position: requiredString(),
-    companyName: requiredString(),
-    description: requiredString(),
-    start: requiredString().refine((val) => isValidDate(val), {
-      message: "Formato de data inválido",
-    }),
-    end: z.string(),
-    xpType: requiredString(),
-  });
+const experienceSchema = z.object({
+  position: requiredString(),
+  companyName: requiredString(),
+  description: requiredString(),
+  start: requiredString().refine((val) => isValidDate(val), {
+    message: "Formato de data inválido",
+  }),
+  end: z.string(),
+  xpType: requiredString(),
+});
 
-  type ExperienceData = z.infer<typeof experienceSchema>;
+export type ExperienceData = z.infer<typeof experienceSchema>;
+
+interface ExperienceFormProps{
+  addNewExperience: (data: ExperienceData) => void;
+  selectedExperience:ExperienceData | null;
+}
+
+const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormProps) => {
 
   const {
     register,
@@ -29,18 +35,19 @@ const ExperienceForm = () => {
   } = useForm<ExperienceData>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
-      companyName: "",
-      description: "",
-      start: "",
-      position: "",
-      xpType: "academic",
+      companyName: selectedExperience?.companyName ?? "",
+      description: selectedExperience?.description ?? "",
+      start: selectedExperience?.start ?? "",
+      position: selectedExperience?.position ?? "",
+      xpType: selectedExperience?.xpType ?? "academic",
+      end: selectedExperience?.end ?? "",
     },
   });
 
   return (
     <form
       className="flex flex-col gap-4 items-center"
-      onSubmit={handleSubmit(() => {})}
+      onSubmit={handleSubmit((data:ExperienceData) => addNewExperience(data))}
     >
       <Controller
         name="xpType"
