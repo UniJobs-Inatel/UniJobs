@@ -19,9 +19,12 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   confirmPass: z.string().nonempty('Confirmação de senha é obrigatória'),
+  role: z.enum(['aluno', 'empresa'], {
+    errorMap: () => ({ message: "Selecione uma opção: aluno ou empresa" }),
+  }),
 }).refine((data) => data.password === data.confirmPass, {
   message: 'As senhas não coincidem',
-  path: ['confirmPass'], 
+  path: ['confirmPass'],
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -72,7 +75,7 @@ const Login: React.FC = () => {
                 className="mb-4"
               />
               {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-              
+
               <Label htmlFor="password">Senha:</Label>
               <Input
                 type="password"
@@ -82,7 +85,7 @@ const Login: React.FC = () => {
                 className="mb-4"
               />
               {errors.password && <p className="text-red-500">{errors.password.message}</p>}
-              
+
               <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
                 Entrar
               </Button>
@@ -101,7 +104,7 @@ const Login: React.FC = () => {
                 className="mb-4"
               />
               {registerErrors.email && <p className="text-red-500">{registerErrors.email.message}</p>}
-              
+
               <Label htmlFor="password">Senha:</Label>
               <Input
                 type="password"
@@ -111,7 +114,7 @@ const Login: React.FC = () => {
                 className="mb-4"
               />
               {registerErrors.password && <p className="text-red-500">{registerErrors.password.message}</p>}
-              
+
               <Label htmlFor="confirm-pass">Confirmar senha:</Label>
               <Input
                 type="password"
@@ -121,7 +124,33 @@ const Login: React.FC = () => {
                 className="mb-4"
               />
               {registerErrors.confirmPass && <p className="text-red-500">{registerErrors.confirmPass.message}</p>}
-              
+
+              <Label className="flex items-center mb-4">
+                Você é:
+                <div className="flex items-center ml-4">
+                  <Label className="flex items-center mr-4">
+                    <Input
+                      type="radio"
+                      value="aluno"
+                      {...registerRegisterForm('role')}
+                      className="mr-2"
+                    />
+                    Aluno
+                  </Label>
+                  <Label className="flex items-center">
+                    <Input
+                      type="radio"
+                      value="empresa"
+                      {...registerRegisterForm('role')}
+                      className="mr-2"
+                    />
+                    Empresa
+                  </Label>
+                </div>
+              </Label>
+
+              {registerErrors.role && <p className="text-red-500">{registerErrors.role.message}</p>}
+
               <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
                 Cadastrar-se
               </Button>
