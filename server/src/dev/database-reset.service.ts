@@ -24,6 +24,9 @@ export class DatabaseResetService {
       'job_publication',
       'favorite_jobs',
       'verification',
+      'tag',
+      'student_proficiency',
+      'job_tag',
     ];
 
     try {
