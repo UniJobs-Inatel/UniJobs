@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Field } from './field.entity';
+import { JobTag } from './job-tag.entity';
 
 @Entity()
 export class Job {
@@ -38,4 +45,7 @@ export class Job {
 
   @ManyToOne(() => Field, (field) => field.jobs, { onDelete: 'CASCADE' })
   field: Field;
+
+  @OneToMany(() => JobTag, (jobTag) => jobTag.job)
+  tags: JobTag[];
 }

@@ -10,6 +10,7 @@ import { College } from './college.entity';
 import { Experience } from './experience.entity';
 import { Service } from './service.entity';
 import { FavoriteJobs } from './favorite-jobs.entity';
+import { StudentProficiency } from './student-proficiency.entity';
 
 @Entity()
 export class Student {
@@ -41,4 +42,10 @@ export class Student {
 
   @OneToMany(() => FavoriteJobs, (favoriteJobs) => favoriteJobs.student)
   favoriteJobs: FavoriteJobs[];
+
+  @OneToMany(
+    () => StudentProficiency,
+    (studentProficiency) => studentProficiency.student,
+  )
+  proficiencies: StudentProficiency[];
 }
