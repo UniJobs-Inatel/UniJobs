@@ -9,6 +9,7 @@ import { MailService } from './mail/mail.service';
 import { UserModule } from './user/user.module';
 import { TagModule } from './tag/tag.module';
 import { CompanyModule } from './company/company.module';
+import { CollegeModule } from './college/college.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CompanyModule } from './company/company.module';
     DevModule,
     TagModule,
     CompanyModule,
+    CollegeModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],
