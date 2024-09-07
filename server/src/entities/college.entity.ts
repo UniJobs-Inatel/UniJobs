@@ -33,4 +33,3 @@ export class College {
   @ManyToOne(() => User, (user) => user.colleges, { onDelete: 'CASCADE' })
   user: User;
 }
-
