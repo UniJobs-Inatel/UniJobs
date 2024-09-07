@@ -16,4 +16,16 @@ export class Experience {
     onDelete: 'CASCADE',
   })
   student: Student;
+
+  @Column({ type: 'varchar', length: 255 })
+  company_name: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  position: string;
+
+  @Column({ type: 'date' })
+  start_date: Date;
+
+  @Column({ type: 'date', nullable: true })
+  end_date: Date;
 }

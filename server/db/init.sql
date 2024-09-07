@@ -28,6 +28,10 @@ CREATE TABLE experience (
     type ENUM('professional', 'academic') NOT NULL,
     description TEXT NOT NULL,
     student_id INT UNSIGNED,
+    company_name VARCHAR(255) NOT NULL,
+    position VARCHAR(100) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE,
     FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE
 );
 
