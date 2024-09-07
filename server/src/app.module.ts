@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailService } from './mail/mail.service';
 import { UserModule } from './user/user.module';
 import { TagModule } from './tag/tag.module';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TagModule } from './tag/tag.module';
     UserModule,
     DevModule,
     TagModule,
+    CompanyModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],
