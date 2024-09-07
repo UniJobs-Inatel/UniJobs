@@ -27,5 +27,5 @@ export class User {
   companies: Company[];
 
   @OneToMany(() => College, (college) => college.user)
-  colleges: College[]; 
+  colleges: College[];
 }
