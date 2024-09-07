@@ -13,6 +13,9 @@ import { Service } from '../entities/service.entity';
 import { JobPublication } from '../entities/job-publication.entity';
 import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { Verification } from 'src/entities/verification.entity';
+import { Tag } from '../entities/tag.entity'; // New entity
+import { StudentProficiency } from '../entities/student-proficiency.entity'; // New entity
+import { JobTag } from '../entities/job-tag.entity'; // New entity
 
 @Module({
   imports: [
@@ -37,6 +40,9 @@ import { Verification } from 'src/entities/verification.entity';
         JobPublication,
         FavoriteJobs,
         Verification,
+        Tag,
+        StudentProficiency,
+        JobTag,
       ],
       synchronize: true, // Set to 'false' in production
     }),
