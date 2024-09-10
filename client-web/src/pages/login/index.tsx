@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import useAuthStore from '@/stores/authStore';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
 
 const loginSchema = z.object({
   email: z.string().nonempty('O e-mail é obrigatório').email('E-mail inválido'),
@@ -33,6 +34,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Login: React.FC = () => {
+  const navigate = useNavigate(); // Utilize o hook useNavigate
   const {
     register,
     handleSubmit,
@@ -61,6 +63,7 @@ const Login: React.FC = () => {
       const { accessToken, refreshToken } = response.data;
       setTokens(accessToken, refreshToken);
       console.log('Login realizado com sucesso');
+      navigate('/job-offers'); // Redireciona após login bem-sucedido
     } catch (error) {
       console.error('Erro no login:', error);
     }
@@ -75,6 +78,7 @@ const Login: React.FC = () => {
       });
   
       console.log('Registro realizado com sucesso:', response.data.message);
+      navigate('/profile'); // Redireciona após registro bem-sucedido
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Erro no registro:', error.response?.data || error.message);

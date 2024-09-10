@@ -21,7 +21,7 @@ const useAuth = () => {
       }
     };
 
-    // Pode implementar lógica de verificação de expiração aqui
+    // Implementar lógica de verificação de expiração aqui
     refreshAccessToken();
   }, [refreshToken, setTokens, clearTokens]);
 
