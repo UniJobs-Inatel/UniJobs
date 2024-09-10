@@ -8,10 +8,13 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 
 # Install dependencies using Yarn
-RUN yarn install --production
+RUN yarn install
 
 # Copy the rest of your application's code
 COPY . .
+
+# Rebuild bcrypt if necessary
+RUN yarn add --dev bcrypt --build-from-source
 
 # Build the NestJS application
 RUN yarn build
