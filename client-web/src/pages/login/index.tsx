@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import useAuthStore from '@/stores/authStore';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
 
 const loginSchema = z.object({
   email: z.string().nonempty('O e-mail é obrigatório').email('E-mail inválido'),
@@ -19,7 +22,7 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   confirmPass: z.string().nonempty('Confirmação de senha é obrigatória'),
-  role: z.enum(['aluno', 'empresa'], {
+  role: z.enum(['student', 'company'], {
     errorMap: () => ({ message: "Selecione uma opção: aluno ou empresa" }),
   }),
 }).refine((data) => data.password === data.confirmPass, {
@@ -31,11 +34,12 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Login: React.FC = () => {
+  const navigate = useNavigate(); // Utilize o hook useNavigate
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData | RegisterFormData>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
@@ -47,12 +51,41 @@ const Login: React.FC = () => {
     resolver: zodResolver(registerSchema),
   });
 
-  const handleLogin = (data: LoginFormData) => {
-    console.log('Login data:', data);
+  const { setTokens } = useAuthStore();
+
+  const handleLogin = async (data: LoginFormData) => {
+    try {
+      const response = await axios.post('http://localhost:4000/api/auth/login', {
+        email: data.email,
+        password: data.password,
+      });
+
+      const { accessToken, refreshToken } = response.data;
+      setTokens(accessToken, refreshToken);
+      console.log('Login realizado com sucesso');
+      navigate('/job-offers'); // Redireciona após login bem-sucedido
+    } catch (error) {
+      console.error('Erro no login:', error);
+    }
   };
 
-  const handleRegister = (data: RegisterFormData) => {
-    console.log('Register data:', data);
+  const handleRegister = async (data: RegisterFormData) => {
+    try {
+      const response = await axios.post('http://localhost:4000/api/auth/register', {
+        email: data.email,
+        password: data.password,
+        type: data.role,
+      });
+  
+      console.log('Registro realizado com sucesso:', response.data.message);
+      navigate('/profile'); // Redireciona após registro bem-sucedido
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Erro no registro:', error.response?.data || error.message);
+      } else {
+        console.error('Erro desconhecido:', error);
+      }
+    }
   };
 
   return (
@@ -131,7 +164,7 @@ const Login: React.FC = () => {
                   <Label className="flex items-center mr-4">
                     <Input
                       type="radio"
-                      value="aluno"
+                      value="student"
                       {...registerRegisterForm('role')}
                       className="mr-2"
                     />
@@ -140,7 +173,7 @@ const Login: React.FC = () => {
                   <Label className="flex items-center">
                     <Input
                       type="radio"
-                      value="empresa"
+                      value="company"
                       {...registerRegisterForm('role')}
                       className="mr-2"
                     />

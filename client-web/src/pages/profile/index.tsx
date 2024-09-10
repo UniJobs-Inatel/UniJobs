@@ -1,5 +1,5 @@
 const Profile = () => {
-    return <>JobOffers</>
+    return <>Profile</>
 }
 
 export default Profile;
