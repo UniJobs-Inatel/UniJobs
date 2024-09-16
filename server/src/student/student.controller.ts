@@ -27,7 +27,8 @@ export class StudentController {
   async createProfile(
     @Body() createStudentProfileDto: CreateStudentProfileDto,
   ) {
-    return this.studentService.createProfile(createStudentProfileDto);
+    const userId = createStudentProfileDto.userId;
+    return this.studentService.createProfile(createStudentProfileDto, userId);
   }
 
   @Put('profile/:id')

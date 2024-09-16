@@ -1,4 +1,5 @@
 export class CreateStudentProfileDto {
+  userId: number;
   student: {
     first_name: string;
     last_name: string;
