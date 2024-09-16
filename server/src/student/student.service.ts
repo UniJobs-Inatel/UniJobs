@@ -31,6 +31,18 @@ export class StudentService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  async getProfileByUserId(userId: number) {
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['user', 'college', 'experiences', 'proficiencies'],
+    });
+    if (!student) {
+      throw new Error('Student profile not found for this user.');
+    }
+
+    return student;
+  }
+
   private async getCollegeIdByEmailDomain(email: string): Promise<number> {
     const emailDomain = email.split('@')[1];
 

@@ -39,6 +39,11 @@ export class StudentController {
     return this.studentService.updateProfile(id, updateStudentProfileDto);
   }
 
+  @Get('profile/user/:userId')
+  async getProfileByUserId(@Param('userId', ParseIntPipe) userId: number) {
+    return this.studentService.getProfileByUserId(userId);
+  }
+
   @Post('experience')
   @HttpCode(HttpStatus.CREATED)
   async createExperience(@Body() createExperienceDto: CreateExperienceDto) {
