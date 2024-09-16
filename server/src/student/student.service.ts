@@ -31,7 +31,7 @@ export class StudentService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  private async getCollegeByEmailDomain(email: string): Promise<College> {
+  private async getCollegeIdByEmailDomain(email: string): Promise<number> {
     const emailDomain = email.split('@')[1];
 
     const validEmail = await this.validEmailRepository.findOne({
@@ -40,10 +40,10 @@ export class StudentService {
     });
 
     if (validEmail && validEmail.college) {
-      return validEmail.college;
+      return validEmail.college.id;
     }
 
-    return await this.collegeRepository.findOne({ where: { id: 1 } });
+    return 1;
   }
 
   async createProfile(
@@ -57,12 +57,12 @@ export class StudentService {
       throw new Error('User not found');
     }
 
-    const college = await this.getCollegeByEmailDomain(user.email);
+    const collegeId = await this.getCollegeIdByEmailDomain(user.email);
 
     const newStudent = await this.studentRepository.save({
       ...student,
       user,
-      college,
+      college: { id: collegeId },
     });
 
     if (experiences && experiences.length > 0) {
