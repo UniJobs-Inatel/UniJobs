@@ -112,6 +112,7 @@ CREATE TABLE job_publication (
     job_id INT UNSIGNED,
     college_id INT UNSIGNED,
     company_id INT UNSIGNED,
+    status ENUM('pending', 'approved', 'reproved') DEFAULT 'pending',
     FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
     FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE SET NULL,
     FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
@@ -137,11 +138,10 @@ CREATE TABLE verification (
 -- Table: tag
 CREATE TABLE tag (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL
 );
 
 -- Table: job_tag
-
 CREATE TABLE job_tag (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id INT UNSIGNED,
@@ -151,7 +151,6 @@ CREATE TABLE job_tag (
 );
 
 -- Table: student_proficiency
-
 CREATE TABLE student_proficiency (
     student_id INT UNSIGNED,
     tag_id INT UNSIGNED,
