@@ -6,6 +6,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Job } from './job.entity';
 import { JobPublication } from './job-publication.entity';
 
 @Entity()
@@ -30,6 +31,9 @@ export class Company {
 
   @ManyToOne(() => User, (user) => user.companies, { onDelete: 'CASCADE' })
   user: User;
+
+  @OneToMany(() => Job, (job) => job.company)
+  jobs: Job[];
 
   @OneToMany(() => JobPublication, (jobPublication) => jobPublication.company)
   jobPublications: JobPublication[];

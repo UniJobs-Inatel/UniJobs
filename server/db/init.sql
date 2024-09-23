@@ -88,10 +88,12 @@ CREATE TABLE job (
     weekly_hours INT NOT NULL,
     mode ENUM('on_site', 'hybrid', 'remote') NOT NULL,
     benefits TEXT,
-    salary_range VARCHAR(100),
+    salary INT UNSIGNED,
     requirements TEXT NOT NULL,
     field_id INT UNSIGNED,
-    FOREIGN KEY (field_id) REFERENCES field(id) ON DELETE CASCADE
+    company_id INT UNSIGNED,
+    FOREIGN KEY (field_id) REFERENCES field(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
 -- Table: service
@@ -112,7 +114,9 @@ CREATE TABLE job_publication (
     job_id INT UNSIGNED,
     college_id INT UNSIGNED,
     company_id INT UNSIGNED,
-    status ENUM('pending', 'approved', 'reproved') DEFAULT 'pending',
+    status ENUM('pending', 'approved', 'reproved', 'removed') DEFAULT 'pending',
+    publication_request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    publication_date TIMESTAMP NULL,
     FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
     FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE SET NULL,
     FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE

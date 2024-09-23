@@ -51,9 +51,10 @@ export class StudentService {
 
     if (validEmail && validEmail.college) {
       return validEmail.college.id;
+    }else{
+      return 1;
     }
 
-    return 1;
   }
 
   async createProfile(

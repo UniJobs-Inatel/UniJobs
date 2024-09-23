@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Job } from './job.entity';
 import { College } from './college.entity';
 import { Company } from './company.entity';
@@ -8,7 +8,7 @@ export class JobPublication {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Job, (job) => job.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Job, (job) => job.jobPublications, { onDelete: 'CASCADE' })
   job: Job;
 
   @ManyToOne(() => College, (college) => college.jobPublications, {
@@ -16,6 +16,21 @@ export class JobPublication {
   })
   college: College;
 
-  @ManyToOne(() => Company, (company) => company.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Company, (company) => company.jobPublications, {
+    onDelete: 'CASCADE',
+  })
   company: Company;
+
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'approved', 'reproved', 'removed'],
+    default: 'pending',
+  })
+  status: string;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  publication_request_date: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  publication_date: Date | null;
 }

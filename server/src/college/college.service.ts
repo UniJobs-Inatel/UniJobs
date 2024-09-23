@@ -23,9 +23,17 @@ export class CollegeService {
 
     const company = await this.companyRepository.findOne({
       where: { id: company_id },
+      relations: ['user'],
     });
+
     if (!company) {
       throw new Error('Company not found');
+    }
+
+    if (company.user.type !== 'college') {
+      throw new Error(
+        'The user associated with this company must be of type "college".',
+      );
     }
 
     const college = this.collegeRepository.create({ company });

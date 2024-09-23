@@ -21,6 +21,7 @@ export class Field {
       'law',
       'education',
     ],
+    unique: true,
   })
   field: string;
 
