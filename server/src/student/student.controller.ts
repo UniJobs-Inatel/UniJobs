@@ -11,12 +11,10 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
-import {
-  CreateStudentProfileDto,
-  UpdateStudentProfileDto,
-  CreateExperienceDto,
-  UpdateExperienceDto,
-} from './dto';
+import { CreateStudentProfileDto } from './dto/create-student-profile.dto';
+import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
+import { CreateExperienceDto } from './dto/create-experience.dto';
+import { UpdateExperienceDto } from './dto/update-experience.dto';
 
 @Controller('student')
 export class StudentController {

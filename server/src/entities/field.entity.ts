@@ -30,4 +30,3 @@ export class Field {
   @OneToMany(() => Job, (job) => job.field)
   jobs: Job[];
 }
-

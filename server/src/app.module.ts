@@ -11,6 +11,7 @@ import { TagModule } from './tag/tag.module';
 import { CompanyModule } from './company/company.module';
 import { CollegeModule } from './college/college.module';
 import { StudentModule } from './student/student.module';
+import { JobModule } from './job/job.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { StudentModule } from './student/student.module';
     CompanyModule,
     CollegeModule,
     StudentModule,
+    JobModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],

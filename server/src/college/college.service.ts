@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { College } from '../entities/college.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
-import { CreateCollegeDto, CreateValidEmailDto } from './dto';
+import { CreateCollegeDto } from './dto/create-college-dto';
+import { CreateValidEmailDto } from './dto/create-valid-email-dto';
 import { Company } from '../entities/company.entity';
 
 @Injectable()

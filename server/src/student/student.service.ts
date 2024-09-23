@@ -7,12 +7,10 @@ import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
 import { College } from '../entities/college.entity';
 import { User } from '../entities/user.entity';
-import {
-  CreateStudentProfileDto,
-  UpdateStudentProfileDto,
-  CreateExperienceDto,
-  UpdateExperienceDto,
-} from './dto';
+import { CreateStudentProfileDto } from './dto/create-student-profile.dto';
+import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
+import { CreateExperienceDto } from './dto/create-experience.dto';
+import { UpdateExperienceDto } from './dto/update-experience.dto';
 
 @Injectable()
 export class StudentService {
