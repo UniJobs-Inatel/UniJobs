@@ -3,7 +3,8 @@ import { createBrowserRouter } from "react-router-dom";
 
 const Login = lazy(() => import("@pages/login"));
 const JobOffers = lazy(() => import("@pages/jobOffers"));
-const Profile = lazy(() => import("@pages/profile"));
+const CollegeProfile = lazy(() => import("@/pages/profile/college"));
+const CompanyProfile = lazy(() => import("@/pages/profile/company"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 export const router = createBrowserRouter([
@@ -20,7 +21,11 @@ export const router = createBrowserRouter([
     element: <JobOffers />,
   },
   {
-    path: "/perfil",
-    element: <Profile />,
+    path: "/perfil-estudante",
+    element: <CollegeProfile />,
+  },
+  {
+    path: "/perfil-empresa",
+    element: <CompanyProfile />,
   },
 ]);

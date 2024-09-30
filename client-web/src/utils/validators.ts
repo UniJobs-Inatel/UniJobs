@@ -63,3 +63,31 @@ export const isValidDate = (dateString: string) => {
     date.getDate() === day
   );
 };
+
+/**
+ * Validates a CNPJ number. Built to use with Zod.
+ *
+ * @param cnpj CNPJ number to be validated
+ * @returns true if the CNPJ is valid, false otherwise
+ */
+export const cnpjValidator = (cnpj: string): boolean => {
+  if (cnpj.length === 0) return false;
+  if (typeof cnpj !== 'string') return false;
+  cnpj = cnpj.replace(/[^\d]+/g, '');
+
+  if (cnpj.length !== 14 || !!cnpj.match(/(\d)\1{13}/)) return false;
+
+  const cnpjDigits = cnpj.split('').map((el) => +el);
+
+  const rest = (count: number): number => {
+    const size = count - 7;
+    const numbers = cnpjDigits.slice(0, count);
+    const sum = numbers
+      .map((el, index) => el * (size - index))
+      .reduce((acc, curr) => acc + curr, 0);
+
+    return sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  };
+
+  return rest(12) === cnpjDigits[12] && rest(13) === cnpjDigits[13];
+};

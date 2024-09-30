@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { ExperienceData, ExperienceForm } from "./ExperienceForm";
+import { ExperienceData, ExperienceForm } from "../ExperienceForm";
 import { useState } from "react";
 import { EditIcon, Trash2Icon, X } from "lucide-react";
 
-const Profile = () => {
+const CollegeProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedExperience, setSelectedExperience] = useState<{
@@ -206,4 +206,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default CollegeProfile;
