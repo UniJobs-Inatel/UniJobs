@@ -1,6 +1,6 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
-
+const JobList = lazy(() => import("@pages/jobList"));
 const Login = lazy(() => import("@pages/login"));
 const JobOffers = lazy(() => import("@pages/jobOffers"));
 const CollegeProfile = lazy(() => import("@/pages/profile/college"));
@@ -27,5 +27,9 @@ export const router = createBrowserRouter([
   {
     path: "/perfil-empresa",
     element: <CompanyProfile />,
+  },
+  {
+    path: "/job-list",
+    element: <JobList />,
   },
 ]);

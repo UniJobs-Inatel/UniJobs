@@ -6,6 +6,7 @@ import {
   BadRequestException,
   Post,
   Body,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -38,5 +39,24 @@ export class AuthController {
         throw error;
       }
     }
+  }
+
+  @Post('login')
+  async login(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const user = await this.authService.validateUser(email, password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return this.authService.login(user);
+  }
+
+  @Post('refresh-token')
+  async refreshToken(
+    @Body('refreshToken') refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    return this.authService.refreshAccessToken(refreshToken);
   }
 }

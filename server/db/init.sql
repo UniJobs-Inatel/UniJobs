@@ -28,6 +28,10 @@ CREATE TABLE experience (
     type ENUM('professional', 'academic') NOT NULL,
     description TEXT NOT NULL,
     student_id INT UNSIGNED,
+    company_name VARCHAR(255) NOT NULL,
+    position VARCHAR(100) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE,
     FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE
 );
 
@@ -50,8 +54,8 @@ CREATE TABLE college (
     FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
--- Table: validEmail
-CREATE TABLE validEmail (
+-- Table: valid_email
+CREATE TABLE valid_email (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     domain VARCHAR(100) NOT NULL,
     college_id INT UNSIGNED,
@@ -84,10 +88,12 @@ CREATE TABLE job (
     weekly_hours INT NOT NULL,
     mode ENUM('on_site', 'hybrid', 'remote') NOT NULL,
     benefits TEXT,
-    salary_range VARCHAR(100),
+    salary INT UNSIGNED,
     requirements TEXT NOT NULL,
     field_id INT UNSIGNED,
-    FOREIGN KEY (field_id) REFERENCES field(id) ON DELETE CASCADE
+    company_id INT UNSIGNED,
+    FOREIGN KEY (field_id) REFERENCES field(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
 -- Table: service
@@ -102,19 +108,22 @@ CREATE TABLE service (
     FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE
 );
 
--- Table: jobPublication
-CREATE TABLE jobPublication (
+-- Table: job_publication
+CREATE TABLE job_publication (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id INT UNSIGNED,
     college_id INT UNSIGNED,
     company_id INT UNSIGNED,
+    status ENUM('pending', 'approved', 'reproved', 'removed') DEFAULT 'pending',
+    publication_request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    publication_date TIMESTAMP NULL,
     FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
     FOREIGN KEY (college_id) REFERENCES college(id) ON DELETE SET NULL,
     FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
--- Table: favoriteJobs
-CREATE TABLE favoriteJobs (
+-- Table: favorite_jobs
+CREATE TABLE favorite_jobs (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id INT UNSIGNED,
     student_id INT UNSIGNED,
@@ -128,4 +137,28 @@ CREATE TABLE verification (
     verificationCode VARCHAR(36) NOT NULL,
     user_id INT UNSIGNED,
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- Table: tag
+CREATE TABLE tag (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+-- Table: job_tag
+CREATE TABLE job_tag (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    job_id INT UNSIGNED,
+    tag_id INT UNSIGNED,
+    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
+);
+
+-- Table: student_proficiency
+CREATE TABLE student_proficiency (
+    student_id INT UNSIGNED,
+    tag_id INT UNSIGNED,
+    PRIMARY KEY (student_id, tag_id),
+    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );

@@ -1,18 +1,27 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Field } from './field.entity';
+import { JobTag } from './job-tag.entity';
+import { JobPublication } from './job-publication.entity';
+import { Company } from './company.entity';
 
 @Entity()
 export class Job {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 100 })
   job_name: string;
 
   @Column({ type: 'text' })
   description: string;
 
-  @Column()
+  @Column({ length: 100 })
   location: string;
 
   @Column({
@@ -31,11 +40,20 @@ export class Job {
   benefits: string;
 
   @Column({ nullable: true })
-  salary_range: string;
+  salary: number;
 
   @Column({ type: 'text' })
   requirements: string;
 
   @ManyToOne(() => Field, (field) => field.jobs, { onDelete: 'CASCADE' })
   field: Field;
+
+  @ManyToOne(() => Company, (company) => company.jobs, { onDelete: 'CASCADE' })
+  company: Company;
+
+  @OneToMany(() => JobTag, (jobTag) => jobTag.job)
+  tags: JobTag[];
+
+  @OneToMany(() => JobPublication, (jobPublication) => jobPublication.job)
+  jobPublications: JobPublication[];
 }
