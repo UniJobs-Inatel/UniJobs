@@ -17,7 +17,6 @@ export class DatabaseResetService {
       'company',
       'college',
       'valid_email',
-      'field',
       'course',
       'job',
       'service',

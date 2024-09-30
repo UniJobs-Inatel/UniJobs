@@ -19,4 +19,3 @@ export class Verification {
   @JoinColumn()
   user: User;
 }
-

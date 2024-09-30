@@ -21,6 +21,7 @@ export class Field {
       'law',
       'education',
     ],
+    unique: true,
   })
   field: string;
 
@@ -30,4 +31,3 @@ export class Field {
   @OneToMany(() => Job, (job) => job.field)
   jobs: Job[];
 }
-
