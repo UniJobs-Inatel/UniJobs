@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RadioButton } from "@/components/ui/radio-group";
+import { RadioButton } from "@/components/ui/radioGroup";
 import { Textarea } from "@/components/ui/textarea";
 import { isValidDate, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -92,7 +92,7 @@ const Login: React.FC = () => {
       console.log("Registro realizado com sucesso:", response.data.message);
       navigate("/profile"); // Redireciona após registro bem-sucedido
     } catch (error) {
-      if (error && error.response  )
+      
         if (axios.isAxiosError(error)) {
           console.error(
             "Erro no registro:",

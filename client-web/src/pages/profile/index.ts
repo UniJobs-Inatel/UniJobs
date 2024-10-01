@@ -1,2 +1,2 @@
-export * from './college'
+export * from './student'
 export * from './company'

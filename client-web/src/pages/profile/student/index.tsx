@@ -14,14 +14,16 @@ import { z } from "zod";
 import { ExperienceData, ExperienceForm } from "../ExperienceForm";
 import { useState } from "react";
 import { EditIcon, Trash2Icon, X } from "lucide-react";
+import { MultiSelectInput } from "@/components/ui/multiSelectInput";
 
-const CollegeProfile = () => {
+const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedExperience, setSelectedExperience] = useState<{
     selectedExperience: ExperienceData | null;
     index?: number;
   } | null>(null);
+  const [proficiencies, setProficiencies] = useState<string[]>([]);
 
   const completeRegistrationSchema = z.object({
     firstName: requiredString(),
@@ -96,8 +98,7 @@ const CollegeProfile = () => {
           Informações Pessoais
         </h4>
         <form
-          className="grid grid-cols-1 gap-4"
-          onSubmit={handleSubmit(handleLogin)}
+          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
         >
           <Input
             label="Nome:"
@@ -137,16 +138,13 @@ const CollegeProfile = () => {
             {...register("email")}
             error={errors.email?.message}
           />
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              className="w-[160px] h-10 text-white bg-primary"
-            >
-              Salvar
-            </Button>
-          </div>
+
+          <MultiSelectInput selectedOptions={proficiencies} onChange={(value:string[]) => setProficiencies(value)} options={[{label:'Figma', value:'figma',},{label:'Javascript', value:'js'}]}  />
+
+          
         </form>
       </section>
+
       <section>
         <h4 className="text-primary text-[16px] font-bold">Experiências</h4>
         <Dialog open={isOpen} onOpenChange={() => setIsOpen(true)}>
@@ -202,8 +200,17 @@ const CollegeProfile = () => {
           ))}
         </div>
       </section>
+      <div className="flex justify-end mt-4 ">
+            <Button
+              className="w-[160px] h-10 text-white bg-primary"
+              type="submit"
+              onClick={handleSubmit(handleLogin)}
+            >
+              Salvar
+            </Button>
+          </div>
     </div>
   );
 };
 
-export default CollegeProfile;
+export default StudentProfile;
