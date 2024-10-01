@@ -1,20 +1,21 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Label } from "@radix-ui/react-label";
 import { useEffect, useState } from "react";
+import { Tag } from "@/domain/tags";
+import { Label } from "@radix-ui/react-label";
 
 export interface MultiSelectInputProps {
   label?: string;
-  options: Array<{ value: string; label: string }>;
-  selectedOptions: string[];
-  onChange: (selected: string[]) => void;
+  options: Tag[];
+  selectedOptions: Tag[];
+  onChange: (selected: Tag[]) => void;
   error?: string;
 }
 
 const MultiSelectInput = ({
   label,
   options,
-  selectedOptions,
+  selectedOptions = [],
   onChange,
   error,
 }: MultiSelectInputProps) => {
@@ -26,14 +27,16 @@ const MultiSelectInput = ({
   React.useEffect(() => {
     setFilteredOptions(
       options.filter((option) =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase())
+        option.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }, [searchTerm, options]);
 
-  const toggleOption = (value: string) => {
-    if (selectedOptions.includes(value)) {
-      onChange(selectedOptions.filter((option) => option !== value));
+  const toggleOption = (value: Tag) => {
+    const isSelected = selectedOptions.find((option) => option.id === value.id);
+    
+    if (isSelected) {
+      onChange(selectedOptions.filter((option) => option.id !== value.id));
     } else {
       onChange([...selectedOptions, value]);
     }
@@ -77,10 +80,10 @@ const MultiSelectInput = ({
             <div className="flex flex-wrap gap-1">
               {selectedOptions.map((option) => (
                 <span
-                  key={option}
+                  key={option.id}
                   className="flex items-center bg-primary text-white rounded px-2 py-1 text-xs"
                 >
-                  {options.find((opt) => opt.value === option)?.label}
+                  {options.find((opt) => opt.id === option.id)?.name}
                   <button
                     type="button"
                     className="ml-1 text-xs"
@@ -110,22 +113,22 @@ const MultiSelectInput = ({
             <ul className="max-h-40 w-full overflow-y-auto">
               {filteredOptions.map((option) => (
                 <li
-                  key={option.value}
+                  key={option.id}
                   className={cn(
                     "flex items-center cursor-pointer select-none px-3 py-2 text-sm hover:bg-gray-200",
-                    selectedOptions.includes(option.value)
+                    selectedOptions.find((option) => option.id )
                       ? "bg-gray-100 font-medium"
                       : ""
                   )}
-                  onClick={() => toggleOption(option.value)}
+                  onClick={() => toggleOption(option)}
                 >
                   <input
                     type="checkbox"
-                    checked={selectedOptions.includes(option.value)}
-                    onChange={() => toggleOption(option.value)}
+                    checked={selectedOptions.some((selectedOption) => option.id === selectedOption.id)} 
+                    onChange={() => toggleOption(option)}
                     className="mr-2"
                   />
-                  {option.label}
+                  {option.name}
                 </li>
               ))}
             </ul>
