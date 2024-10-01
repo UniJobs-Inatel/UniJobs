@@ -139,13 +139,13 @@ const StudentProfile = () => {
             error={errors.email?.message}
           />
 
-          <MultiSelectInput selectedOptions={proficiencies} onChange={(value:string[]) => setProficiencies(value)} options={[{label:'Figma', value:'figma',},{label:'Javascript', value:'js'}]}  />
+          <MultiSelectInput label="Competências:" selectedOptions={proficiencies} onChange={(value: string[]) => setProficiencies(value)} options={[{ label: 'Figma', value: 'figma', }, { label: 'Javascript', value: 'js' }]} />
 
-          
+
         </form>
       </section>
 
-      <section>
+      <section className="mt-4" >
         <h4 className="text-primary text-[16px] font-bold">Experiências</h4>
         <Dialog open={isOpen} onOpenChange={() => setIsOpen(true)}>
           <DialogTrigger asChild>
@@ -201,14 +201,14 @@ const StudentProfile = () => {
         </div>
       </section>
       <div className="flex justify-end mt-4 ">
-            <Button
-              className="w-[160px] h-10 text-white bg-primary"
-              type="submit"
-              onClick={handleSubmit(handleLogin)}
-            >
-              Salvar
-            </Button>
-          </div>
+        <Button
+          className="w-[160px] h-10 text-white bg-primary"
+          type="submit"
+          onClick={handleSubmit(handleLogin)}
+        >
+          Salvar
+        </Button>
+      </div>
     </div>
   );
 };
