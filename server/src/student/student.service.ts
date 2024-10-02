@@ -51,10 +51,9 @@ export class StudentService {
 
     if (validEmail && validEmail.college) {
       return validEmail.college.id;
-    }else{
+    } else {
       return 1;
     }
-
   }
 
   async createProfile(
@@ -91,6 +90,9 @@ export class StudentService {
       }));
       await this.studentProficiencyRepository.save(proficienciesToSave);
     }
+
+    user.status = 'complete';
+    await this.userRepository.save(user);
 
     return newStudent;
   }
