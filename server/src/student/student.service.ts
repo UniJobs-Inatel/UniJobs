@@ -67,6 +67,12 @@ export class StudentService {
       throw new Error('User not found');
     }
 
+    if (user.type !== 'student') {
+      throw new Error(
+        'Apenas usuários do tipo estudante podem criar perfis de estudante',
+      );
+    }
+
     const collegeId = await this.getCollegeIdByEmailDomain(user.email);
 
     const newStudent = await this.studentRepository.save({
