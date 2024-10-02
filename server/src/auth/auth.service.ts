@@ -94,6 +94,11 @@ export class AuthService {
   async login(
     user: any,
   ): Promise<{ accessToken: string; refreshToken: string }> {
+    if (user.status === 'created') {
+      throw new BadRequestException(
+        'É necessário validar o usuário antes de realizar login',
+      );
+    }
     const payload = {
       email: user.email,
       sub: user.id,

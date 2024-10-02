@@ -51,10 +51,9 @@ export class StudentService {
 
     if (validEmail && validEmail.college) {
       return validEmail.college.id;
-    }else{
+    } else {
       return 1;
     }
-
   }
 
   async createProfile(
@@ -66,6 +65,12 @@ export class StudentService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new Error('User not found');
+    }
+
+    if (user.type !== 'student') {
+      throw new Error(
+        'Apenas usuários do tipo estudante podem criar perfis de estudante',
+      );
     }
 
     const collegeId = await this.getCollegeIdByEmailDomain(user.email);
@@ -91,6 +96,9 @@ export class StudentService {
       }));
       await this.studentProficiencyRepository.save(proficienciesToSave);
     }
+
+    user.status = 'complete';
+    await this.userRepository.save(user);
 
     return newStudent;
   }
