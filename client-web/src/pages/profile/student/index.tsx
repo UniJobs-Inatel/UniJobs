@@ -12,9 +12,14 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { ExperienceData, ExperienceForm } from "../ExperienceForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EditIcon, Trash2Icon, X } from "lucide-react";
 import { MultiSelectInput } from "@/components/ui/multiSelectInput";
+import { Tag } from "@/domain/tags";
+import { getAllTags } from "@/services/repositories/tags";
+import { createStudentProfile } from "@/services/repositories";
+import { Experience,ICreateStudentProfile  } from "@/domain/student";
+import { isoFormatter } from "@/lib/utils";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -23,15 +28,16 @@ const StudentProfile = () => {
     selectedExperience: ExperienceData | null;
     index?: number;
   } | null>(null);
-  const [proficiencies, setProficiencies] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
+  const [tags, setTags] = useState<Tag[]>([]);
 
   const completeRegistrationSchema = z.object({
-    firstName: requiredString(),
-    lastName: requiredString(),
+    first_name: requiredString(),
+    last_name: requiredString(),
     cpf: requiredString().refine(cpfValidator, {
       message: "Digite um CPF válido.",
     }),
-    email: requiredString().email("Digite um email válido"),
   });
 
   type CompleteRegistrationData = z.infer<typeof completeRegistrationSchema>;
@@ -45,14 +51,33 @@ const StudentProfile = () => {
     resolver: zodResolver(completeRegistrationSchema),
     defaultValues: {
       cpf: "",
-      email: "",
-      firstName: "",
-      lastName: "",
+      first_name: "",
+      last_name: "",
     },
   });
 
-  const handleLogin = (data: CompleteRegistrationData) => {
+  const handleLogin = async (data: CompleteRegistrationData) => {
+    console.log("Tags:", selectedTags);
+    console.log(":", experiences);
     console.log("Login data:", data);
+
+    const experiencesFormatted = experiences.map((experience) => ({
+      ...experience,
+      start_date: isoFormatter(experience.start_date),
+      end_date: isoFormatter(experience.end_date),
+    } as Experience ));
+
+    const creationData:ICreateStudentProfile = {
+      student:{...data},
+      userId:8,
+      experiences:experiencesFormatted,
+      proficiencies:selectedTags.map((tag) => ({id:tag.id}))
+    }
+
+    const response = await createStudentProfile(creationData)
+
+    if(response?.status == 201) console.log('Deu certo')
+
   };
 
   const closeModal = () => {
@@ -64,8 +89,6 @@ const StudentProfile = () => {
     closeModal();
 
     setExperiences((experiences) => {
-      console.log(data);
-      console.log(selectedExperience?.index);
       if (
         selectedExperience?.index == undefined ||
         selectedExperience?.index == null
@@ -90,29 +113,31 @@ const StudentProfile = () => {
     );
   };
 
+  useEffect(() => {
+    getAllTags().then((response) => response && setTags(response));
+  }, []);
+
   return (
     <div className="pb-5">
-      <h3 className="text-primary text-[20px] font-bold mb-3">Meu perfil</h3>
+      <h3 className="text-primary text-[20px] font-bold mb-6">Meu perfil</h3>
       <section>
-        <h4 className="text-primary text-[16px] font-bold">
+        <h4 className="text-primary text-[16px] font-bold mb-4">
           Informações Pessoais
         </h4>
-        <form
-          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-        >
+        <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Input
             label="Nome:"
             id="firstName"
-            {...register("firstName")}
+            {...register("first_name")}
             placeholder="Seu nome"
-            error={errors.firstName?.message}
+            error={errors.first_name?.message}
           />
           <Input
             label="Sobrenome:"
             id="lastName"
-            {...register("lastName")}
+            {...register("last_name")}
             placeholder="Seu sobrenome"
-            error={errors.lastName?.message}
+            error={errors.last_name?.message}
           />
           <Controller
             control={control}
@@ -135,17 +160,18 @@ const StudentProfile = () => {
             type="email"
             id="email"
             placeholder="Entre com seu e-mail"
-            {...register("email")}
-            error={errors.email?.message}
           />
 
-          <MultiSelectInput label="Competências:" selectedOptions={proficiencies} onChange={(value: string[]) => setProficiencies(value)} options={[{ label: 'Figma', value: 'figma', }, { label: 'Javascript', value: 'js' }]} />
-
-
+          <MultiSelectInput
+            label="Competências:"
+            selectedOptions={selectedTags}
+            onChange={(value: Tag[]) => setSelectedTags(value)}
+            options={tags}
+          />
         </form>
       </section>
 
-      <section className="mt-4" >
+      <section className="mt-4">
         <h4 className="text-primary text-[16px] font-bold">Experiências</h4>
         <Dialog open={isOpen} onOpenChange={() => setIsOpen(true)}>
           <DialogTrigger asChild>
@@ -174,13 +200,13 @@ const StudentProfile = () => {
           {experiences.map((experience, index) => (
             <div
               className="flex flex-col justify-evenly w-full border border-primary-800 rounded-lg p-1 h-[120px]"
-              key={`${experience.position} ${experience.companyName} ${Math.random()}`}
+              key={`${experience.position} ${experience.company_name} ${Math.random()}`}
             >
               <div className="flex justify-between">
                 <h3 className="font-bold text-[18px]">{experience.position}</h3>
-                <div className="text-[14px]">{`${experience.start} - ${experience.end == "" ? "Atual" : experience.end}`}</div>
+                <div className="text-[14px]">{`${experience.start_date} - ${experience.end_date == "" ? "Atual" : experience.end_date}`}</div>
               </div>
-              <h4>{experience.companyName}</h4>
+              <h4>{experience.company_name}</h4>
               <div className="flex justify-between">
                 <p className="text-[14px] break-all line-clamp-2 w-4/5 ">
                   {experience.description}

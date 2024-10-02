@@ -9,13 +9,13 @@ import { z } from "zod";
 
 const experienceSchema = z.object({
   position: requiredString(),
-  companyName: requiredString(),
+  company_name: requiredString(),
   description: requiredString(),
-  start: requiredString().refine((val) => isValidDate(val), {
+  start_date: requiredString().refine((val) => isValidDate(val), {
     message: "Formato de data inválido",
   }),
-  end: z.string(),
-  xpType: requiredString(),
+  end_date: z.string(),
+  type: requiredString(),
 });
 
 export type ExperienceData = z.infer<typeof experienceSchema>;
@@ -35,12 +35,12 @@ const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormPro
   } = useForm<ExperienceData>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
-      companyName: selectedExperience?.companyName ?? "",
+      company_name: selectedExperience?.company_name ?? "",
       description: selectedExperience?.description ?? "",
-      start: selectedExperience?.start ?? "",
+      start_date: selectedExperience?.start_date ?? "",
       position: selectedExperience?.position ?? "",
-      xpType: selectedExperience?.xpType ?? "academic",
-      end: selectedExperience?.end ?? "",
+      type: selectedExperience?.type ?? "academic",
+      end_date: selectedExperience?.end_date ?? "",
     },
   });
 
@@ -50,7 +50,7 @@ const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormPro
       onSubmit={handleSubmit((data:ExperienceData) => addNewExperience(data))}
     >
       <Controller
-        name="xpType"
+        name="type"
         control={control}
         render={({ field }) => (
           <div>
@@ -68,7 +68,7 @@ const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormPro
                 checked={field.value === "professional"}
               />
             </div>
-            {errors.xpType?.message && <p className="mt-1 text-[10px] text-red-500">{errors.xpType?.message}</p>}
+            {errors.type?.message && <p className="mt-1 text-[10px] text-red-500">{errors.type?.message}</p>}
           </div>
         )}
       />
@@ -83,21 +83,21 @@ const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormPro
       />
       <Input
         label="Nome da empresa*"
-        id="companyName"
+        id="company_name"
         placeholder="Nome da empresa"
-        error={errors.companyName?.message}
-        {...register("companyName")}
+        error={errors.company_name?.message}
+        {...register("company_name")}
       />
       <Controller
         control={control}
-        name="start"
+        name="start_date"
         render={({ field }) => (
           <Input
             mask="99/99/9999"
             label="Início*"
-            id="start"
+            id="start_date"
             placeholder="mm/dd/aaaa"
-            error={errors.start?.message}
+            error={errors.start_date?.message}
             {...field}
           />
         )}
@@ -105,12 +105,12 @@ const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormPro
 
       <Controller
         control={control}
-        name="end"
+        name="end_date"
         render={({ field }) => (
           <Input
             mask="99/99/9999"
             label="Término"
-            id="end"
+            id="end_date"
             placeholder="mm/dd/aaaa"
             {...field}
           />
@@ -123,7 +123,7 @@ const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormPro
         {...register("description")}
       />
 
-      <Button className="w-full md:w-[120px] md:self-end ">Salvar</Button>
+      <Button className="w-full md:w-[120px] md:self-end_date ">Salvar</Button>
     </form>
   );
 };

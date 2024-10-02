@@ -8,10 +8,12 @@ import { z } from "zod";
 const CompanyProfile = () => {
   const completeRegistrationSchema = z.object({
     companyName: requiredString(),
+    description: requiredString(),
+    field_of_activity: requiredString(),
+    contact_website: requiredString(),
     cnpj: requiredString().refine(cnpjValidator, {
       message: "Digite um CNPJ válido.",
     }),
-    email: requiredString().email("Digite um email válido"),
   });
 
   type CompleteRegistrationData = z.infer<typeof completeRegistrationSchema>;
@@ -25,7 +27,6 @@ const CompanyProfile = () => {
     resolver: zodResolver(completeRegistrationSchema),
     defaultValues: {
       cnpj: "",
-      email: "",
       companyName:''
     },
   });
@@ -36,14 +37,13 @@ const CompanyProfile = () => {
 
   return (
     <div className="pb-5">
-      <h3 className="text-primary text-[20px] font-bold mb-3">Meu perfil</h3>
+      <h3 className="text-primary text-[20px] font-bold mb-6">Meu perfil</h3>
       <section>
-        <h4 className="text-primary text-[16px] font-bold">
+        <h4 className="text-primary text-[16px] font-bold mb-4">
           Informações Empresariais
         </h4>
         <form
-          className="grid grid-cols-1 gap-4"
-          onSubmit={handleSubmit(handleLogin)}
+          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
         >
           <Input
             label="Nome da Empresa:"
@@ -69,22 +69,35 @@ const CompanyProfile = () => {
           />
 
           <Input
-            label="E-mail:"
-            type="email"
-            id="email"
+            label="Descrição:"
+            id="description"
             placeholder="Entre com seu e-mail"
-            {...register("email")}
-            error={errors.email?.message}
+            {...register("description")}
+            error={errors.description?.message}
           />
-          <div className="flex justify-end">
+          <Input
+            label="Área de atuação:"
+            id="field_of_activity"
+            placeholder="Entre a área de atuação"
+            {...register("field_of_activity")}
+            error={errors.field_of_activity?.message}
+          />
+          <Input
+            label="Site:"
+            id="contact_website"
+            placeholder="Entre com o site da empresa"
+            {...register("contact_website")}
+            error={errors.contact_website?.message}
+          />
+        </form>
+          <div className="flex justify-end mt-4 ">
             <Button
-              type="submit"
+              onClick={handleSubmit(handleLogin)}
               className="w-[160px] h-10 text-white bg-primary"
             >
               Salvar
             </Button>
           </div>
-        </form>
       </section>
     </div>
   );
