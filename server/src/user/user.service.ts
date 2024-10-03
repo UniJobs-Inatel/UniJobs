@@ -52,7 +52,7 @@ export class UserService {
 
     if (userData.password) {
       const hashedPassword = await bcrypt.hash(userData.password, 10);
-      userData.password = hashedPassword; // Hash the new password
+      userData.password = hashedPassword;
     }
 
     const updatedUser = this.userRepository.merge(user, userData);
