@@ -1,7 +1,8 @@
 import {
-  ConflictException,
   Injectable,
+  ConflictException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,51 +17,67 @@ export class UserService {
   ) {}
 
   async create(userData: Partial<User>): Promise<User> {
-    const existingUser = await this.userRepository.findOne({
-      where: { email: userData.email },
-    });
-    if (existingUser) {
-      throw new ConflictException('Email already registered.');
-    }
+    try {
+      const existingUser = await this.userRepository.findOne({
+        where: { email: userData.email },
+      });
+      if (existingUser) {
+        throw new ConflictException('O email já está registrado.');
+      }
 
-    if (userData.password) {
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      userData.password = hashedPassword;
-    }
+      if (userData.password) {
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        userData.password = hashedPassword;
+      }
 
-    const user = this.userRepository.create(userData);
-    return this.userRepository.save(user);
+      const user = this.userRepository.create(userData);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao criar o usuário.');
+    }
   }
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+    try {
+      return await this.userRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao buscar os usuários.');
+    }
   }
 
   async findOne(id: number): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+      }
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao buscar o usuário.');
     }
-    return user;
   }
 
   async update(id: number, userData: Partial<User>): Promise<User> {
-    const user = await this.findOne(id);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
+    try {
+      const user = await this.findOne(id);
+      if (userData.password) {
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        userData.password = hashedPassword;
+      }
 
-    if (userData.password) {
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      userData.password = hashedPassword;
+      const updatedUser = this.userRepository.merge(user, userData);
+      return await this.userRepository.save(updatedUser);
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao atualizar o usuário.');
     }
-
-    const updatedUser = this.userRepository.merge(user, userData);
-    return this.userRepository.save(updatedUser);
   }
 
   async remove(id: number): Promise<void> {
-    const user = await this.findOne(id);
-    await this.userRepository.remove(user);
+    try {
+      const user = await this.findOne(id);
+      await this.userRepository.remove(user);
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao remover o usuário.');
+    }
   }
 }

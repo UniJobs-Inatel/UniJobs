@@ -8,6 +8,9 @@ import {
   Put,
   UseGuards,
   Req,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -21,35 +24,40 @@ export class TagController {
   /*--------------- Tags (Admin Only) ---------------*/
   @UseGuards(AdminGuard)
   @Post()
-  createTag(@Body() createTagDto: { name: string }) {
+  @HttpCode(HttpStatus.CREATED)
+  async createTag(@Body() createTagDto: { name: string }) {
     if (!createTagDto.name || createTagDto.name.trim() === '') {
-      throw new Error('Tag name cannot be empty');
+      throw new BadRequestException('Nome da tag não pode estar vazio.');
     }
     return this.tagService.createTag(createTagDto.name);
   }
 
   @UseGuards(AdminGuard)
   @Put(':id')
-  updateTag(@Param('id') id: number, @Body('name') name: string) {
+  @HttpCode(HttpStatus.OK)
+  async updateTag(@Param('id') id: number, @Body('name') name: string) {
     return this.tagService.updateTag(id, name);
   }
 
   @UseGuards(AdminGuard)
   @Delete(':id')
-  deleteTag(@Param('id') id: number) {
-    return this.tagService.deleteTag(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteTag(@Param('id') id: number) {
+    await this.tagService.deleteTag(id);
   }
 
   /*--------------- Tagging Operations with JWT Validation (Authenticated Users) ---------------*/
   @UseGuards(JwtAuthGuard)
   @Get()
-  getTags() {
+  @HttpCode(HttpStatus.OK)
+  async getTags() {
     return this.tagService.getTags();
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('student/:studentId')
-  getTagsByStudentId(
+  @HttpCode(HttpStatus.OK)
+  async getTagsByStudentId(
     @Param('studentId') studentId: number,
     @Req() req: RequestWithUser,
   ) {
@@ -58,14 +66,19 @@ export class TagController {
 
   @UseGuards(JwtAuthGuard)
   @Get('job/:jobId')
-  getTagsByJobId(@Param('jobId') jobId: number, @Req() req: RequestWithUser) {
+  @HttpCode(HttpStatus.OK)
+  async getTagsByJobId(
+    @Param('jobId') jobId: number,
+    @Req() req: RequestWithUser,
+  ) {
     return this.tagService.getTagsByJobId(jobId, req);
   }
 
   /* --------------- StudentProficiency (JWT Required) --------------- */
   @UseGuards(JwtAuthGuard)
   @Post('student-proficiencies')
-  createStudentProficiency(
+  @HttpCode(HttpStatus.CREATED)
+  async createStudentProficiency(
     @Body('studentId') studentId: number,
     @Body('tagId') tagId: number,
     @Req() req: RequestWithUser,
@@ -75,7 +88,8 @@ export class TagController {
 
   @UseGuards(JwtAuthGuard)
   @Get('student-proficiencies/:studentId')
-  getStudentProficiencies(
+  @HttpCode(HttpStatus.OK)
+  async getStudentProficiencies(
     @Param('studentId') studentId: number,
     @Req() req: RequestWithUser,
   ) {
@@ -84,17 +98,19 @@ export class TagController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('student-proficiencies/:id')
-  deleteStudentProficiency(
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteStudentProficiency(
     @Param('id') id: number,
     @Req() req: RequestWithUser,
   ) {
-    return this.tagService.deleteStudentProficiency(id, req);
+    await this.tagService.deleteStudentProficiency(id, req);
   }
 
   /* --------------- JobTag (JWT Required) --------------- */
   @UseGuards(JwtAuthGuard)
   @Post('job-tags')
-  createJobTag(
+  @HttpCode(HttpStatus.CREATED)
+  async createJobTag(
     @Body('jobId') jobId: number,
     @Body('tagId') tagId: number,
     @Req() req: RequestWithUser,
@@ -104,13 +120,15 @@ export class TagController {
 
   @UseGuards(JwtAuthGuard)
   @Get('job-tags/:jobId')
-  getJobTags(@Param('jobId') jobId: number, @Req() req: RequestWithUser) {
+  @HttpCode(HttpStatus.OK)
+  async getJobTags(@Param('jobId') jobId: number, @Req() req: RequestWithUser) {
     return this.tagService.getJobTags(jobId, req);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('job-tags/:id')
-  deleteJobTag(@Param('id') id: number, @Req() req: RequestWithUser) {
-    return this.tagService.deleteJobTag(id, req);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteJobTag(@Param('id') id: number, @Req() req: RequestWithUser) {
+    await this.tagService.deleteJobTag(id, req);
   }
 }

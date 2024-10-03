@@ -6,14 +6,13 @@ import {
   Param,
   Put,
   Delete,
-  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from '../entities/user.entity';
-import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('user')
-@UseGuards(AdminGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -23,11 +22,13 @@ export class UserController {
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: Partial<User>): Promise<User> {
     return this.userService.create(createUserDto);
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: number,
     @Body() updateUserDto: Partial<User>,
@@ -36,11 +37,13 @@ export class UserController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: number): Promise<void> {
-    return this.userService.remove(id);
+    await this.userService.remove(id);
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: number): Promise<User> {
     return this.userService.findOne(id);
   }

@@ -7,6 +7,8 @@ import {
   Get,
   UseGuards,
   Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CollegeService } from './college.service';
 import { CreateCollegeDto } from './dto/create-college-dto';
@@ -20,6 +22,7 @@ export class CollegeController {
   constructor(private readonly collegeService: CollegeService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async createCollege(
     @Body() createCollegeDto: CreateCollegeDto,
     @Req() req: RequestWithUser,
@@ -28,6 +31,7 @@ export class CollegeController {
   }
 
   @Post('valid-email')
+  @HttpCode(HttpStatus.CREATED)
   async createValidEmail(
     @Body() createValidEmailDto: CreateValidEmailDto,
     @Req() req: RequestWithUser,
@@ -36,11 +40,13 @@ export class CollegeController {
   }
 
   @Delete('valid-email/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteValidEmail(@Param('id') id: number, @Req() req: RequestWithUser) {
     return this.collegeService.deleteValidEmail(id, req);
   }
 
   @Get('valid-email/:college_id')
+  @HttpCode(HttpStatus.OK)
   async listValidEmails(
     @Param('college_id') college_id: number,
     @Req() req: RequestWithUser,
@@ -49,6 +55,7 @@ export class CollegeController {
   }
 
   @Get('valid-email/')
+  @HttpCode(HttpStatus.OK)
   async listAllValidEmails(@Req() req: RequestWithUser) {
     return this.collegeService.listAllValidEmails(req);
   }

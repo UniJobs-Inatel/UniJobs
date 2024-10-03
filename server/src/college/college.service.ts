@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { College } from '../entities/college.entity';
@@ -32,18 +36,18 @@ export class CollegeService {
     });
 
     if (!company) {
-      throw new Error('Company not found');
+      throw new NotFoundException('Empresa não encontrada.');
     }
 
     if (company.user.type !== 'college') {
-      throw new Error(
-        'The user associated with this company must be of type "college".',
+      throw new UnauthorizedException(
+        'O usuário associado a esta empresa deve ser do tipo "faculdade".',
       );
     }
 
     if (company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar esta ação',
+        'Usuário não autorizado a realizar esta ação.',
       );
     }
 
@@ -62,8 +66,9 @@ export class CollegeService {
       where: { id: college_id },
       relations: ['company'],
     });
+
     if (!college) {
-      throw new Error('College not found');
+      throw new NotFoundException('Faculdade não encontrada.');
     }
 
     const company = await this.companyRepository.findOne({
@@ -73,7 +78,7 @@ export class CollegeService {
 
     if (company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar esta ação',
+        'Usuário não autorizado a realizar esta ação.',
       );
     }
 
@@ -88,8 +93,9 @@ export class CollegeService {
       where: { id },
       relations: ['college'],
     });
+
     if (!validEmail) {
-      throw new Error('Valid email not found');
+      throw new NotFoundException('E-mail válido não encontrado.');
     }
 
     const company = await this.companyRepository.findOne({
@@ -99,7 +105,7 @@ export class CollegeService {
 
     if (company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar esta ação',
+        'Usuário não autorizado a realizar esta ação.',
       );
     }
 
@@ -113,8 +119,9 @@ export class CollegeService {
       where: { id: college_id },
       relations: ['company'],
     });
+
     if (!college) {
-      throw new Error('College not found');
+      throw new NotFoundException('Faculdade não encontrada.');
     }
 
     const company = await this.companyRepository.findOne({
@@ -124,7 +131,7 @@ export class CollegeService {
 
     if (company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar esta ação',
+        'Usuário não autorizado a realizar esta ação.',
       );
     }
 
@@ -141,7 +148,9 @@ export class CollegeService {
     });
 
     if (userColleges.length === 0) {
-      throw new UnauthorizedException('Usuário não autorizado a visualizar');
+      throw new UnauthorizedException(
+        'Usuário não autorizado a visualizar os e-mails.',
+      );
     }
 
     return this.validEmailRepository.find();

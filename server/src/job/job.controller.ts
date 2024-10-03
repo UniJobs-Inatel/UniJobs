@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -23,6 +25,7 @@ export class JobController {
   constructor(private readonly jobService: JobService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async createJob(
     @Body() createJobDto: CreateJobDto,
     @Req() req: RequestWithUser,
@@ -31,16 +34,19 @@ export class JobController {
   }
 
   @Get()
+  @HttpCode(HttpStatus.OK)
   async getAllJobs() {
     return this.jobService.getAllJobs();
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async getJobById(@Param('id') id: number) {
     return this.jobService.getJobById(id);
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   async updateJob(
     @Param('id') id: number,
     @Body() updateJobDto: UpdateJobDto,
@@ -50,11 +56,13 @@ export class JobController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteJob(@Param('id') id: number, @Req() req: RequestWithUser) {
-    return this.jobService.deleteJob(id, req);
+    await this.jobService.deleteJob(id, req);
   }
 
   @Post('publish')
+  @HttpCode(HttpStatus.CREATED)
   async publishJob(
     @Body() createJobPublicationDto: CreateJobPublicationDto,
     @Req() req: RequestWithUser,
@@ -63,6 +71,7 @@ export class JobController {
   }
 
   @Get('company/:companyId')
+  @HttpCode(HttpStatus.OK)
   async getJobsByCompany(
     @Param('companyId') companyId: number,
     @Req() req: RequestWithUser,
@@ -71,6 +80,7 @@ export class JobController {
   }
 
   @Get('publications/company/:companyId')
+  @HttpCode(HttpStatus.OK)
   async getJobPublicationsByCompany(
     @Param('companyId') companyId: number,
     @Req() req: RequestWithUser,
@@ -79,6 +89,7 @@ export class JobController {
   }
 
   @Get('publications/college/:collegeId')
+  @HttpCode(HttpStatus.OK)
   async getJobPublicationsByCollege(
     @Param('collegeId') collegeId: number,
     @Req() req: RequestWithUser,
@@ -87,6 +98,7 @@ export class JobController {
   }
 
   @Put('publications/:id')
+  @HttpCode(HttpStatus.OK)
   async updateJobPublication(
     @Param('id') id: number,
     @Body() updateJobPublicationDto: UpdateJobPublicationDto,

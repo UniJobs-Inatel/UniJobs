@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job } from '../entities/job.entity';
@@ -37,12 +42,12 @@ export class JobService {
     });
 
     if (!company) {
-      throw new Error('Company not found');
+      throw new NotFoundException('Empresa não encontrada.');
     }
 
     if (company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar essa ação',
+        'Usuário não autorizado a criar uma vaga para esta empresa.',
       );
     }
 
@@ -51,7 +56,7 @@ export class JobService {
     });
 
     if (!field) {
-      throw new Error('Field not found');
+      throw new NotFoundException('Área de atuação não encontrada.');
     }
 
     const job = this.jobRepository.create({
@@ -70,10 +75,16 @@ export class JobService {
   }
 
   async getJobById(id: number) {
-    return await this.jobRepository.findOne({
+    const job = await this.jobRepository.findOne({
       where: { id },
       relations: ['field', 'company'],
     });
+
+    if (!job) {
+      throw new NotFoundException('Vaga não encontrada.');
+    }
+
+    return job;
   }
 
   async updateJob(
@@ -86,13 +97,13 @@ export class JobService {
       relations: ['company'],
     });
     if (!job) {
-      throw new Error('Job not found');
+      throw new NotFoundException('Vaga não encontrada.');
     }
 
     const userId = req.user.userId;
     if (job.company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar essa ação',
+        'Usuário não autorizado a atualizar esta vaga.',
       );
     }
 
@@ -101,7 +112,7 @@ export class JobService {
         where: { id: updateJobDto.field_id },
       });
       if (!field) {
-        throw new Error('Field not found');
+        throw new NotFoundException('Área de atuação não encontrada.');
       }
       job.field = field;
     }
@@ -117,17 +128,18 @@ export class JobService {
       relations: ['company'],
     });
     if (!job) {
-      throw new Error('Job not found');
+      throw new NotFoundException('Vaga não encontrada.');
     }
 
     const userId = req.user.userId;
     if (job.company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar essa ação',
+        'Usuário não autorizado a deletar esta vaga.',
       );
     }
 
-    return await this.jobRepository.delete(id);
+    await this.jobRepository.delete(id);
+    return { message: 'Vaga deletada com sucesso.' };
   }
 
   async createJobPublication(
@@ -145,12 +157,12 @@ export class JobService {
     });
 
     if (!job || !company) {
-      throw new Error('Job or company not found');
+      throw new NotFoundException('Vaga ou empresa não encontrada.');
     }
 
     if (company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Usuário não autorizado a realizar essa ação',
+        'Usuário não autorizado a criar esta publicação.',
       );
     }
 
@@ -163,7 +175,7 @@ export class JobService {
 
       if (college && college.company.user.id !== userId) {
         throw new UnauthorizedException(
-          'Usuário não autorizado a realizar essa ação',
+          'Usuário não autorizado a vincular esta faculdade à publicação.',
         );
       }
     }
@@ -190,7 +202,7 @@ export class JobService {
 
     if (!company || company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Apenas a própria empresa pode ver suas publicações de vaga',
+        'Apenas a própria empresa pode ver suas vagas.',
       );
     }
 
@@ -210,7 +222,7 @@ export class JobService {
 
     if (!company || company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Apenas a própria empresa pode ver suas publicações de vaga',
+        'Apenas a própria empresa pode ver suas publicações de vagas.',
       );
     }
 
@@ -230,7 +242,7 @@ export class JobService {
 
     if (!college || college.company.user.id !== userId) {
       throw new UnauthorizedException(
-        'Apenas a própria faculdade pode gerenciar as vagas publicadas em seu feed',
+        'Apenas a própria faculdade pode gerenciar suas publicações.',
       );
     }
 
@@ -251,7 +263,7 @@ export class JobService {
     });
 
     if (!jobPublication) {
-      throw new Error('Job Publication not found');
+      throw new NotFoundException('Publicação de vaga não encontrada.');
     }
 
     const userId = req.user.userId;
@@ -265,7 +277,7 @@ export class JobService {
         jobPublication.college.company.user.id !== userId
       ) {
         throw new UnauthorizedException(
-          'Apenas a faculdade pode aprovar ou reprovar uma publicação',
+          'Apenas a faculdade pode aprovar ou reprovar uma publicação.',
         );
       }
     }
@@ -276,7 +288,7 @@ export class JobService {
         jobPublication.college?.company.user.id !== userId
       ) {
         throw new UnauthorizedException(
-          'Apenas a empresa ou a faculdade pode remover uma publicação',
+          'Apenas a empresa ou a faculdade pode remover uma publicação.',
         );
       }
     }
@@ -292,8 +304,8 @@ export class JobService {
     } else if (currentStatus === 'approved' && newStatus === 'removed') {
       jobPublication.status = 'removed';
     } else {
-      throw new Error(
-        `Invalid status transition from ${currentStatus} to ${newStatus}`,
+      throw new BadRequestException(
+        `Transição de status inválida de ${currentStatus} para ${newStatus}.`,
       );
     }
 

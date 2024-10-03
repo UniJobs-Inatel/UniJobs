@@ -35,6 +35,7 @@ export class StudentController {
   }
 
   @Put('profile/:id')
+  @HttpCode(HttpStatus.OK)
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateStudentProfileDto: UpdateStudentProfileDto,
@@ -44,6 +45,7 @@ export class StudentController {
   }
 
   @Get('profile/user/:userId')
+  @HttpCode(HttpStatus.OK)
   async getProfileByUserId(
     @Param('userId', ParseIntPipe) userId: number,
     @Req() req: RequestWithUser,
@@ -58,16 +60,19 @@ export class StudentController {
   }
 
   @Get('experience')
+  @HttpCode(HttpStatus.OK)
   async getAllExperiences() {
     return this.studentService.getAllExperiences();
   }
 
   @Get('experience/:id')
+  @HttpCode(HttpStatus.OK)
   async getExperienceById(@Param('id', ParseIntPipe) id: number) {
     return this.studentService.getExperienceById(id);
   }
 
   @Put('experience/:id')
+  @HttpCode(HttpStatus.OK)
   async updateExperience(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateExperienceDto: UpdateExperienceDto,

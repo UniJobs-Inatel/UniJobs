@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tag } from '../entities/tag.entity';
@@ -33,6 +38,9 @@ export class TagService {
 
   /*--------------- Tags ---------------*/
   async createTag(name: string): Promise<Tag> {
+    if (!name || name.trim() === '') {
+      throw new BadRequestException('Nome da tag não pode estar vazio.');
+    }
     const newTag = this.tagRepository.create({ name });
     return this.tagRepository.save(newTag);
   }
@@ -43,20 +51,26 @@ export class TagService {
 
   async updateTag(id: number, name: string): Promise<Tag> {
     const tag = await this.tagRepository.findOneBy({ id });
-    if (tag) {
-      tag.name = name;
-      return this.tagRepository.save(tag);
+    if (!tag) {
+      throw new NotFoundException('Tag não encontrada.');
     }
-    throw new Error('Tag not found');
+    if (!name || name.trim() === '') {
+      throw new BadRequestException('Nome da tag não pode estar vazio.');
+    }
+    tag.name = name;
+    return this.tagRepository.save(tag);
   }
 
   async deleteTag(id: number): Promise<void> {
+    const tag = await this.tagRepository.findOneBy({ id });
+    if (!tag) {
+      throw new NotFoundException('Tag não encontrada.');
+    }
     await this.tagRepository.delete(id);
   }
 
   /* --------------- Protecting User Routes --------------- */
 
-  // Student: Validate if the student is the same as in JWT
   async getTagsByStudentId(
     studentId: number,
     req: RequestWithUser,
@@ -81,7 +95,6 @@ export class TagService {
     return studentProficiencies.map((proficiency) => proficiency.tag);
   }
 
-  // Job: Validate if the company owning the job matches the JWT user ID
   async getTagsByJobId(jobId: number, req: RequestWithUser): Promise<Tag[]> {
     const jwtUserId = req.user.userId;
     const job = await this.jobRepository.findOne({
