@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
@@ -11,6 +11,7 @@ import { CreateStudentProfileDto } from './dto/create-student-profile.dto';
 import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
+import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Injectable()
 export class StudentService {
@@ -29,7 +30,15 @@ export class StudentService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getProfileByUserId(userId: number) {
+  async getProfileByUserId(userId: number, req: RequestWithUser) {
+    const jwtUserId = req.user.userId;
+
+    if (jwtUserId !== userId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a acessar este perfil.',
+      );
+    }
+
     const student = await this.studentRepository.findOne({
       where: { user: { id: userId } },
       relations: ['user', 'college', 'experiences', 'proficiencies'],
@@ -58,8 +67,10 @@ export class StudentService {
 
   async createProfile(
     createStudentProfileDto: CreateStudentProfileDto,
-    userId: number,
+    req: RequestWithUser,
   ) {
+    const userId = req.user.userId;
+
     const { student, experiences, proficiencies } = createStudentProfileDto;
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -68,7 +79,7 @@ export class StudentService {
     }
 
     if (user.type !== 'student') {
-      throw new Error(
+      throw new UnauthorizedException(
         'Apenas usuários do tipo estudante podem criar perfis de estudante',
       );
     }
@@ -106,10 +117,31 @@ export class StudentService {
   async updateProfile(
     id: number,
     updateStudentProfileDto: UpdateStudentProfileDto,
+    req: RequestWithUser,
   ) {
-    const { student, experiences, proficiencies } = updateStudentProfileDto;
+    const jwtUserId = req.user.userId;
+    const student = await this.studentRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
 
-    await this.studentRepository.update(id, student);
+    if (!student) {
+      throw new Error('Student profile not found');
+    }
+
+    if (student.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a atualizar este perfil.',
+      );
+    }
+
+    const {
+      student: studentData,
+      experiences,
+      proficiencies,
+    } = updateStudentProfileDto;
+
+    await this.studentRepository.update(id, studentData);
 
     await this.handleExperiences(id, experiences);
     await this.handleProficiencies(id, proficiencies);

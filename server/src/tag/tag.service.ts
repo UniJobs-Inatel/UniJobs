@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tag } from '../entities/tag.entity';
 import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { JobTag } from '../entities/job-tag.entity';
+import { RequestWithUser } from '../auth/request-with-user.interface';
+import { Student } from '../entities/student.entity';
+import { Job } from '../entities/job.entity';
+import { Company } from '../entities/company.entity';
 
 @Injectable()
 export class TagService {
@@ -16,6 +20,15 @@ export class TagService {
 
     @InjectRepository(JobTag)
     private jobTagRepository: Repository<JobTag>,
+
+    @InjectRepository(Student)
+    private studentRepository: Repository<Student>,
+
+    @InjectRepository(Job)
+    private jobRepository: Repository<Job>,
+
+    @InjectRepository(Company)
+    private companyRepository: Repository<Company>,
   ) {}
 
   /*--------------- Tags ---------------*/
@@ -41,7 +54,25 @@ export class TagService {
     await this.tagRepository.delete(id);
   }
 
-  async getTagsByStudentId(studentId: number): Promise<Tag[]> {
+  /* --------------- Protecting User Routes --------------- */
+
+  // Student: Validate if the student is the same as in JWT
+  async getTagsByStudentId(
+    studentId: number,
+    req: RequestWithUser,
+  ): Promise<Tag[]> {
+    const jwtUserId = req.user.userId;
+    const student = await this.studentRepository.findOne({
+      where: { id: studentId },
+      relations: ['user'],
+    });
+
+    if (!student || student.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a acessar esta informação.',
+      );
+    }
+
     const studentProficiencies = await this.studentProficiencyRepository.find({
       where: { student: { id: studentId } },
       relations: ['tag'],
@@ -50,7 +81,20 @@ export class TagService {
     return studentProficiencies.map((proficiency) => proficiency.tag);
   }
 
-  async getTagsByJobId(jobId: number): Promise<Tag[]> {
+  // Job: Validate if the company owning the job matches the JWT user ID
+  async getTagsByJobId(jobId: number, req: RequestWithUser): Promise<Tag[]> {
+    const jwtUserId = req.user.userId;
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+      relations: ['company', 'company.user'],
+    });
+
+    if (!job || job.company.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a acessar esta informação.',
+      );
+    }
+
     const jobTags = await this.jobTagRepository.find({
       where: { job: { id: jobId } },
       relations: ['tag'],
@@ -63,7 +107,20 @@ export class TagService {
   async createStudentProficiency(
     studentId: number,
     tagId: number,
+    req: RequestWithUser,
   ): Promise<StudentProficiency> {
+    const jwtUserId = req.user.userId;
+    const student = await this.studentRepository.findOne({
+      where: { id: studentId },
+      relations: ['user'],
+    });
+
+    if (!student || student.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a criar esta proficiência.',
+      );
+    }
+
     const newProficiency = this.studentProficiencyRepository.create({
       student: { id: studentId },
       tag: { id: tagId },
@@ -73,19 +130,62 @@ export class TagService {
 
   async getStudentProficiencies(
     studentId: number,
+    req: RequestWithUser,
   ): Promise<StudentProficiency[]> {
+    const jwtUserId = req.user.userId;
+    const student = await this.studentRepository.findOne({
+      where: { id: studentId },
+      relations: ['user'],
+    });
+
+    if (!student || student.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a acessar estas proficiências.',
+      );
+    }
+
     return this.studentProficiencyRepository.find({
       where: { student: { id: studentId } },
       relations: ['tag'],
     });
   }
 
-  async deleteStudentProficiency(id: number): Promise<void> {
+  async deleteStudentProficiency(
+    id: number,
+    req: RequestWithUser,
+  ): Promise<void> {
+    const proficiency = await this.studentProficiencyRepository.findOne({
+      where: { id },
+      relations: ['student', 'student.user'],
+    });
+
+    if (!proficiency || proficiency.student.user.id !== req.user.userId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a deletar esta proficiência.',
+      );
+    }
+
     await this.studentProficiencyRepository.delete(id);
   }
 
   /* --------------- JobTag --------------- */
-  async createJobTag(jobId: number, tagId: number): Promise<JobTag> {
+  async createJobTag(
+    jobId: number,
+    tagId: number,
+    req: RequestWithUser,
+  ): Promise<JobTag> {
+    const jwtUserId = req.user.userId;
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+      relations: ['company', 'company.user'],
+    });
+
+    if (!job || job.company.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a criar esta tag de trabalho.',
+      );
+    }
+
     const newJobTag = this.jobTagRepository.create({
       job: { id: jobId },
       tag: { id: tagId },
@@ -93,14 +193,37 @@ export class TagService {
     return this.jobTagRepository.save(newJobTag);
   }
 
-  async getJobTags(jobId: number): Promise<JobTag[]> {
+  async getJobTags(jobId: number, req: RequestWithUser): Promise<JobTag[]> {
+    const jwtUserId = req.user.userId;
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+      relations: ['company', 'company.user'],
+    });
+
+    if (!job || job.company.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a acessar estas tags de trabalho.',
+      );
+    }
+
     return this.jobTagRepository.find({
       where: { job: { id: jobId } },
       relations: ['tag'],
     });
   }
 
-  async deleteJobTag(id: number): Promise<void> {
+  async deleteJobTag(id: number, req: RequestWithUser): Promise<void> {
+    const jobTag = await this.jobTagRepository.findOne({
+      where: { id },
+      relations: ['job', 'job.company', 'job.company.user'],
+    });
+
+    if (!jobTag || jobTag.job.company.user.id !== req.user.userId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a deletar esta tag de trabalho.',
+      );
+    }
+
     await this.jobTagRepository.delete(id);
   }
 }

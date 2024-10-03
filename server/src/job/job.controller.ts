@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -14,71 +15,87 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobPublicationDto } from './dto/create-job-publication.dto';
 import { UpdateJobPublicationDto } from './dto/update-job-publication.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Controller('job')
+@UseGuards(JwtAuthGuard)
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
-  async createJob(@Body() createJobDto: CreateJobDto) {
-    return this.jobService.createJob(createJobDto);
+  async createJob(
+    @Body() createJobDto: CreateJobDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.jobService.createJob(createJobDto, req);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async getAllJobs() {
     return this.jobService.getAllJobs();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getJobById(@Param('id') id: number) {
     return this.jobService.getJobById(id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateJob(@Param('id') id: number, @Body() updateJobDto: UpdateJobDto) {
-    return this.jobService.updateJob(id, updateJobDto);
+  async updateJob(
+    @Param('id') id: number,
+    @Body() updateJobDto: UpdateJobDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.jobService.updateJob(id, updateJobDto, req);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteJob(@Param('id') id: number) {
-    return this.jobService.deleteJob(id);
+  async deleteJob(@Param('id') id: number, @Req() req: RequestWithUser) {
+    return this.jobService.deleteJob(id, req);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('publish')
-  async publishJob(@Body() createJobPublicationDto: CreateJobPublicationDto) {
-    return this.jobService.createJobPublication(createJobPublicationDto);
+  async publishJob(
+    @Body() createJobPublicationDto: CreateJobPublicationDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.jobService.createJobPublication(createJobPublicationDto, req);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('company/:companyId')
-  async getJobsByCompany(@Param('companyId') companyId: number) {
-    return this.jobService.getJobsByCompany(companyId);
+  async getJobsByCompany(
+    @Param('companyId') companyId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.jobService.getJobsByCompany(companyId, req);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('publications/company/:companyId')
-  async getJobPublicationsByCompany(@Param('companyId') companyId: number) {
-    return this.jobService.getJobPublicationsByCompany(companyId);
+  async getJobPublicationsByCompany(
+    @Param('companyId') companyId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.jobService.getJobPublicationsByCompany(companyId, req);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('publications/college/:collegeId')
-  async getJobPublicationsByCollege(@Param('collegeId') collegeId: number) {
-    return this.jobService.getJobPublicationsByCollege(collegeId);
+  async getJobPublicationsByCollege(
+    @Param('collegeId') collegeId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.jobService.getJobPublicationsByCollege(collegeId, req);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Put('publications/:id')
   async updateJobPublication(
     @Param('id') id: number,
     @Body() updateJobPublicationDto: UpdateJobPublicationDto,
+    @Req() req: RequestWithUser,
   ) {
-    return this.jobService.updateJobPublication(id, updateJobPublicationDto);
+    return this.jobService.updateJobPublication(
+      id,
+      updateJobPublicationDto,
+      req,
+    );
   }
 }
