@@ -71,23 +71,45 @@ export const isValidDate = (dateString: string) => {
  * @returns true if the CNPJ is valid, false otherwise
  */
 export const cnpjValidator = (cnpj: string): boolean => {
-  if (cnpj.length === 0) return false;
-  if (typeof cnpj !== 'string') return false;
-  cnpj = cnpj.replace(/[^\d]+/g, '');
+      cnpj = cnpj.replace(/[^\d]+/g, '');
 
-  if (cnpj.length !== 14 || !!cnpj.match(/(\d)\1{13}/)) return false;
+      
+      console.log(cnpj.length !== 14)
+      console.log(/^(\d)\1+$/.test(cnpj))
+      if (cnpj.length !== 14) return false;
+  
+      if (/^(\d)\1+$/.test(cnpj)) return false;
+  
+      let size = cnpj.length - 2;
+      let numbers = cnpj.substring(0, size);
+      const digits = cnpj.substring(size);
+      let sum = 0;
+      let pos = size - 7;
+  
+      for (let i = size; i >= 1; i--) {
+          sum += +numbers.charAt(size - i) * pos--;
+          if (pos < 2) pos = 9;
+      }
+  
+      let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
 
-  const cnpjDigits = cnpj.split('').map((el) => +el);
+      
+  
+      if (result != +digits.charAt(0)) return false;
+  
+      size++;
+      numbers = cnpj.substring(0, size);
+      sum = 0;
+      pos = size - 7;
+  
+      for (let i = size; i >= 1; i--) {
+          sum += +numbers.charAt(size - i) * pos--;
+          if (pos < 2) pos = 9;
+      }
+  
+      result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
 
-  const rest = (count: number): number => {
-    const size = count - 7;
-    const numbers = cnpjDigits.slice(0, count);
-    const sum = numbers
-      .map((el, index) => el * (size - index))
-      .reduce((acc, curr) => acc + curr, 0);
-
-    return sum % 11 < 2 ? 0 : 11 - (sum % 11);
-  };
-
-  return rest(12) === cnpjDigits[12] && rest(13) === cnpjDigits[13];
+      
+  
+      return result == +digits.charAt(1);
 };

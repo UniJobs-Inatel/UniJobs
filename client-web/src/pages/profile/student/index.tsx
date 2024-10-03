@@ -18,8 +18,8 @@ import { MultiSelectInput } from "@/components/ui/multiSelectInput";
 import { Tag } from "@/domain/tags";
 import { getAllTags } from "@/services/repositories/tags";
 import { createStudentProfile } from "@/services/repositories";
-import { Experience,ICreateStudentProfile  } from "@/domain/student";
-import { isoFormatter } from "@/lib/utils";
+import { Experience, ICreateStudentProfile } from "@/domain/student";
+import { isoFormatter, onlyNumbers } from "@/lib/utils";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -61,23 +61,25 @@ const StudentProfile = () => {
     console.log(":", experiences);
     console.log("Login data:", data);
 
-    const experiencesFormatted = experiences.map((experience) => ({
-      ...experience,
-      start_date: isoFormatter(experience.start_date),
-      end_date: isoFormatter(experience.end_date),
-    } as Experience ));
+    const experiencesFormatted = experiences.map(
+      (experience) =>
+        ({
+          ...experience,
+          start_date: isoFormatter(experience.start_date),
+          end_date: isoFormatter(experience.end_date),
+        }) as Experience
+    );
 
-    const creationData:ICreateStudentProfile = {
-      student:{...data},
-      userId:8,
-      experiences:experiencesFormatted,
-      proficiencies:selectedTags.map((tag) => ({id:tag.id}))
-    }
+    const creationData: ICreateStudentProfile = {
+      student: { ...data, cpf: onlyNumbers(data.cpf) },
+      userId: 8,
+      experiences: experiencesFormatted,
+      proficiencies: selectedTags.map((tag) => ({ id: tag.id })),
+    };
 
-    const response = await createStudentProfile(creationData)
+    const response = await createStudentProfile(creationData);
 
-    if(response?.status == 201) console.log('Deu certo')
-
+    if (response?.status == 201) console.log("Deu certo");
   };
 
   const closeModal = () => {

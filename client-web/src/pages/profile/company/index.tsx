@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ICreateCompanyProfile } from "@/domain/company";
+import { onlyNumbers } from "@/lib/utils";
+import { createCompanyProfile } from "@/services/repositories";
 import { cnpjValidator, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -7,7 +10,7 @@ import { z } from "zod";
 
 const CompanyProfile = () => {
   const completeRegistrationSchema = z.object({
-    companyName: requiredString(),
+    name: requiredString(),
     description: requiredString(),
     field_of_activity: requiredString(),
     contact_website: requiredString(),
@@ -27,12 +30,24 @@ const CompanyProfile = () => {
     resolver: zodResolver(completeRegistrationSchema),
     defaultValues: {
       cnpj: "",
-      companyName:''
+      name: "",
     },
   });
 
-  const handleLogin = (data: CompleteRegistrationData) => {
+  const handleLogin = async (data: CompleteRegistrationData) => {
     console.log("Login data:", data);
+
+    const creationData: ICreateCompanyProfile = {
+      ...data,
+      cnpj:onlyNumbers(data.cnpj),
+      user_id:9
+    };
+
+    console.log(creationData)
+
+    const response = await createCompanyProfile(creationData);
+
+    if (response?.status == 201) console.log("Deu certo");
   };
 
   return (
@@ -42,15 +57,13 @@ const CompanyProfile = () => {
         <h4 className="text-primary text-[16px] font-bold mb-4">
           Informações Empresariais
         </h4>
-        <form
-          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-        >
+        <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Input
             label="Nome da Empresa:"
             id="lastName"
-            {...register("companyName")}
+            {...register("name")}
             placeholder="Nome da empresa"
-            error={errors.companyName?.message}
+            error={errors.name?.message}
           />
           <Controller
             control={control}
@@ -58,20 +71,25 @@ const CompanyProfile = () => {
             render={({ field }) => (
               <Input
                 label="CNPJ:"
-                mask=" 99.999.999/0001-9"
+                mask=" 99.999.999/0001-99"  
                 inputMode="numeric"
                 id="cnpj"
                 {...field}
-                placeholder="Seu cpf"
+                placeholder="Seu CNPJ"
                 error={errors.cnpj?.message}
               />
             )}
           />
 
           <Input
+            label="E-mail:"
+            id="email"
+            value='trocaEmailParaSalvo@email.com'
+          />
+          <Input
             label="Descrição:"
             id="description"
-            placeholder="Entre com seu e-mail"
+            placeholder="Entre com a descrição"
             {...register("description")}
             error={errors.description?.message}
           />
@@ -90,14 +108,14 @@ const CompanyProfile = () => {
             error={errors.contact_website?.message}
           />
         </form>
-          <div className="flex justify-end mt-4 ">
-            <Button
-              onClick={handleSubmit(handleLogin)}
-              className="w-[160px] h-10 text-white bg-primary"
-            >
-              Salvar
-            </Button>
-          </div>
+        <div className="flex justify-end mt-4 ">
+          <Button
+            onClick={handleSubmit(handleLogin)}
+            className="w-[160px] h-10 text-white bg-primary"
+          >
+            Salvar
+          </Button>
+        </div>
       </section>
     </div>
   );
