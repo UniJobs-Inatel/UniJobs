@@ -6,22 +6,20 @@ import {
   Param,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from '../entities/user.entity';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('user')
+@UseGuards(AdminGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
   async findAll(): Promise<User[]> {
     return this.userService.findAll();
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: number): Promise<User> {
-    return this.userService.findOne(id);
   }
 
   @Post()
@@ -40,5 +38,10 @@ export class UserController {
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<void> {
     return this.userService.remove(id);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: number): Promise<User> {
+    return this.userService.findOne(id);
   }
 }

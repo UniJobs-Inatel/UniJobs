@@ -10,6 +10,7 @@ import {
 import { FieldService } from './field.service';
 import { Field } from '../entities/field.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('field')
 export class FieldController {
@@ -27,7 +28,7 @@ export class FieldController {
     return this.fieldService.getFieldById(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
   @Post()
   async createField(@Body() createFieldDto: { field: string }): Promise<Field> {
     return this.fieldService.createField(createFieldDto);
