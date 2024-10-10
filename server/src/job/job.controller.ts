@@ -10,6 +10,7 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -39,10 +40,52 @@ export class JobController {
     return this.jobService.getAllJobs();
   }
 
+  @Get('search')
+  @HttpCode(HttpStatus.OK)
+  async searchJobs(
+    @Query('location') location?: string,
+    @Query('type') type?: string,
+    @Query('skills') skills?: string,
+    @Query('minSalary') minSalary?: number,
+    @Query('maxSalary') maxSalary?: number,
+    @Query('mode') mode?: string,
+    @Query('weeklyHours') weeklyHours?: number,
+    @Query('fieldId') fieldId?: number,
+    @Query('limit') limit: number = 10,
+    @Query('offset') offset: number = 0,
+  ) {
+    const salaryRange =
+      minSalary && maxSalary ? { min: minSalary, max: maxSalary } : undefined;
+    const skillIds = skills ? skills.split(',').map(Number) : [];
+
+    const filters = {
+      location,
+      type,
+      skills: skillIds.length > 0 ? skillIds : undefined,
+      salaryRange,
+      mode,
+      weeklyHours,
+      fieldId,
+    };
+
+    const pagination = { limit, offset };
+
+    return this.jobService.searchJobs(filters, pagination);
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getJobById(@Param('id') id: number) {
     return this.jobService.getJobById(id);
+  }
+
+  @Get('company/:companyId')
+  @HttpCode(HttpStatus.OK)
+  async getJobsByCompany(
+    @Param('companyId') companyId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.jobService.getJobsByCompany(companyId, req);
   }
 
   @Put(':id')
@@ -68,15 +111,6 @@ export class JobController {
     @Req() req: RequestWithUser,
   ) {
     return this.jobService.createJobPublication(createJobPublicationDto, req);
-  }
-
-  @Get('company/:companyId')
-  @HttpCode(HttpStatus.OK)
-  async getJobsByCompany(
-    @Param('companyId') companyId: number,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.jobService.getJobsByCompany(companyId, req);
   }
 
   @Get('publications/company/:companyId')
