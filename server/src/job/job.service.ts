@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job } from '../entities/job.entity';
 import { JobPublication } from '../entities/job-publication.entity';
+import { JobTag } from '../entities/job-tag.entity';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobPublicationDto } from './dto/create-job-publication.dto';
@@ -22,6 +23,8 @@ export class JobService {
   constructor(
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
+    @InjectRepository(JobTag)
+    private readonly jobTagRepository: Repository<JobTag>,
     @InjectRepository(JobPublication)
     private readonly jobPublicationRepository: Repository<JobPublication>,
     @InjectRepository(Company)
@@ -74,6 +77,67 @@ export class JobService {
     });
   }
 
+  async searchJobs(
+    filters: {
+      location?: string;
+      type?: string;
+      skills?: number[];
+      salaryRange?: { min: number; max: number };
+      mode?: string;
+      weeklyHours?: number;
+      fieldId?: number;
+    },
+    pagination: { limit: number; offset: number },
+  ) {
+    const { location, type, skills, salaryRange, mode, weeklyHours, fieldId } =
+      filters;
+    const { limit, offset } = pagination;
+
+    const query = this.jobRepository
+      .createQueryBuilder('job')
+      .leftJoinAndSelect('job.field', 'field')
+      .leftJoinAndSelect('job.company', 'company')
+      .leftJoinAndSelect('job.tags', 'jobTags')
+      .leftJoinAndSelect('jobTags.tag', 'tag')
+      .where('1=1');
+
+    if (location) {
+      query.andWhere('job.location = :location', { location });
+    }
+    if (type) {
+      query.andWhere('job.type = :type', { type });
+    }
+    if (skills && skills.length > 0) {
+      query.andWhere('tag.id IN (:...skills)', { skills });
+    }
+    if (salaryRange) {
+      query.andWhere('job.salary BETWEEN :min AND :max', {
+        min: salaryRange.min,
+        max: salaryRange.max,
+      });
+    }
+    if (mode) {
+      query.andWhere('job.mode = :mode', { mode });
+    }
+    if (weeklyHours) {
+      query.andWhere('job.weekly_hours = :weeklyHours', { weeklyHours });
+    }
+    if (fieldId) {
+      query.andWhere('job.field_id = :fieldId', { fieldId });
+    }
+
+    query.take(limit).skip(offset);
+
+    const [jobs, total] = await query.getManyAndCount();
+
+    return {
+      jobs,
+      total,
+      pageCount: Math.ceil(total / limit),
+      currentPage: Math.floor(offset / limit) + 1,
+    };
+  }
+
   async getJobById(id: number) {
     const job = await this.jobRepository.findOne({
       where: { id },
@@ -85,6 +149,26 @@ export class JobService {
     }
 
     return job;
+  }
+
+  async getJobsByCompany(companyId: number, req: RequestWithUser) {
+    const userId = req.user.userId;
+
+    const company = await this.companyRepository.findOne({
+      where: { id: companyId },
+      relations: ['user'],
+    });
+
+    if (!company || company.user.id !== userId) {
+      throw new UnauthorizedException(
+        'Apenas a própria empresa pode ver suas vagas.',
+      );
+    }
+
+    return await this.jobRepository.find({
+      where: { company: { id: companyId } },
+      relations: ['company'],
+    });
   }
 
   async updateJob(
@@ -142,6 +226,8 @@ export class JobService {
     return { message: 'Vaga deletada com sucesso.' };
   }
 
+  /* Job Publication */
+
   async createJobPublication(
     createJobPublicationDto: CreateJobPublicationDto,
     req: RequestWithUser,
@@ -172,12 +258,6 @@ export class JobService {
         where: { id: createJobPublicationDto.college_id },
         relations: ['company'],
       });
-
-      if (college && college.company.user.id !== userId) {
-        throw new UnauthorizedException(
-          'Usuário não autorizado a vincular esta faculdade à publicação.',
-        );
-      }
     }
 
     const jobPublication = this.jobPublicationRepository.create({
@@ -190,26 +270,6 @@ export class JobService {
     });
 
     return await this.jobPublicationRepository.save(jobPublication);
-  }
-
-  async getJobsByCompany(companyId: number, req: RequestWithUser) {
-    const userId = req.user.userId;
-
-    const company = await this.companyRepository.findOne({
-      where: { id: companyId },
-      relations: ['user'],
-    });
-
-    if (!company || company.user.id !== userId) {
-      throw new UnauthorizedException(
-        'Apenas a própria empresa pode ver suas vagas.',
-      );
-    }
-
-    return await this.jobRepository.find({
-      where: { company: { id: companyId } },
-      relations: ['company'],
-    });
   }
 
   async getJobPublicationsByCompany(companyId: number, req: RequestWithUser) {
@@ -293,6 +353,14 @@ export class JobService {
       }
     }
 
+    if (updateJobPublicationDto.status === 'pending') {
+      if (jobPublication.company.user.id !== userId) {
+        throw new UnauthorizedException(
+          'Apenas a empresa pode republicar uma publicação.',
+        );
+      }
+    }
+
     const currentStatus = jobPublication.status;
     const newStatus = updateJobPublicationDto.status;
 
@@ -303,6 +371,10 @@ export class JobService {
       jobPublication.publication_date = new Date();
     } else if (currentStatus === 'approved' && newStatus === 'removed') {
       jobPublication.status = 'removed';
+    } else if (currentStatus === 'removed' && newStatus === 'pending') {
+      jobPublication.status = 'pending';
+    } else if (currentStatus === 'reproved' && newStatus === 'pending') {
+      jobPublication.status = 'pending';
     } else {
       throw new BadRequestException(
         `Transição de status inválida de ${currentStatus} para ${newStatus}.`,
