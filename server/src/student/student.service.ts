@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
@@ -11,6 +15,7 @@ import { CreateStudentProfileDto } from './dto/create-student-profile.dto';
 import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
+import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Injectable()
 export class StudentService {
@@ -29,13 +34,21 @@ export class StudentService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getProfileByUserId(userId: number) {
+  async getProfileByUserId(userId: number, req: RequestWithUser) {
+    const jwtUserId = req.user.userId;
+
+    if (jwtUserId !== userId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a acessar este perfil.',
+      );
+    }
+
     const student = await this.studentRepository.findOne({
       where: { user: { id: userId } },
       relations: ['user', 'college', 'experiences', 'proficiencies'],
     });
     if (!student) {
-      throw new Error('Student profile not found for this user.');
+      throw new NotFoundException('Perfil de estudante não encontrado.');
     }
 
     return student;
@@ -58,18 +71,19 @@ export class StudentService {
 
   async createProfile(
     createStudentProfileDto: CreateStudentProfileDto,
-    userId: number,
+    req: RequestWithUser,
   ) {
+    const userId = req.user.userId;
     const { student, experiences, proficiencies } = createStudentProfileDto;
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('Usuário não encontrado.');
     }
 
     if (user.type !== 'student') {
-      throw new Error(
-        'Apenas usuários do tipo estudante podem criar perfis de estudante',
+      throw new UnauthorizedException(
+        'Apenas usuários do tipo estudante podem criar perfis de estudante.',
       );
     }
 
@@ -106,10 +120,31 @@ export class StudentService {
   async updateProfile(
     id: number,
     updateStudentProfileDto: UpdateStudentProfileDto,
+    req: RequestWithUser,
   ) {
-    const { student, experiences, proficiencies } = updateStudentProfileDto;
+    const jwtUserId = req.user.userId;
+    const student = await this.studentRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
 
-    await this.studentRepository.update(id, student);
+    if (!student) {
+      throw new NotFoundException('Perfil de estudante não encontrado.');
+    }
+
+    if (student.user.id !== jwtUserId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a atualizar este perfil.',
+      );
+    }
+
+    const {
+      student: studentData,
+      experiences,
+      proficiencies,
+    } = updateStudentProfileDto;
+
+    await this.studentRepository.update(id, studentData);
 
     await this.handleExperiences(id, experiences);
     await this.handleProficiencies(id, proficiencies);
@@ -170,9 +205,7 @@ export class StudentService {
   }
 
   async createExperience(createExperienceDto: CreateExperienceDto) {
-    const experience =
-      await this.experienceRepository.save(createExperienceDto);
-    return experience;
+    return await this.experienceRepository.save(createExperienceDto);
   }
 
   async getAllExperiences() {
@@ -180,18 +213,34 @@ export class StudentService {
   }
 
   async getExperienceById(id: number) {
-    return this.experienceRepository.findOne({
+    const experience = await this.experienceRepository.findOne({
       where: { id },
       relations: ['student'],
     });
+    if (!experience) {
+      throw new NotFoundException('Experiência não encontrada.');
+    }
+    return experience;
   }
 
   async updateExperience(id: number, updateExperienceDto: UpdateExperienceDto) {
+    const experience = await this.experienceRepository.findOne({
+      where: { id },
+    });
+    if (!experience) {
+      throw new NotFoundException('Experiência não encontrada.');
+    }
     await this.experienceRepository.update(id, updateExperienceDto);
     return this.experienceRepository.findOne({ where: { id } });
   }
 
   async deleteExperience(id: number) {
+    const experience = await this.experienceRepository.findOne({
+      where: { id },
+    });
+    if (!experience) {
+      throw new NotFoundException('Experiência não encontrada.');
+    }
     await this.experienceRepository.delete(id);
   }
 }

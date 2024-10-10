@@ -6,6 +6,8 @@ import {
   Param,
   Put,
   Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from '../entities/user.entity';
@@ -19,17 +21,14 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number): Promise<User> {
-    return this.userService.findOne(id);
-  }
-
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: Partial<User>): Promise<User> {
     return this.userService.create(createUserDto);
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: number,
     @Body() updateUserDto: Partial<User>,
@@ -38,7 +37,14 @@ export class UserController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: number): Promise<void> {
-    return this.userService.remove(id);
+    await this.userService.remove(id);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('id') id: number): Promise<User> {
+    return this.userService.findOne(id);
   }
 }

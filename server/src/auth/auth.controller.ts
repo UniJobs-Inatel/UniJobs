@@ -3,10 +3,12 @@ import {
   Get,
   Query,
   Res,
-  BadRequestException,
   Post,
   Body,
+  BadRequestException,
   UnauthorizedException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -16,6 +18,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   async register(
     @Body('email') email: string,
     @Body('password') password: string,
@@ -25,6 +28,7 @@ export class AuthController {
   }
 
   @Get('verify')
+  @HttpCode(HttpStatus.OK)
   async verifyAccount(
     @Query('code') code: string,
     @Res() res: Response,
@@ -34,7 +38,7 @@ export class AuthController {
       res.redirect('http://localhost:4000/api');
     } catch (error) {
       if (error instanceof BadRequestException) {
-        res.status(400).send('Invalid verification code');
+        res.status(400).send('Código de verificação inválido.');
       } else {
         throw error;
       }
@@ -42,18 +46,20 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body('email') email: string,
     @Body('password') password: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciais inválidas.');
     }
     return this.authService.login(user);
   }
 
   @Post('refresh-token')
+  @HttpCode(HttpStatus.OK)
   async refreshToken(
     @Body('refreshToken') refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {

@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from '../entities/company.entity';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { User } from '../entities/user.entity';
+import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Injectable()
 export class CompanyService {
@@ -15,47 +21,75 @@ export class CompanyService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async createCompanyProfile(createCompanyDto: CreateCompanyDto) {
-    const { user_id, ...companyData } = createCompanyDto;
+  async createCompanyProfile(
+    createCompanyDto: CreateCompanyDto,
+    req: RequestWithUser,
+  ) {
+    const userId = req.user.userId;
 
     const existingCompany = await this.companyRepository.findOne({
-      where: { user: { id: user_id } },
+      where: { user: { id: userId } },
     });
     if (existingCompany) {
-      throw new Error('User already has a company profile');
+      throw new ConflictException('O usuário já possui um perfil de empresa.');
     }
 
-    const user = await this.userRepository.findOne({ where: { id: user_id } });
+    const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('Usuário não encontrado.');
     }
 
     if (user.type !== 'company' && user.type !== 'college') {
-      throw new Error(
-        'Only users of type "company" or "college" can create a company profile',
+      throw new UnauthorizedException(
+        'Apenas usuários do tipo "empresa" ou "faculdade" podem criar um perfil de empresa.',
       );
     }
 
-    const company = this.companyRepository.create({ ...companyData, user });
+    const company = this.companyRepository.create({
+      ...createCompanyDto,
+      user,
+    });
     return this.companyRepository.save(company);
   }
 
-  async getCompanyProfile(userId: number) {
-    return this.companyRepository.findOne({
+  async getCompanyProfile(userId: number, req: RequestWithUser) {
+    const jwtUserId = req.user.userId;
+    if (jwtUserId !== userId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a realizar esta ação.',
+      );
+    }
+
+    const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
       relations: ['user'],
     });
+
+    if (!company) {
+      throw new NotFoundException('Perfil de empresa não encontrado.');
+    }
+
+    return company;
   }
 
   async updateCompanyProfile(
     userId: number,
     updateCompanyDto: UpdateCompanyDto,
+    req: RequestWithUser,
   ) {
+    const jwtUserId = req.user.userId;
+    if (jwtUserId !== userId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a realizar esta ação.',
+      );
+    }
+
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
     });
+
     if (!company) {
-      throw new Error('Company profile not found');
+      throw new NotFoundException('Perfil de empresa não encontrado.');
     }
 
     Object.assign(company, updateCompanyDto);

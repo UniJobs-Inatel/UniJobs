@@ -33,7 +33,7 @@ export class AuthService {
       where: { email },
     });
     if (existingUser) {
-      throw new ConflictException('Email already registered.');
+      throw new ConflictException('E-mail já registrado.');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -58,7 +58,7 @@ export class AuthService {
     await this.mailService.sendVerificationEmail(user.email, verificationUrl);
 
     return {
-      message: 'User created successfully',
+      message: 'Usuário criado com sucesso. Verifique seu e-mail.',
       verificationLink: verificationUrl,
     };
   }
@@ -70,7 +70,7 @@ export class AuthService {
     });
 
     if (!verification) {
-      throw new BadRequestException('Invalid verification code.');
+      throw new BadRequestException('Código de verificação inválido.');
     }
 
     const user = verification.user;
@@ -96,7 +96,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     if (user.status === 'created') {
       throw new BadRequestException(
-        'É necessário validar o usuário antes de realizar login',
+        'É necessário validar o usuário antes de realizar login.',
       );
     }
     const payload = {
@@ -124,7 +124,7 @@ export class AuthService {
 
       if (!payload.sub) {
         throw new UnauthorizedException(
-          'Invalid token: No user ID in token payload',
+          'Token inválido: ID de usuário não encontrado no payload.',
         );
       }
 
@@ -133,14 +133,14 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new UnauthorizedException(
-          'Invalid refresh token: User not found',
-        );
+        throw new UnauthorizedException('Token de atualização inválido.');
       }
 
       return this.login(user);
     } catch (error) {
-      throw new UnauthorizedException('Error validating refresh token');
+      throw new UnauthorizedException(
+        'Erro ao validar o token de atualização.',
+      );
     }
   }
 }
