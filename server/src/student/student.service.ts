@@ -11,6 +11,8 @@ import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
 import { College } from '../entities/college.entity';
 import { User } from '../entities/user.entity';
+import { Job } from '../entities/job.entity';
+import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { CreateStudentProfileDto } from './dto/create-student-profile.dto';
 import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
@@ -32,8 +34,13 @@ export class StudentService {
     private readonly collegeRepository: Repository<College>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Job)
+    private readonly jobRepository: Repository<Job>,
+    @InjectRepository(FavoriteJobs)
+    private readonly favoriteJobsRepository: Repository<FavoriteJobs>,
   ) {}
 
+  /* Profile */
   async getProfileByUserId(userId: number, req: RequestWithUser) {
     const jwtUserId = req.user.userId;
 
@@ -152,6 +159,7 @@ export class StudentService {
     return await this.studentRepository.findOne({ where: { id } });
   }
 
+  /* Handles */
   private async handleExperiences(studentId: number, experiences) {
     const existingExperiences = await this.experienceRepository.find({
       where: { student: { id: studentId } },
@@ -204,6 +212,7 @@ export class StudentService {
     }
   }
 
+  /* Experiences */
   async createExperience(createExperienceDto: CreateExperienceDto) {
     return await this.experienceRepository.save(createExperienceDto);
   }
@@ -242,5 +251,97 @@ export class StudentService {
       throw new NotFoundException('Experiência não encontrada.');
     }
     await this.experienceRepository.delete(id);
+  }
+
+  /* Favorite Jobs */
+
+  async unfavoriteJob(jobId: number, req: RequestWithUser) {
+    const userId = req.user.userId;
+
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (userId !== student.user.id) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a desfavoritar esta vaga.',
+      );
+    }
+
+    if (!student) {
+      throw new NotFoundException('Perfil de estudante não encontrado.');
+    }
+
+    const favoriteJob = await this.favoriteJobsRepository.findOne({
+      where: { student: { id: student.id }, job: { id: jobId } },
+    });
+
+    if (!favoriteJob) {
+      throw new NotFoundException('Esta vaga não está nos favoritos.');
+    }
+
+    await this.favoriteJobsRepository.remove(favoriteJob);
+  }
+
+  async favoriteJob(jobId: number, req: RequestWithUser) {
+    const userId = req.user.userId;
+
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (userId !== student.user.id) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a favoritar esta vaga.',
+      );
+    }
+
+    if (!student) {
+      throw new NotFoundException('Perfil de estudante não encontrado.');
+    }
+
+    const job = await this.jobRepository.findOne({ where: { id: jobId } });
+
+    if (!job) {
+      throw new NotFoundException('Vaga não encontrada.');
+    }
+
+    const existingFavorite = await this.favoriteJobsRepository.findOne({
+      where: { student: { id: student.id }, job: { id: jobId } },
+    });
+
+    if (existingFavorite) {
+      throw new Error('Esta vaga já está nos favoritos.');
+    }
+
+    const favoriteJob = this.favoriteJobsRepository.create({
+      student,
+      job,
+    });
+
+    return this.favoriteJobsRepository.save(favoriteJob);
+  }
+
+  async getFavoriteJobs(userId: number, req: RequestWithUser) {
+    const jwtUserId = req.user.userId;
+
+    if (jwtUserId !== userId) {
+      throw new UnauthorizedException(
+        'Usuário não autorizado a acessar esta lista de favoritos.',
+      );
+    }
+
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Perfil de estudante não encontrado.');
+    }
+
+    return this.favoriteJobsRepository.find({
+      where: { student: { id: student.id } },
+      relations: ['job'],
+    });
   }
 }

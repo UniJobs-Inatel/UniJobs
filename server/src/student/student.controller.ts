@@ -85,4 +85,28 @@ export class StudentController {
   async deleteExperience(@Param('id', ParseIntPipe) id: number) {
     await this.studentService.deleteExperience(id);
   }
+
+  @Get('favorite-jobs')
+  @HttpCode(HttpStatus.OK)
+  async getFavoriteJobs(@Req() req: RequestWithUser) {
+    return this.studentService.getFavoriteJobs(req.user.userId, req);
+  }
+
+  @Post('favorite-job/:jobId')
+  @HttpCode(HttpStatus.CREATED)
+  async favoriteJob(
+    @Param('jobId', ParseIntPipe) jobId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.studentService.favoriteJob(jobId, req);
+  }
+
+  @Delete('favorite-job/:jobId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async unfavoriteJob(
+    @Param('jobId', ParseIntPipe) jobId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    await this.studentService.unfavoriteJob(jobId, req);
+  }
 }
