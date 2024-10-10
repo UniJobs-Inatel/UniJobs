@@ -172,12 +172,6 @@ export class JobService {
         where: { id: createJobPublicationDto.college_id },
         relations: ['company'],
       });
-
-      if (college && college.company.user.id !== userId) {
-        throw new UnauthorizedException(
-          'Usuário não autorizado a vincular esta faculdade à publicação.',
-        );
-      }
     }
 
     const jobPublication = this.jobPublicationRepository.create({
@@ -293,6 +287,14 @@ export class JobService {
       }
     }
 
+    if (updateJobPublicationDto.status === 'pending') {
+      if (jobPublication.company.user.id !== userId) {
+        throw new UnauthorizedException(
+          'Apenas a empresa pode republicar uma publicação.',
+        );
+      }
+    }
+
     const currentStatus = jobPublication.status;
     const newStatus = updateJobPublicationDto.status;
 
@@ -303,6 +305,10 @@ export class JobService {
       jobPublication.publication_date = new Date();
     } else if (currentStatus === 'approved' && newStatus === 'removed') {
       jobPublication.status = 'removed';
+    } else if (currentStatus === 'removed' && newStatus === 'pending') {
+      jobPublication.status = 'pending';
+    } else if (currentStatus === 'reproved' && newStatus === 'pending') {
+      jobPublication.status = 'pending';
     } else {
       throw new BadRequestException(
         `Transição de status inválida de ${currentStatus} para ${newStatus}.`,
