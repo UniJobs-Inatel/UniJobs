@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
 import { requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -34,6 +35,9 @@ const JobForm = ({ addNewJob }: JobFormProps) => {
     resolver: zodResolver(jobSchema),
   });
 
+  // Definindo jobTypes como um array de strings
+  const jobTypes = ["Estágio", "Freelancer", "Trainee", "CLT", "PJ", "Meio Período", "Outro"];
+
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
       <h2 className="text-2xl font-bold mb-4 text-center">Cadastro de Vaga</h2>
@@ -41,93 +45,136 @@ const JobForm = ({ addNewJob }: JobFormProps) => {
         className="flex flex-col gap-4"
         onSubmit={handleSubmit((data: JobData) => addNewJob(data))}
       >
-        <Input
-          label="Nome da Vaga*"
-          id="title"
-          placeholder="Título da vaga"
-          error={errors.title?.message}
-          {...register("title")}
-        />
-        
-        <Textarea
-          label="Descrição*"
-          error={errors.description?.message}
-          placeholder="Descreva a vaga"
-          {...register("description")}
-        />
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium mb-1">
+            Nome da Vaga*
+          </label>
+          <Input
+            id="title"
+            placeholder="Título da vaga"
+            {...register("title")}
+            className={errors.title ? "border-red-500" : ""}
+          />
+          {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>}
+        </div>
 
-        <Input
-          label="Local*"
-          id="location"
-          placeholder="Localização da vaga"
-          error={errors.location?.message}
-          {...register("location")}
-        />
-        
-        <Controller
-          name="jobType"
-          control={control}
-          render={({ field }) => (
-            <div>
-              <label className="block text-sm font-medium mb-1">Tipo de Vaga*</label>
-              <select
-                {...field}
-                className="block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-blue-500"
-              >
-                <option value="estágio">Estágio</option>
-                <option value="freelancer">Freelancer</option>
-                <option value="trainee">Trainee</option>
-                <option value="clt">CLT</option>
-                <option value="pj">PJ</option>
-                <option value="meio período">Meio Período</option>
-                <option value="outro">Outro</option>
-              </select>
-              {errors.jobType?.message && (
-                <p className="mt-1 text-xs text-red-500">{errors.jobType?.message}</p>
-              )}
-            </div>
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium mb-1">
+            Descrição*
+          </label>
+          <Textarea
+            id="description"
+            placeholder="Descreva a vaga"
+            {...register("description")}
+            className={errors.description ? "border-red-500" : ""}
+          />
+          {errors.description && (
+            <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>
           )}
-        />
+        </div>
 
-        <Input
-          label="Modalidade*"
-          id="modality"
-          placeholder="Remoto, Presencial, Híbrido"
-          error={errors.modality?.message}
-          {...register("modality")}
-        />
+        <div>
+          <label htmlFor="location" className="block text-sm font-medium mb-1">
+            Local*
+          </label>
+          <Input
+            id="location"
+            placeholder="Localização da vaga"
+            {...register("location")}
+            className={errors.location ? "border-red-500" : ""}
+          />
+          {errors.location && <p className="mt-1 text-xs text-red-500">{errors.location.message}</p>}
+        </div>
 
-        <Textarea
-          label="Benefícios*"
-          error={errors.benefits?.message}
-          placeholder="Quais são os benefícios?"
-          {...register("benefits")}
-        />
+        <div>
+          <label htmlFor="jobType" className="block text-sm font-medium mb-1">
+            Tipo de Vaga*
+          </label>
+          <Controller
+            name="jobType"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onChange={field.onChange}
+                // Agora estamos passando um array de strings para 'options'
+                options={jobTypes}
+              />
+            )}
+          />
+          {errors.jobType && <p className="mt-1 text-xs text-red-500">{errors.jobType.message}</p>}
+        </div>
 
-        <Input
-          label="Faixa Salarial*"
-          id="salaryRange"
-          placeholder="Faixa salarial"
-          error={errors.salaryRange?.message}
-          {...register("salaryRange")}
-        />
+        <div>
+          <label htmlFor="modality" className="block text-sm font-medium mb-1">
+            Modalidade*
+          </label>
+          <Input
+            id="modality"
+            placeholder="Remoto, Presencial, Híbrido"
+            {...register("modality")}
+            className={errors.modality ? "border-red-500" : ""}
+          />
+          {errors.modality && <p className="mt-1 text-xs text-red-500">{errors.modality.message}</p>}
+        </div>
 
-        <Input
-          label="Tags*"
-          id="tags"
-          placeholder="Palavras-chave para a vaga"
-          error={errors.tags?.message}
-          {...register("tags")}
-        />
+        <div>
+          <label htmlFor="benefits" className="block text-sm font-medium mb-1">
+            Benefícios*
+          </label>
+          <Textarea
+            id="benefits"
+            placeholder="Quais são os benefícios?"
+            {...register("benefits")}
+            className={errors.benefits ? "border-red-500" : ""}
+          />
+          {errors.benefits && <p className="mt-1 text-xs text-red-500">{errors.benefits.message}</p>}
+        </div>
 
-        <Textarea
-          label="Requisitos*"
-          error={errors.requirements?.message}
-          placeholder="Quais são os requisitos?"
-          {...register("requirements")}
-        />
+        <div>
+          <label htmlFor="salaryRange" className="block text-sm font-medium mb-1">
+            Faixa Salarial*
+          </label>
+          <Input
+            id="salaryRange"
+            placeholder="Faixa salarial"
+            {...register("salaryRange")}
+            className={errors.salaryRange ? "border-red-500" : ""}
+          />
+          {errors.salaryRange && (
+            <p className="mt-1 text-xs text-red-500">{errors.salaryRange.message}</p>
+          )}
+        </div>
 
-        <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md">
+        <div>
+          <label htmlFor="tags" className="block text-sm font-medium mb-1">
+            Tags*
+          </label>
+          <Input
+            id="tags"
+            placeholder="Palavras-chave para a vaga"
+            {...register("tags")}
+            className={errors.tags ? "border-red-500" : ""}
+          />
+          {errors.tags && <p className="mt-1 text-xs text-red-500">{errors.tags.message}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="requirements" className="block text-sm font-medium mb-1">
+            Requisitos*
+          </label>
+          <Textarea
+            id="requirements"
+            placeholder="Quais são os requisitos?"
+            {...register("requirements")}
+            className={errors.requirements ? "border-red-500" : ""}
+          />
+          {errors.requirements && (
+            <p className="mt-1 text-xs text-red-500">{errors.requirements.message}</p>
+          )}
+        </div>
+
+        <Button type="submit" className="w-full">
           Cadastrar Vaga
         </Button>
       </form>
@@ -135,4 +182,4 @@ const JobForm = ({ addNewJob }: JobFormProps) => {
   );
 };
 
-export default  JobForm;
+export default JobForm;
