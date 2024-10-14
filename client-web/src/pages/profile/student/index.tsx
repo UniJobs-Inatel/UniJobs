@@ -20,6 +20,7 @@ import { getAllTags } from "@/services/repositories/tags";
 import { createStudentProfile } from "@/services/repositories";
 import { Experience, ICreateStudentProfile } from "@/domain/student";
 import { isoFormatter, onlyNumbers } from "@/lib/utils";
+import useAuthStore from "@/stores/authStore";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -31,6 +32,9 @@ const StudentProfile = () => {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   const [tags, setTags] = useState<Tag[]>([]);
+
+  const {user} = useAuthStore()
+
 
   const completeRegistrationSchema = z.object({
     first_name: requiredString(),
@@ -162,6 +166,8 @@ const StudentProfile = () => {
             type="email"
             id="email"
             placeholder="Entre com seu e-mail"
+            value={user?.email}
+            disabled
           />
 
           <MultiSelectInput

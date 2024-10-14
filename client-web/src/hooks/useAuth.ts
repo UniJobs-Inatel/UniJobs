@@ -3,7 +3,7 @@ import useAuthStore from '../stores/authStore';
 import axios from 'axios';
 
 const useAuth = () => {
-  const { accessToken, refreshToken, setTokens, clearTokens } = useAuthStore();
+  const { accessToken, refreshToken,saveAuthResponse, clearTokens } = useAuthStore();
 
   useEffect(() => {
     const refreshAccessToken = async () => {
@@ -14,16 +14,15 @@ const useAuth = () => {
           refreshToken,
         });
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
-        setTokens(newAccessToken, newRefreshToken);
+        saveAuthResponse(newAccessToken, newRefreshToken);
       } catch (error) {
         console.error('Erro ao atualizar o token:', error);
         clearTokens();
       }
     };
 
-    // Implementar lógica de verificação de expiração aqui
     refreshAccessToken();
-  }, [refreshToken, setTokens, clearTokens]);
+  }, [refreshToken, saveAuthResponse, clearTokens]);
 
   return {
     accessToken,

@@ -57,7 +57,7 @@ const Login: React.FC = () => {
     resolver: zodResolver(registerSchema),
   });
 
-  const { setTokens } = useAuthStore();
+  const { saveAuthResponse } = useAuthStore();
 
   const handleLogin = async (data: LoginFormData) => {
     try {
@@ -69,10 +69,11 @@ const Login: React.FC = () => {
         }
       );
 
+
       const { accessToken, refreshToken } = response.data;
-      setTokens(accessToken, refreshToken);
+      saveAuthResponse(accessToken, refreshToken);
       console.log("Login realizado com sucesso");
-      navigate("/job-offers"); // Redireciona após login bem-sucedido
+      navigate("/perfil-estudante");
     } catch (error) {
       console.error("Erro no login:", error);
     }
@@ -90,8 +91,7 @@ const Login: React.FC = () => {
       );
 
       console.log("Registro realizado com sucesso:", response.data.message);
-      navigate("/profile"); // Redireciona após registro bem-sucedido
-    } catch (error) {
+      } catch (error) {
       
         if (axios.isAxiosError(error)) {
           console.error(
@@ -133,7 +133,6 @@ const Login: React.FC = () => {
                 <p className="text-red-500">{errors.email.message}</p>
               )}
 
-              <Label htmlFor="password">Senha:</Label>
               <Input
                 label="Senha:"
                 type="password"
@@ -148,7 +147,7 @@ const Login: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full text-white bg-black hover:bg-gray-800"
+                className="w-full text-white bg-primary hover:bg-gray-800"
               >
                 Entrar
               </Button>
@@ -230,7 +229,7 @@ const Login: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full text-white bg-black hover:bg-gray-800"
+                className="w-full text-white bg-primary hover:bg-gray-800"
               >
                 Cadastrar-se
               </Button>
