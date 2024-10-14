@@ -1,34 +1,40 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import useAuthStore from '@/stores/authStore';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import useAuthStore from "@/stores/authStore";
+import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Importe o useNavigate
+import { Label } from "@/components/ui/label";
 
 const loginSchema = z.object({
-  email: z.string().nonempty('O e-mail é obrigatório').email('E-mail inválido'),
-  password: z.string()
-    .min(8, 'A senha deve ter no mínimo 8 caracteres')
-    .regex(/[A-Z]/, 'A senha deve conter pelo menos uma letra maiúscula')
-    .regex(/[a-z]/, 'A senha deve conter pelo menos uma letra minúscula')
-    .regex(/[0-9]/, 'A senha deve conter pelo menos um número')
-    .regex(/[@$!%*?&#]/, 'A senha deve conter pelo menos um caractere especial'),
+  email: z.string().nonempty("O e-mail é obrigatório").email("E-mail inválido"),
+  password: z
+    .string()
+    // .min(1, "A senha deve ter no mínimo 8 caracteres")
+    // .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
+    // .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
+    // .regex(/[0-9]/, "A senha deve conter pelo menos um número")
+    // .regex(
+    //   /[@$!%*?&#]/,
+    //   "A senha deve conter pelo menos um caractere especial"
+    // ),
 });
 
-const registerSchema = loginSchema.extend({
-  confirmPass: z.string().nonempty('Confirmação de senha é obrigatória'),
-  role: z.enum(['student', 'company'], {
-    errorMap: () => ({ message: "Selecione uma opção: aluno ou empresa" }),
-  }),
-}).refine((data) => data.password === data.confirmPass, {
-  message: 'As senhas não coincidem',
-  path: ['confirmPass'],
-});
+const registerSchema = loginSchema
+  .extend({
+    confirmPass: z.string().nonempty("Confirmação de senha é obrigatória"),
+    role: z.enum(["student", "company"], {
+      errorMap: () => ({ message: "Selecione uma opção: aluno ou empresa" }),
+    }),
+  })
+  .refine((data) => data.password === data.confirmPass, {
+    message: "As senhas não coincidem",
+    path: ["confirmPass"],
+  });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -55,36 +61,46 @@ const Login: React.FC = () => {
 
   const handleLogin = async (data: LoginFormData) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/login', {
-        email: data.email,
-        password: data.password,
-      });
+      const response = await axios.post(
+        "http://localhost:4000/api/auth/login",
+        {
+          email: data.email,
+          password: data.password,
+        }
+      );
 
       const { accessToken, refreshToken } = response.data;
       setTokens(accessToken, refreshToken);
-      console.log('Login realizado com sucesso');
-      navigate('/job-offers'); // Redireciona após login bem-sucedido
+      console.log("Login realizado com sucesso");
+      navigate("/job-offers"); // Redireciona após login bem-sucedido
     } catch (error) {
-      console.error('Erro no login:', error);
+      console.error("Erro no login:", error);
     }
   };
 
   const handleRegister = async (data: RegisterFormData) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/register', {
-        email: data.email,
-        password: data.password,
-        type: data.role,
-      });
-  
-      console.log('Registro realizado com sucesso:', response.data.message);
-      navigate('/profile'); // Redireciona após registro bem-sucedido
+      const response = await axios.post(
+        "http://localhost:4000/api/auth/register",
+        {
+          email: data.email,
+          password: data.password,
+          type: data.role,
+        }
+      );
+
+      console.log("Registro realizado com sucesso:", response.data.message);
+      navigate("/profile"); // Redireciona após registro bem-sucedido
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Erro no registro:', error.response?.data || error.message);
-      } else {
-        console.error('Erro desconhecido:', error);
-      }
+      
+        if (axios.isAxiosError(error)) {
+          console.error(
+            "Erro no registro:",
+            error.response?.data  || error.message
+          );
+        } else {
+          console.error("Erro desconhecido:", error);
+        }
     }
   };
 
@@ -93,33 +109,47 @@ const Login: React.FC = () => {
       <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg min-h-[28rem] max-h-[40rem]">
         <Tabs defaultValue="login" className="mb-6">
           <TabsList>
-            <TabsTrigger value="login">Entrar</TabsTrigger>
-            <TabsTrigger value="register">Cadastrar-se</TabsTrigger>
+            <TabsTrigger className="text-primary" value="login">
+              Entrar
+            </TabsTrigger>
+            <TabsTrigger className="text-primary" value="register">
+              Cadastrar-se
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <form onSubmit={handleSubmit(handleLogin)}>
-              <h1 className="mb-6 text-2xl font-bold text-center">Entrar</h1>
-              <Label htmlFor="email">E-mail:</Label>
+              <h1 className="mb-6 text-2xl font-bold text-center text-primary">
+                Entrar
+              </h1>
               <Input
+                label="E-mail:"
                 type="email"
                 id="email"
-                {...register('email')}
+                {...register("email")}
                 placeholder="Entre com seu e-mail"
                 className="mb-4"
               />
-              {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-red-500">{errors.email.message}</p>
+              )}
 
               <Label htmlFor="password">Senha:</Label>
               <Input
+                label="Senha:"
                 type="password"
                 id="password"
-                {...register('password')}
+                {...register("password")}
                 placeholder="Entre com sua senha"
                 className="mb-4"
               />
-              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+              {errors.password && (
+                <p className="text-red-500">{errors.password.message}</p>
+              )}
 
-              <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
+              <Button
+                type="submit"
+                className="w-full text-white bg-black hover:bg-gray-800"
+              >
                 Entrar
               </Button>
             </form>
@@ -127,36 +157,48 @@ const Login: React.FC = () => {
 
           <TabsContent value="register">
             <form onSubmit={handleRegisterSubmit(handleRegister)}>
-              <h1 className="mb-6 text-2xl font-bold text-center">Cadastrar-se</h1>
-              <Label htmlFor="email">E-mail:</Label>
+              <h1 className="mb-6 text-2xl font-bold text-center text-primary">
+                Cadastrar-se
+              </h1>
               <Input
+                label="E-mail:"
                 type="email"
                 id="email"
-                {...registerRegisterForm('email')}
+                {...registerRegisterForm("email")}
                 placeholder="Entre com seu e-mail"
                 className="mb-4"
               />
-              {registerErrors.email && <p className="text-red-500">{registerErrors.email.message}</p>}
+              {registerErrors.email && (
+                <p className="text-red-500">{registerErrors.email.message}</p>
+              )}
 
-              <Label htmlFor="password">Senha:</Label>
               <Input
+                label="Senha:"
                 type="password"
                 id="password"
-                {...registerRegisterForm('password')}
+                {...registerRegisterForm("password")}
                 placeholder="Entre com sua senha"
                 className="mb-4"
               />
-              {registerErrors.password && <p className="text-red-500">{registerErrors.password.message}</p>}
+              {registerErrors.password && (
+                <p className="text-red-500">
+                  {registerErrors.password.message}
+                </p>
+              )}
 
-              <Label htmlFor="confirm-pass">Confirmar senha:</Label>
               <Input
+                label="Confirmar senha:"
                 type="password"
                 id="confirm-pass"
-                {...registerRegisterForm('confirmPass')}
+                {...registerRegisterForm("confirmPass")}
                 placeholder="Confirme sua senha"
                 className="mb-4"
               />
-              {registerErrors.confirmPass && <p className="text-red-500">{registerErrors.confirmPass.message}</p>}
+              {registerErrors.confirmPass && (
+                <p className="text-red-500">
+                  {registerErrors.confirmPass.message}
+                </p>
+              )}
 
               <Label className="flex items-center mb-4">
                 Você é:
@@ -165,7 +207,7 @@ const Login: React.FC = () => {
                     <Input
                       type="radio"
                       value="student"
-                      {...registerRegisterForm('role')}
+                      {...registerRegisterForm("role")}
                       className="mr-2"
                     />
                     Aluno
@@ -174,7 +216,7 @@ const Login: React.FC = () => {
                     <Input
                       type="radio"
                       value="company"
-                      {...registerRegisterForm('role')}
+                      {...registerRegisterForm("role")}
                       className="mr-2"
                     />
                     Empresa
@@ -182,9 +224,14 @@ const Login: React.FC = () => {
                 </div>
               </Label>
 
-              {registerErrors.role && <p className="text-red-500">{registerErrors.role.message}</p>}
+              {registerErrors.role && (
+                <p className="text-red-500">{registerErrors.role.message}</p>
+              )}
 
-              <Button type="submit" className="w-full text-white bg-black hover:bg-gray-800">
+              <Button
+                type="submit"
+                className="w-full text-white bg-black hover:bg-gray-800"
+              >
                 Cadastrar-se
               </Button>
             </form>
