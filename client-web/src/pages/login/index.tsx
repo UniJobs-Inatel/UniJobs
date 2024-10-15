@@ -73,7 +73,7 @@ const Login: React.FC = () => {
       const { accessToken, refreshToken } = response.data;
       saveAuthResponse(accessToken, refreshToken);
       console.log("Login realizado com sucesso");
-      navigate("/perfil-estudante");
+      navigate("/vagas");
     } catch (error) {
       console.error("Erro no login:", error);
     }

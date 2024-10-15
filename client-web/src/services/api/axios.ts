@@ -1,4 +1,4 @@
-'use client';
+import useAuthStore from '@/stores/authStore';
 import axios from 'axios';
 
 const instance = axios.create({
@@ -6,7 +6,8 @@ const instance = axios.create({
   timeout: 30000,
   headers: {
     'Access-Control-Allow-Origin': '*',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${useAuthStore.getState().accessToken}`
   }
 });
 

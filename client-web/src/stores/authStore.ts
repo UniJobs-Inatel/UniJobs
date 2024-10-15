@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { AuthResponse } from "@/domain/user";
 import decodeJWT from "@/utils/jwt";
+import { getTypedLocalStorage } from "@/utils/typedLocalStorage";
 
 interface AuthState {
   accessToken: string | null;
@@ -14,11 +15,13 @@ interface AuthState {
 }
 
 const useAuthStore = create<AuthState>((set) => ({
-  accessToken: null,
-  refreshToken: null,
-  user: null,
+  accessToken: getTypedLocalStorage<Omit<AuthState, "saveAuthResponse"| "clearTokens" >>('session')?.accessToken ?? null,
+  refreshToken: getTypedLocalStorage<Omit<AuthState, "saveAuthResponse"| "clearTokens" >>('session')?.refreshToken ?? null,
+  user: getTypedLocalStorage<Omit<AuthState, "saveAuthResponse"| "clearTokens" >>('session')?.user ?? null,
   saveAuthResponse: (accessToken, refreshToken) => {
     const user = decodeJWT<AuthResponse>(accessToken)?? null;
+
+    localStorage.setItem('session',JSON.stringify({user, accessToken, refreshToken}))
 
     set({ accessToken, refreshToken, user });
   },

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FaHeart, FaRegHeart, FaFilter, FaSearch } from "react-icons/fa";
+import useAuthStore from "@/stores/authStore";
+import { useNavigate } from 'react-router-dom';
+import { UserType } from '@/domain/user';
+
 
 interface Job {
   id: number;
@@ -151,6 +155,8 @@ const JobList: React.FC = () => {
     weekly_hour: '',
     field: '',
   });
+  const {user} = useAuthStore()
+  const navigate = useNavigate();
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -163,6 +169,13 @@ const JobList: React.FC = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  
+  if(user?.status != 'complete'){
+    user?.type == UserType.STUDENT && navigate('perfil-estudante')
+    user?.type == UserType.COMPANY && navigate('perfil-empresa')
+    return;
+  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -218,16 +231,6 @@ const JobList: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 border-4 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
-          <span>Carregando...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-4 max-w-2xl md:max-w-4xl mx-auto">
