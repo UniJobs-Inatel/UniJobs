@@ -6,6 +6,8 @@ import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
 import { College } from '../entities/college.entity';
 import { User } from '../entities/user.entity';
+import { Job } from '../entities/job.entity';
+import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { StudentService } from './student.service';
 import { StudentController } from './student.controller';
 
@@ -18,6 +20,8 @@ import { StudentController } from './student.controller';
       ValidEmail,
       College,
       User,
+      Job,
+      FavoriteJobs,
     ]),
   ],
   providers: [StudentService],
