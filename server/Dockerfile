@@ -23,4 +23,4 @@ RUN yarn build
 EXPOSE 4000
 
 # Run the app when the container launches
-CMD [ "node", "dist/main.js" ]
+CMD ["node", "--inspect=0.0.0.0:9229", "dist/main"]
