@@ -8,6 +8,7 @@ import { JobTag } from '../entities/job-tag.entity';
 import { Student } from '../entities/student.entity';
 import { Job } from '../entities/job.entity';
 import { Company } from '../entities/company.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Company } from '../entities/company.entity';
       Job,
       Company,
     ]),
+    AuthModule,
   ],
   providers: [TagService],
   controllers: [TagController],
