@@ -106,7 +106,7 @@ export class AuthService {
       status: user.status,
     };
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload, { expiresIn: '15min' }),
       refreshToken: this.generateRefreshToken(user.id),
     };
   }
