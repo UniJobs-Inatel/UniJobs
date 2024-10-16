@@ -21,6 +21,7 @@ const useAuthStore = create<AuthState>((set) => ({
   saveAuthResponse: (accessToken, refreshToken) => {
     const user = decodeJWT<AuthResponse>(accessToken)?? null;
 
+
     localStorage.setItem('session',JSON.stringify({user, accessToken, refreshToken}))
 
     set({ accessToken, refreshToken, user });

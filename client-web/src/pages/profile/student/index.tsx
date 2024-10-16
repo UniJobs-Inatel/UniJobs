@@ -21,6 +21,7 @@ import { createStudentProfile } from "@/services/repositories";
 import { Experience, ICreateStudentProfile } from "@/domain/student";
 import { isoFormatter, onlyNumbers } from "@/lib/utils";
 import useAuthStore from "@/stores/authStore";
+import { useNavigate } from "react-router-dom";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -34,6 +35,7 @@ const StudentProfile = () => {
   const [tags, setTags] = useState<Tag[]>([]);
 
   const {user} = useAuthStore()
+  const navigate = useNavigate()
 
 
   const completeRegistrationSchema = z.object({
@@ -61,9 +63,6 @@ const StudentProfile = () => {
   });
 
   const handleLogin = async (data: CompleteRegistrationData) => {
-    console.log("Tags:", selectedTags);
-    console.log(":", experiences);
-    console.log("Login data:", data);
 
     const experiencesFormatted = experiences.map(
       (experience) =>
@@ -83,7 +82,7 @@ const StudentProfile = () => {
 
     const response = await createStudentProfile(creationData);
 
-    if (response?.status == 201) console.log("Deu certo");
+    if (response?.status == 201) navigate('/vagas')
   };
 
   const closeModal = () => {

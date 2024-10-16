@@ -62,7 +62,7 @@ const Login: React.FC = () => {
   const handleLogin = async (data: LoginFormData) => {
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/auth/login",
+        `${import.meta.env.VITE_API_URL as string}auth/login`,
         {
           email: data.email,
           password: data.password,
@@ -72,7 +72,6 @@ const Login: React.FC = () => {
 
       const { accessToken, refreshToken } = response.data;
       saveAuthResponse(accessToken, refreshToken);
-      console.log("Login realizado com sucesso");
       navigate("/vagas");
     } catch (error) {
       console.error("Erro no login:", error);
@@ -81,8 +80,8 @@ const Login: React.FC = () => {
 
   const handleRegister = async (data: RegisterFormData) => {
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/register",
+      await axios.post(
+       `${import.meta.env.VITE_API_URL as string}auth/register`,
         {
           email: data.email,
           password: data.password,
@@ -90,7 +89,6 @@ const Login: React.FC = () => {
         }
       );
 
-      console.log("Registro realizado com sucesso:", response.data.message);
       } catch (error) {
       
         if (axios.isAxiosError(error)) {

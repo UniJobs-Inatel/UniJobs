@@ -2,17 +2,16 @@
 import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import useAuthStore from '@/stores/authStore';
+import { JobData } from "@pages/jobForm";
 
 const JobList = lazy(() => import("@pages/jobList"));
 const Login = lazy(() => import("@pages/login"));
-const JobOffers = lazy(() => import("@pages/jobOffers"));
 const JobForm = lazy(() => import("@pages/jobForm"));
 const StudentProfile = lazy(() => import("@/pages/profile/student"));
 const CompanyProfile = lazy(() => import("@/pages/profile/company"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 function PrivateRoute({ children }:{children:React.ReactNode}) {
-  console.log('USER: ',useAuthStore.getState().user )
   return useAuthStore.getState().user  ? children : <Navigate to="/" />;
 }
 
@@ -39,7 +38,9 @@ export const router = createBrowserRouter([
   },
   {
     path: "/job-form",
-    element: <JobForm />,
+    element: <JobForm addNewJob={function (data: JobData): void {
+      console.log(data)
+    } } />,
   },
 ]);
 
