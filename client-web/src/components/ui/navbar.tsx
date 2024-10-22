@@ -7,7 +7,6 @@ const NavBar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const navLinks = [
-    { path: "/", label: "Login" },
     { path: "/job-list", label: "Lista de Vagas" },
     { path: "/perfil-estudante", label: "Perfil do Estudante" },
     { path: "/perfil-empresa", label: "Perfil da Empresa" },
@@ -19,8 +18,8 @@ const NavBar = () => {
   };
 
   return (
-    <nav className="bg-primary p-4 shadow-lg">
-      <div className="flex items-center justify-between">
+    <nav className="bg-primary p-4 shadow-lg w-full">
+      <div className="flex items-center justify-between mx-auto">
         <button
           className="md:hidden text-white focus:outline-none"
           onClick={toggleMenu}
