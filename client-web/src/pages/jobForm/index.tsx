@@ -97,7 +97,6 @@ const JobForm = ({ addNewJob }: JobFormProps) => {
               <Select
                 value={field.value}
                 onChange={field.onChange}
-                // Agora estamos passando um array de strings para 'options'
                 options={jobTypes}
               />
             )}
