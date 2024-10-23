@@ -52,13 +52,8 @@ export class CompanyService {
     return this.companyRepository.save(company);
   }
 
-  async getCompanyProfile(userId: number, req: RequestWithUser) {
-    const jwtUserId = req.user.userId;
-    if (jwtUserId !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a realizar esta ação.',
-      );
-    }
+  async getCompanyProfile(req: RequestWithUser) {
+    const userId = req.user.userId;
 
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
@@ -73,16 +68,10 @@ export class CompanyService {
   }
 
   async updateCompanyProfile(
-    userId: number,
     updateCompanyDto: UpdateCompanyDto,
     req: RequestWithUser,
   ) {
-    const jwtUserId = req.user.userId;
-    if (jwtUserId !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a realizar esta ação.',
-      );
-    }
+    const userId = req.user.userId;
 
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },

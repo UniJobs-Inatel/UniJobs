@@ -34,23 +34,19 @@ export class StudentController {
     return this.studentService.createProfile(createStudentProfileDto, req);
   }
 
-  @Put('profile/:id')
+  @Put('profile')
   @HttpCode(HttpStatus.OK)
   async updateProfile(
-    @Param('id', ParseIntPipe) id: number,
     @Body() updateStudentProfileDto: UpdateStudentProfileDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.studentService.updateProfile(id, updateStudentProfileDto, req);
+    return this.studentService.updateProfile(updateStudentProfileDto, req);
   }
 
-  @Get('profile/user/:userId')
+  @Get('profile')
   @HttpCode(HttpStatus.OK)
-  async getProfileByUserId(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.studentService.getProfileByUserId(userId, req);
+  async getProfileByUser(@Req() req: RequestWithUser) {
+    return this.studentService.getProfileByUser(req);
   }
 
   @Post('experience')

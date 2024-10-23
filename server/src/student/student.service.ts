@@ -41,14 +41,8 @@ export class StudentService {
   ) {}
 
   /* Profile */
-  async getProfileByUserId(userId: number, req: RequestWithUser) {
-    const jwtUserId = req.user.userId;
-
-    if (jwtUserId !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a acessar este perfil.',
-      );
-    }
+  async getProfileByUser(req: RequestWithUser) {
+    const userId = req.user.userId;
 
     const student = await this.studentRepository.findOne({
       where: { user: { id: userId } },
@@ -125,15 +119,17 @@ export class StudentService {
   }
 
   async updateProfile(
-    id: number,
     updateStudentProfileDto: UpdateStudentProfileDto,
     req: RequestWithUser,
   ) {
     const jwtUserId = req.user.userId;
+
     const student = await this.studentRepository.findOne({
-      where: { id },
-      relations: ['user'],
+      where: { user: { id: jwtUserId } },
+      relations: ['user', 'college', 'experiences', 'proficiencies'],
     });
+
+    const studentId = student.id;
 
     if (!student) {
       throw new NotFoundException('Perfil de estudante não encontrado.');
@@ -151,12 +147,12 @@ export class StudentService {
       proficiencies,
     } = updateStudentProfileDto;
 
-    await this.studentRepository.update(id, studentData);
+    await this.studentRepository.update(studentId, studentData);
 
-    await this.handleExperiences(id, experiences);
-    await this.handleProficiencies(id, proficiencies);
+    await this.handleExperiences(studentId, experiences);
+    await this.handleProficiencies(studentId, proficiencies);
 
-    return await this.studentRepository.findOne({ where: { id } });
+    return await this.studentRepository.findOne({ where: { id: studentId } });
   }
 
   /* Handles */

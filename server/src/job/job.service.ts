@@ -14,6 +14,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobPublicationDto } from './dto/create-job-publication.dto';
 import { UpdateJobPublicationDto } from './dto/update-job-publication.dto';
 import { Company } from '../entities/company.entity';
+import { Student } from 'src/entities/student.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
 import { RequestWithUser } from '../auth/request-with-user.interface';
@@ -33,6 +34,8 @@ export class JobService {
     private readonly collegeRepository: Repository<College>,
     @InjectRepository(Field)
     private readonly fieldRepository: Repository<Field>,
+    @InjectRepository(Student)
+    private readonly studentRepository: Repository<Student>,
   ) {}
 
   async createJob(createJobDto: CreateJobDto, req: RequestWithUser) {
@@ -308,6 +311,21 @@ export class JobService {
 
     return await this.jobPublicationRepository.find({
       where: { college: { id: collegeId } },
+      relations: ['job', 'college', 'company'],
+    });
+  }
+
+  async getJobPublicationsByUserCollege(req: RequestWithUser) {
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: req.user.userId } },
+    });
+
+    const college = await this.collegeRepository.findOne({
+      where: { id: student.college.id },
+    });
+
+    return await this.jobPublicationRepository.find({
+      where: { college: { id: college.id } },
       relations: ['job', 'college', 'company'],
     });
   }
