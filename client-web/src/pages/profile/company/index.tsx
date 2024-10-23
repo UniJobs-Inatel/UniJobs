@@ -7,8 +7,13 @@ import { cnpjValidator, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import useAuthStore from "@/stores/authStore";
+
 
 const CompanyProfile = () => {
+
+  const {user} = useAuthStore()
+
   const completeRegistrationSchema = z.object({
     name: requiredString(),
     description: requiredString(),
@@ -35,15 +40,13 @@ const CompanyProfile = () => {
   });
 
   const handleLogin = async (data: CompleteRegistrationData) => {
-    console.log("Login data:", data);
 
     const creationData: ICreateCompanyProfile = {
       ...data,
       cnpj:onlyNumbers(data.cnpj),
-      user_id:9
+      user_id:11
     };
 
-    console.log(creationData)
 
     const response = await createCompanyProfile(creationData);
 
@@ -84,7 +87,8 @@ const CompanyProfile = () => {
           <Input
             label="E-mail:"
             id="email"
-            value='trocaEmailParaSalvo@email.com'
+            value={user?.email}
+            disabled
           />
           <Input
             label="Descrição:"

@@ -10,6 +10,7 @@ import { Job } from '../entities/job.entity';
 import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { StudentService } from './student.service';
 import { StudentController } from './student.controller';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { StudentController } from './student.controller';
       Job,
       FavoriteJobs,
     ]),
+    AuthModule,
   ],
   providers: [StudentService],
   controllers: [StudentController],

@@ -8,5 +8,6 @@ export const getAllTags = async () => {
 
     }catch(error){
       console.error(error)
+      
     }
   }
