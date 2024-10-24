@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { StudentProficiency } from './student-proficiency.entity';
 import { JobTag } from './job-tag.entity';
 
@@ -10,12 +10,12 @@ export class Tag {
   @Column({ unique: true })
   name: string;
 
-  @ManyToMany(
+  @OneToMany(
     () => StudentProficiency,
     (studentProficiency) => studentProficiency.tag,
   )
   studentProficiencies: StudentProficiency[];
 
-  @ManyToMany(() => JobTag, (jobTag) => jobTag.tag)
+  @OneToMany(() => JobTag, (jobTag) => jobTag.tag)
   jobTags: JobTag[];
 }

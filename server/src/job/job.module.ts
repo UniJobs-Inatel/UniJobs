@@ -8,6 +8,7 @@ import { JobTag } from '../entities/job-tag.entity';
 import { Company } from '../entities/company.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
+import { Student } from '../entities/student.entity';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { AuthModule } from '../auth/auth.module';
       Company,
       College,
       Field,
+      Student,
     ]),
     AuthModule,
   ],
