@@ -7,10 +7,10 @@ const NavBar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const navLinks = [
-    { path: "/job-list", label: "Lista de Vagas" },
+    { path: "/vagas", label: "Lista de Vagas" },
     { path: "/perfil-estudante", label: "Perfil do Estudante" },
     { path: "/perfil-empresa", label: "Perfil da Empresa" },
-    { path: "/job-form", label: "Cadastrar Vaga" },
+    { path: "/cadastrar-vaga", label: "Cadastrar Vaga" },
   ];
 
   const toggleMenu = () => {

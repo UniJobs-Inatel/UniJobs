@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/job-form",
+        path: "/cadastrar-vaga",
         element: <JobForm addNewJob={createJob} />,
       },
     ],
