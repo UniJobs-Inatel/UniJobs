@@ -13,6 +13,7 @@ import { CollegeModule } from './college/college.module';
 import { StudentModule } from './student/student.module';
 import { JobModule } from './job/job.module';
 import { FieldModule } from './field/field.module';
+import { DocsModule } from './docs/docs.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { FieldModule } from './field/field.module';
     StudentModule,
     JobModule,
     FieldModule,
+    DocsModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],
