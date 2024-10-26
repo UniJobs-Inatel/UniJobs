@@ -29,28 +29,30 @@ export class DocsController {
               max-width: 800px;
               margin: 20px auto;
               padding: 20px;
-              background-color: #f4f4f4;
+              background-color: #121212;
+              color: #e0e0e0;
               border-radius: 8px;
-              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
             }
             h1, h2, h3 {
-              color: #333;
+              color: #ffffff;
             }
             pre {
-              background-color: #272822;
-              color: #f8f8f2;
+              background-color: #1e1e1e;
+              color: #d4d4d4;
               padding: 10px;
               border-radius: 5px;
               overflow-x: auto;
             }
             code {
-              color: #e8e8e8;
+              background-color: #1e1e1e;
               padding: 2px 4px;
               border-radius: 4px;
               font-family: 'Courier New', monospace;
+              color: #d4d4d4; 
             }
             a {
-              color: #1a73e8;
+              color: #82aaff;
               text-decoration: none;
             }
             a:hover {
@@ -68,17 +70,23 @@ export class DocsController {
               margin-top: 20px;
             }
             th, td {
-              border: 1px solid #ddd;
+              border: 1px solid #2c2c2c;
               padding: 8px;
             }
             th {
-              background-color: #f4f4f4;
+              background-color: #333333;
+              color: #e0e0e0;
+            }
+            td {
+              background-color: #1e1e1e;
+              color: #e0e0e0;
             }
             blockquote {
               margin: 10px 0;
               padding: 10px;
-              background-color: #f9f9f9;
-              border-left: 5px solid #ccc;
+              background-color: #1e1e1e;
+              border-left: 5px solid #444444;
+              color: #cccccc;
             }
           </style>
         </head>
@@ -110,28 +118,30 @@ export class DocsController {
               max-width: 800px;
               margin: 20px auto;
               padding: 20px;
-              background-color: #f4f4f4;
+              background-color: #121212;
+              color: #e0e0e0;
               border-radius: 8px;
-              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
             }
             h1, h2, h3 {
-              color: #333;
+              color: #ffffff;
             }
             pre {
-              background-color: #272822;
-              color: #f8f8f2;
+              background-color: #1e1e1e;
+              color: #d4d4d4;
               padding: 10px;
               border-radius: 5px;
               overflow-x: auto;
             }
             code {
+              background-color: #1e1e1e;
               padding: 2px 4px;
               border-radius: 4px;
               font-family: 'Courier New', monospace;
-              color: #e8e8e8; 
+              color: #d4d4d4; 
             }
             a {
-              color: #1a73e8;
+              color: #82aaff;
               text-decoration: none;
             }
             a:hover {
@@ -149,17 +159,23 @@ export class DocsController {
               margin-top: 20px;
             }
             th, td {
-              border: 1px solid #ddd;
+              border: 1px solid #2c2c2c;
               padding: 8px;
             }
             th {
-              background-color: #f4f4f4;
+              background-color: #333333;
+              color: #e0e0e0;
+            }
+            td {
+              background-color: #1e1e1e;
+              color: #e0e0e0;
             }
             blockquote {
               margin: 10px 0;
               padding: 10px;
-              background-color: #f9f9f9;
-              border-left: 5px solid #ccc;
+              background-color: #1e1e1e;
+              border-left: 5px solid #444444;
+              color: #cccccc;
             }
           </style>
         </head>
