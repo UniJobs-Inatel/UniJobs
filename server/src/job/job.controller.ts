@@ -79,7 +79,7 @@ export class JobController {
     return this.jobService.getJobById(id);
   }
 
-  @Get('company/:companyId')
+  @Get('company')
   @HttpCode(HttpStatus.OK)
   async getJobsByCompany(@Req() req: RequestWithUser) {
     return this.jobService.getJobsByCompany(req);
