@@ -9,6 +9,7 @@ import { Company } from '../entities/company.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
 import { AuthModule } from '../auth/auth.module';
+import { Student } from '../entities/student.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from '../auth/auth.module';
       Company,
       College,
       Field,
+      Student,
     ]),
     AuthModule,
   ],

@@ -1,4 +1,4 @@
-import { ICreateCompanyProfile } from '../../domain/company';
+import { ICompanyResponse, ICreateCompanyProfile } from '../../domain/company';
 
 import instance from "../api/axios"
 
@@ -12,3 +12,13 @@ export const createCompanyProfile = async (creationData: ICreateCompanyProfile) 
     console.error(error);
   }
 };
+
+export const getCompanyData = async () => {
+  try {
+    const response = await instance.get<ICompanyResponse>(`/company/profile`);
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
+

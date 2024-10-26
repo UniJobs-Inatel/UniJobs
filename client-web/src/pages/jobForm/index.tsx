@@ -6,6 +6,7 @@ import { requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { Label } from "@radix-ui/react-label";
 
 const jobSchema = z.object({
   title: requiredString(),
@@ -46,50 +47,39 @@ const JobForm = ({ addNewJob }: JobFormProps) => {
         onSubmit={handleSubmit((data: JobData) => addNewJob(data))}
       >
         <div>
-          <label htmlFor="title" className="block text-sm font-medium mb-1">
-            Nome da Vaga*
-          </label>
           <Input
             id="title"
+            label="Nome da Vaga*"
             placeholder="Título da vaga"
             {...register("title")}
-            className={errors.title ? "border-red-500" : ""}
+            error={errors.title?.message}
           />
-          {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-1">
-            Descrição*
-          </label>
           <Textarea
             id="description"
+            label="Descrição*"
             placeholder="Descreva a vaga"
             {...register("description")}
-            className={errors.description ? "border-red-500" : ""}
+            error={errors.description?.message}
           />
-          {errors.description && (
-            <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>
-          )}
         </div>
 
         <div>
-          <label htmlFor="location" className="block text-sm font-medium mb-1">
-            Local*
-          </label>
           <Input
             id="location"
+            label="Local*"
             placeholder="Localização da vaga"
+            error={errors.location?.message}
             {...register("location")}
-            className={errors.location ? "border-red-500" : ""}
           />
-          {errors.location && <p className="mt-1 text-xs text-red-500">{errors.location.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="jobType" className="block text-sm font-medium mb-1">
+          <Label htmlFor="jobType" className="block text-sm font-medium mb-1">
             Tipo de Vaga*
-          </label>
+          </Label>
           <Controller
             name="jobType"
             control={control}
@@ -106,47 +96,40 @@ const JobForm = ({ addNewJob }: JobFormProps) => {
         </div>
 
         <div>
-          <label htmlFor="modality" className="block text-sm font-medium mb-1">
-            Modalidade*
-          </label>
           <Input
             id="modality"
+            label=' Modalidade*'
+            error={errors.modality?.message}
             placeholder="Remoto, Presencial, Híbrido"
             {...register("modality")}
-            className={errors.modality ? "border-red-500" : ""}
           />
-          {errors.modality && <p className="mt-1 text-xs text-red-500">{errors.modality.message}</p>}
+          {errors.modality && <p className="mt-1 text-xs text-red-500">{}</p>}
         </div>
 
         <div>
-          <label htmlFor="benefits" className="block text-sm font-medium mb-1">
-            Benefícios*
-          </label>
           <Textarea
             id="benefits"
             placeholder="Quais são os benefícios?"
+            error={errors.benefits?.message}
+            label="Benefícios*"
             {...register("benefits")}
-            className={errors.benefits ? "border-red-500" : ""}
           />
-          {errors.benefits && <p className="mt-1 text-xs text-red-500">{errors.benefits.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="salaryRange" className="block text-sm font-medium mb-1">
-            Faixa Salarial*
-          </label>
           <Input
             id="salaryRange"
+            label="Faixa Salarial*"
             placeholder="Faixa salarial"
+            error={errors.salaryRange?.message}
             {...register("salaryRange")}
-            className={errors.salaryRange ? "border-red-500" : ""}
+
           />
-          {errors.salaryRange && (
-            <p className="mt-1 text-xs text-red-500">{errors.salaryRange.message}</p>
-          )}
+
         </div>
 
         <div>
+          {/* TODO: Corrigir para input de tags */}
           <label htmlFor="tags" className="block text-sm font-medium mb-1">
             Tags*
           </label>
@@ -160,18 +143,14 @@ const JobForm = ({ addNewJob }: JobFormProps) => {
         </div>
 
         <div>
-          <label htmlFor="requirements" className="block text-sm font-medium mb-1">
-            Requisitos*
-          </label>
           <Textarea
             id="requirements"
             placeholder="Quais são os requisitos?"
+            label="Requisitos*"
+            error={errors.requirements?.message}
             {...register("requirements")}
-            className={errors.requirements ? "border-red-500" : ""}
           />
-          {errors.requirements && (
-            <p className="mt-1 text-xs text-red-500">{errors.requirements.message}</p>
-          )}
+
         </div>
 
         <Button type="submit" className="w-full">

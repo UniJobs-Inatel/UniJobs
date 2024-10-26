@@ -2,17 +2,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ICreateCompanyProfile } from "@/domain/company";
 import { onlyNumbers } from "@/lib/utils";
-import { createCompanyProfile } from "@/services/repositories";
+import { createCompanyProfile, getCompanyData, getJobsByCompany } from "@/services/repositories";
 import { cnpjValidator, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import useAuthStore from "@/stores/authStore";
-
+import { useNavigate } from "react-router-dom";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import { JobCard } from "@/components/ui/jobCard";
+import { Job } from "@/domain/job";
+import { useEffect, useState } from "react";
 
 const CompanyProfile = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [jobs, setJobs] = useState<Job[]>([
+    {
+      job_name: "Software Engineer",
+      description: "Develop and maintain software solutions.",
+      location: "New York",
+      type: "clt",
+      weekly_hours: 40,
+      mode: "remote",
+      benefits: "Health insurance, 401k",
+      salary: 80000,
+      requirements: "3+ years experience with Node.js and React",
+      id: 1
+    }
+  ])
 
-  const {user} = useAuthStore()
 
   const completeRegistrationSchema = z.object({
     name: requiredString(),
@@ -30,6 +49,7 @@ const CompanyProfile = () => {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<CompleteRegistrationData>({
     resolver: zodResolver(completeRegistrationSchema),
@@ -39,19 +59,43 @@ const CompanyProfile = () => {
     },
   });
 
-  const handleLogin = async (data: CompleteRegistrationData) => {
+  const getCompanyInfo = async () => {
+    const response = await getCompanyData();
+    if(response?.status !== 200) return;
+    
+    setValue("name", response.data.name)
+    setValue("cnpj", response.data.cnpj)
+    setValue("contact_website", response.data.contact_website)
+    setValue("description", response.data.description)
+    setValue("field_of_activity", response.data.field_of_activity)
 
+    if(!response.data.id) return;
+
+    const jobResponse = await getJobsByCompany(response.data.id)
+    if(!jobResponse?.data) return;
+
+    setJobs(jobResponse.data)
+
+  } 
+
+
+
+  useEffect(() => {
+    getCompanyInfo()
+  },[])
+
+  const handleLogin = async (data: CompleteRegistrationData) => {
     const creationData: ICreateCompanyProfile = {
       ...data,
-      cnpj:onlyNumbers(data.cnpj),
-      user_id:11
+      cnpj: onlyNumbers(data.cnpj),
+      user_id: 11,
     };
-
 
     const response = await createCompanyProfile(creationData);
 
     if (response?.status == 201) console.log("Deu certo");
   };
+
 
   return (
     <div className="pb-5">
@@ -61,57 +105,76 @@ const CompanyProfile = () => {
           Informações Empresariais
         </h4>
         <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Input
-            label="Nome da Empresa:"
-            id="lastName"
-            {...register("name")}
-            placeholder="Nome da empresa"
-            error={errors.name?.message}
-          />
-          <Controller
-            control={control}
-            name="cnpj"
-            render={({ field }) => (
-              <Input
-                label="CNPJ:"
-                mask=" 99.999.999/0001-99"  
-                inputMode="numeric"
-                id="cnpj"
-                {...field}
-                placeholder="Seu CNPJ"
-                error={errors.cnpj?.message}
-              />
-            )}
-          />
+          <div className="flex flex-col gap-x-2 gap-y-4 md:flex-row">
+            <Input
+              label="Nome da Empresa:"
+              id="lastName"
+              {...register("name")}
+              placeholder="Nome da empresa"
+              error={errors.name?.message}
+            />
+            <Controller
+              control={control}
+              name="cnpj"
+              render={({ field }) => (
+                <Input
+                  label="CNPJ:"
+                  mask=" 99.999.999/0001-99"
+                  inputMode="numeric"
+                  id="cnpj"
+                  {...field}
+                  placeholder="Seu CNPJ"
+                  error={errors.cnpj?.message}
+                />
+              )}
+            />
+          </div>
 
-          <Input
-            label="E-mail:"
-            id="email"
-            value={user?.email}
-            disabled
-          />
-          <Input
-            label="Descrição:"
-            id="description"
-            placeholder="Entre com a descrição"
-            {...register("description")}
-            error={errors.description?.message}
-          />
-          <Input
-            label="Área de atuação:"
-            id="field_of_activity"
-            placeholder="Entre a área de atuação"
-            {...register("field_of_activity")}
-            error={errors.field_of_activity?.message}
-          />
-          <Input
-            label="Site:"
-            id="contact_website"
-            placeholder="Entre com o site da empresa"
-            {...register("contact_website")}
-            error={errors.contact_website?.message}
-          />
+          <div className="flex flex-col gap-x-2 gap-y-4 md:flex-row">
+            <Input label="E-mail:" id="email" value={user?.email} disabled />
+            <Input
+              label="Descrição:"
+              id="description"
+              placeholder="Entre com a descrição"
+              {...register("description")}
+              error={errors.description?.message}
+            />
+          </div>
+          <div className="flex flex-col gap-x-2 gap-y-4 md:flex-row">
+            <Input
+              label="Área de atuação:"
+              id="field_of_activity"
+              placeholder="Entre a área de atuação"
+              {...register("field_of_activity")}
+              error={errors.field_of_activity?.message}
+            />
+            <Input
+              label="Site:"
+              id="contact_website"
+              placeholder="Entre com o site da empresa"
+              {...register("contact_website")}
+              error={errors.contact_website?.message}
+            />
+          </div>
         </form>
+        <section className="mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-primary text-[16px] font-bold mb-4">Vagas</h4>
+            <Button
+              onClick={() => navigate("/job-form")}
+              variant={"outline"}
+              className="h-[32px] w-36 text-sm"
+              prefixIcon={<PlusIcon className="fill-primary w-[18px]" />}
+            >
+              Nova Vaga
+            </Button>
+          </div>
+          <div>
+            {jobs && jobs.map((job) => (
+              <JobCard key={job.id} job={job} />
+            ))}
+          </div>
+        </section>
         <div className="flex justify-end mt-4 ">
           <Button
             onClick={handleSubmit(handleLogin)}
