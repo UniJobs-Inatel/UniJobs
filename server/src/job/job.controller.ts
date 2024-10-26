@@ -81,11 +81,8 @@ export class JobController {
 
   @Get('company/:companyId')
   @HttpCode(HttpStatus.OK)
-  async getJobsByCompany(
-    @Param('companyId') companyId: number,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.jobService.getJobsByCompany(companyId, req);
+  async getJobsByCompany(@Req() req: RequestWithUser) {
+    return this.jobService.getJobsByCompany(req);
   }
 
   @Put(':id')
@@ -104,6 +101,45 @@ export class JobController {
     await this.jobService.deleteJob(id, req);
   }
 
+  @Get('publications/search')
+  @HttpCode(HttpStatus.OK)
+  async searchJobPublications(
+    @Query('location') location?: string,
+    @Query('type') type?: string,
+    @Query('skills') skills?: string,
+    @Query('minSalary') minSalary?: number,
+    @Query('maxSalary') maxSalary?: number,
+    @Query('mode') mode?: string,
+    @Query('weeklyHours') weeklyHours?: number,
+    @Query('fieldId') fieldId?: number,
+    @Query('limit') limit: number = 10,
+    @Query('offset') offset: number = 0,
+  ) {
+    const salaryRange =
+      minSalary && maxSalary ? { min: minSalary, max: maxSalary } : undefined;
+    const skillIds = skills ? skills.split(',').map(Number) : [];
+
+    const filters = {
+      location,
+      type,
+      skills: skillIds.length > 0 ? skillIds : undefined,
+      salaryRange,
+      mode,
+      weeklyHours,
+      fieldId,
+    };
+
+    const pagination = { limit, offset };
+
+    return this.jobService.searchJobPublications(filters, pagination);
+  }
+
+  @Get('colleges/:jobId')
+  @HttpCode(HttpStatus.OK)
+  async getCollegesWhereJobIsNotPublished(@Param('jobId') jobId: number) {
+    return this.jobService.getCollegesWhereJobIsNotPublished(jobId);
+  }
+
   @Post('publish')
   @HttpCode(HttpStatus.CREATED)
   async publishJob(
@@ -113,22 +149,16 @@ export class JobController {
     return this.jobService.createJobPublication(createJobPublicationDto, req);
   }
 
-  @Get('publications/company/:companyId')
+  @Get('publications/company')
   @HttpCode(HttpStatus.OK)
-  async getJobPublicationsByCompany(
-    @Param('companyId') companyId: number,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.jobService.getJobPublicationsByCompany(companyId, req);
+  async getJobPublicationsByCompany(@Req() req: RequestWithUser) {
+    return this.jobService.getJobPublicationsByCompany(req);
   }
 
-  @Get('publications/college/:collegeId')
+  @Get('publications/college')
   @HttpCode(HttpStatus.OK)
-  async getJobPublicationsByCollege(
-    @Param('collegeId') collegeId: number,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.jobService.getJobPublicationsByCollege(collegeId, req);
+  async getJobPublicationsByCollege(@Req() req: RequestWithUser) {
+    return this.jobService.getJobPublicationsByCollege(req);
   }
 
   @Get('publications/student')
