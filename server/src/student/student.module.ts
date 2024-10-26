@@ -4,9 +4,8 @@ import { Student } from '../entities/student.entity';
 import { Experience } from '../entities/experience.entity';
 import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
-import { College } from '../entities/college.entity';
 import { User } from '../entities/user.entity';
-import { Job } from '../entities/job.entity';
+import { JobPublication } from '../entities/job-publication.entity';
 import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { StudentService } from './student.service';
 import { StudentController } from './student.controller';
@@ -19,9 +18,8 @@ import { AuthModule } from '../auth/auth.module';
       Experience,
       StudentProficiency,
       ValidEmail,
-      College,
       User,
-      Job,
+      JobPublication,
       FavoriteJobs,
     ]),
     AuthModule,

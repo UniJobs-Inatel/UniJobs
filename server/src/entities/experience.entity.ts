@@ -6,7 +6,11 @@ export class Experience {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'enum', enum: ['professional', 'academic'] })
+  @Column({
+    type: 'enum',
+    enum: ['professional', 'academic'],
+    default: 'professional',
+  })
   type: string;
 
   @Column({ type: 'text' })

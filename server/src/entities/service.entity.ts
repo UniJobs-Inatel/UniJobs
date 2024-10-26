@@ -17,7 +17,7 @@ export class Service {
   price: number;
 
   @ManyToOne(() => College, (college) => college.services, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   college: College;
 
