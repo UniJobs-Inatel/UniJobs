@@ -9,15 +9,14 @@ import { Student } from '../entities/student.entity';
 import { Experience } from '../entities/experience.entity';
 import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
-import { College } from '../entities/college.entity';
 import { User } from '../entities/user.entity';
-import { Job } from '../entities/job.entity';
 import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { CreateStudentProfileDto } from './dto/create-student-profile.dto';
 import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { RequestWithUser } from '../auth/request-with-user.interface';
+import { JobPublication } from 'src/entities/job-publication.entity';
 
 @Injectable()
 export class StudentService {
@@ -30,25 +29,17 @@ export class StudentService {
     private readonly studentProficiencyRepository: Repository<StudentProficiency>,
     @InjectRepository(ValidEmail)
     private readonly validEmailRepository: Repository<ValidEmail>,
-    @InjectRepository(College)
-    private readonly collegeRepository: Repository<College>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Job)
-    private readonly jobRepository: Repository<Job>,
+    @InjectRepository(JobPublication)
+    private readonly jobPublicationRepository: Repository<JobPublication>,
     @InjectRepository(FavoriteJobs)
     private readonly favoriteJobsRepository: Repository<FavoriteJobs>,
   ) {}
 
   /* Profile */
-  async getProfileByUserId(userId: number, req: RequestWithUser) {
-    const jwtUserId = req.user.userId;
-
-    if (jwtUserId !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a acessar este perfil.',
-      );
-    }
+  async getProfileByUser(req: RequestWithUser) {
+    const userId = req.user.userId;
 
     const student = await this.studentRepository.findOne({
       where: { user: { id: userId } },
@@ -125,15 +116,17 @@ export class StudentService {
   }
 
   async updateProfile(
-    id: number,
     updateStudentProfileDto: UpdateStudentProfileDto,
     req: RequestWithUser,
   ) {
     const jwtUserId = req.user.userId;
+
     const student = await this.studentRepository.findOne({
-      where: { id },
-      relations: ['user'],
+      where: { user: { id: jwtUserId } },
+      relations: ['user', 'college', 'experiences', 'proficiencies'],
     });
+
+    const studentId = student.id;
 
     if (!student) {
       throw new NotFoundException('Perfil de estudante não encontrado.');
@@ -151,12 +144,12 @@ export class StudentService {
       proficiencies,
     } = updateStudentProfileDto;
 
-    await this.studentRepository.update(id, studentData);
+    await this.studentRepository.update(studentId, studentData);
 
-    await this.handleExperiences(id, experiences);
-    await this.handleProficiencies(id, proficiencies);
+    await this.handleExperiences(studentId, experiences);
+    await this.handleProficiencies(studentId, proficiencies);
 
-    return await this.studentRepository.findOne({ where: { id } });
+    return await this.studentRepository.findOne({ where: { id: studentId } });
   }
 
   /* Handles */
@@ -255,7 +248,7 @@ export class StudentService {
 
   /* Favorite Jobs */
 
-  async unfavoriteJob(jobId: number, req: RequestWithUser) {
+  async unfavoriteJob(jobPublicationId: number, req: RequestWithUser) {
     const userId = req.user.userId;
 
     const student = await this.studentRepository.findOne({
@@ -273,7 +266,10 @@ export class StudentService {
     }
 
     const favoriteJob = await this.favoriteJobsRepository.findOne({
-      where: { student: { id: student.id }, job: { id: jobId } },
+      where: {
+        student: { id: student.id },
+        jobPublication: { id: jobPublicationId },
+      },
     });
 
     if (!favoriteJob) {
@@ -283,7 +279,7 @@ export class StudentService {
     await this.favoriteJobsRepository.remove(favoriteJob);
   }
 
-  async favoriteJob(jobId: number, req: RequestWithUser) {
+  async favoriteJob(jobPublicationId: number, req: RequestWithUser) {
     const userId = req.user.userId;
 
     const student = await this.studentRepository.findOne({
@@ -300,14 +296,19 @@ export class StudentService {
       throw new NotFoundException('Perfil de estudante não encontrado.');
     }
 
-    const job = await this.jobRepository.findOne({ where: { id: jobId } });
+    const jobPublication = await this.jobPublicationRepository.findOne({
+      where: { id: jobPublicationId },
+    });
 
-    if (!job) {
+    if (!jobPublication) {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
     const existingFavorite = await this.favoriteJobsRepository.findOne({
-      where: { student: { id: student.id }, job: { id: jobId } },
+      where: {
+        student: { id: student.id },
+        jobPublication: { id: jobPublicationId },
+      },
     });
 
     if (existingFavorite) {
@@ -316,7 +317,7 @@ export class StudentService {
 
     const favoriteJob = this.favoriteJobsRepository.create({
       student,
-      job,
+      jobPublication,
     });
 
     return this.favoriteJobsRepository.save(favoriteJob);

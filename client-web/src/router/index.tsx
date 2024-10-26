@@ -1,15 +1,21 @@
+/* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react";
-import { createBrowserRouter } from "react-router-dom";
-import { createJob } from '@/services/repositories/job';
+import { createJob } from "@/services/repositories/job";
 
 const Layout = lazy(() => import("@/components/ui/layout"));
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import useAuthStore from "@/stores/authStore";
+
 const JobList = lazy(() => import("@pages/jobList"));
 const Login = lazy(() => import("@pages/login"));
-const JobOffers = lazy(() => import("@pages/jobOffers"));
 const JobForm = lazy(() => import("@pages/jobForm"));
 const StudentProfile = lazy(() => import("@/pages/profile/student"));
 const CompanyProfile = lazy(() => import("@/pages/profile/company"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  return useAuthStore.getState().user ? children : <Navigate to="/" />;
+}
 
 export const router = createBrowserRouter([
   {
@@ -17,33 +23,42 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
+        path: "*",
+        element: <NotFound />,
+      },
+      {
         path: "",
         element: <Login />,
       },
       {
-        path: "/job-offers",
-        element: <JobOffers />,
-      },
-      {
         path: "/perfil-estudante",
-        element: <StudentProfile />,
+        element: (
+          <PrivateRoute>
+            <StudentProfile />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/perfil-empresa",
-        element: <CompanyProfile />,
+        element: (
+          <PrivateRoute>
+            <CompanyProfile />
+          </PrivateRoute>
+        ),
       },
       {
-        path: "/job-list",
-        element: <JobList />,
+        path: "/vagas",
+        element: (
+          <PrivateRoute>
+            {" "}
+            <JobList />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/job-form",
         element: <JobForm addNewJob={createJob} />,
       },
     ],
-  },
-  {
-    path: "*",
-    element: <NotFound />,
   },
 ]);

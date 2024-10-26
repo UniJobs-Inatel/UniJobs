@@ -14,6 +14,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobPublicationDto } from './dto/create-job-publication.dto';
 import { UpdateJobPublicationDto } from './dto/update-job-publication.dto';
 import { Company } from '../entities/company.entity';
+import { Student } from 'src/entities/student.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
 import { RequestWithUser } from '../auth/request-with-user.interface';
@@ -33,6 +34,8 @@ export class JobService {
     private readonly collegeRepository: Repository<College>,
     @InjectRepository(Field)
     private readonly fieldRepository: Repository<Field>,
+    @InjectRepository(Student)
+    private readonly studentRepository: Repository<Student>,
   ) {}
 
   async createJob(createJobDto: CreateJobDto, req: RequestWithUser) {
@@ -151,22 +154,15 @@ export class JobService {
     return job;
   }
 
-  async getJobsByCompany(companyId: number, req: RequestWithUser) {
+  async getJobsByCompany(req: RequestWithUser) {
     const userId = req.user.userId;
 
     const company = await this.companyRepository.findOne({
-      where: { id: companyId },
-      relations: ['user'],
+      where: { user: { id: userId } },
     });
 
-    if (!company || company.user.id !== userId) {
-      throw new UnauthorizedException(
-        'Apenas a própria empresa pode ver suas vagas.',
-      );
-    }
-
     return await this.jobRepository.find({
-      where: { company: { id: companyId } },
+      where: { company: { id: company.id } },
       relations: ['company'],
     });
   }
@@ -228,6 +224,68 @@ export class JobService {
 
   /* Job Publication */
 
+  async searchJobPublications(
+    filters: {
+      location?: string;
+      type?: string;
+      skills?: number[];
+      salaryRange?: { min: number; max: number };
+      mode?: string;
+      weeklyHours?: number;
+      fieldId?: number;
+    },
+    pagination: { limit: number; offset: number },
+  ) {
+    const { location, type, skills, salaryRange, mode, weeklyHours, fieldId } =
+      filters;
+    const { limit, offset } = pagination;
+
+    const query = this.jobPublicationRepository
+      .createQueryBuilder('jobPublication')
+      .leftJoinAndSelect('jobPublication.job', 'job')
+      .leftJoinAndSelect('job.field', 'field')
+      .leftJoinAndSelect('job.company', 'company')
+      .leftJoinAndSelect('job.tags', 'jobTags')
+      .leftJoinAndSelect('jobTags.tag', 'tag')
+      .where('jobPublication.status = :status', { status: 'approved' });
+
+    if (location) {
+      query.andWhere('job.location = :location', { location });
+    }
+    if (type) {
+      query.andWhere('job.type = :type', { type });
+    }
+    if (skills && skills.length > 0) {
+      query.andWhere('tag.id IN (:...skills)', { skills });
+    }
+    if (salaryRange) {
+      query.andWhere('job.salary BETWEEN :min AND :max', {
+        min: salaryRange.min,
+        max: salaryRange.max,
+      });
+    }
+    if (mode) {
+      query.andWhere('job.mode = :mode', { mode });
+    }
+    if (weeklyHours) {
+      query.andWhere('job.weekly_hours = :weeklyHours', { weeklyHours });
+    }
+    if (fieldId) {
+      query.andWhere('job.field_id = :fieldId', { fieldId });
+    }
+
+    query.take(limit).skip(offset);
+
+    const [publications, total] = await query.getManyAndCount();
+
+    return {
+      publications,
+      total,
+      pageCount: Math.ceil(total / limit),
+      currentPage: Math.floor(offset / limit) + 1,
+    };
+  }
+
   async createJobPublication(
     createJobPublicationDto: CreateJobPublicationDto,
     req: RequestWithUser,
@@ -272,44 +330,72 @@ export class JobService {
     return await this.jobPublicationRepository.save(jobPublication);
   }
 
-  async getJobPublicationsByCompany(companyId: number, req: RequestWithUser) {
+  async getJobPublicationsByCompany(req: RequestWithUser) {
     const userId = req.user.userId;
 
     const company = await this.companyRepository.findOne({
-      where: { id: companyId },
-      relations: ['user'],
+      where: { user: { id: userId } },
     });
 
-    if (!company || company.user.id !== userId) {
-      throw new UnauthorizedException(
-        'Apenas a própria empresa pode ver suas publicações de vagas.',
-      );
-    }
-
     return await this.jobPublicationRepository.find({
-      where: { company: { id: companyId } },
+      where: { company: { id: company.id } },
       relations: ['job', 'college', 'company'],
     });
   }
 
-  async getJobPublicationsByCollege(collegeId: number, req: RequestWithUser) {
+  async getJobPublicationsByCollege(req: RequestWithUser) {
     const userId = req.user.userId;
 
-    const college = await this.collegeRepository.findOne({
-      where: { id: collegeId },
-      relations: ['company'],
+    const company = await this.companyRepository.findOne({
+      where: { user: { id: userId } },
     });
 
-    if (!college || college.company.user.id !== userId) {
-      throw new UnauthorizedException(
-        'Apenas a própria faculdade pode gerenciar suas publicações.',
-      );
-    }
+    const college = await this.collegeRepository.findOne({
+      where: { company: { id: company.id } },
+    });
 
     return await this.jobPublicationRepository.find({
-      where: { college: { id: collegeId } },
+      where: { college: { id: college.id } },
       relations: ['job', 'college', 'company'],
     });
+  }
+
+  async getJobPublicationsByUserCollege(req: RequestWithUser) {
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: req.user.userId } },
+    });
+
+    const college = await this.collegeRepository.findOne({
+      where: { id: student.college.id },
+    });
+
+    return await this.jobPublicationRepository.find({
+      where: { college: { id: college.id } },
+      relations: ['job', 'college', 'company'],
+    });
+  }
+
+  async getCollegesWhereJobIsNotPublished(jobId: number) {
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+    });
+
+    if (!job) {
+      throw new NotFoundException('Vaga não encontrada.');
+    }
+
+    const colleges = await this.collegeRepository
+      .createQueryBuilder('college')
+      .leftJoin(
+        'college.jobPublications',
+        'jobPublication',
+        'jobPublication.job_id = :jobId',
+        { jobId },
+      )
+      .where('jobPublication.id IS NULL')
+      .getMany();
+
+    return colleges;
   }
 
   async updateJobPublication(

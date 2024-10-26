@@ -73,9 +73,6 @@ export const isValidDate = (dateString: string) => {
 export const cnpjValidator = (cnpj: string): boolean => {
       cnpj = cnpj.replace(/[^\d]+/g, '');
 
-      
-      console.log(cnpj.length !== 14)
-      console.log(/^(\d)\1+$/.test(cnpj))
       if (cnpj.length !== 14) return false;
   
       if (/^(\d)\1+$/.test(cnpj)) return false;

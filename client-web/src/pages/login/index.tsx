@@ -57,22 +57,22 @@ const Login: React.FC = () => {
     resolver: zodResolver(registerSchema),
   });
 
-  const { setTokens } = useAuthStore();
+  const { saveAuthResponse } = useAuthStore();
 
   const handleLogin = async (data: LoginFormData) => {
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/auth/login",
+        `${import.meta.env.VITE_API_URL as string}auth/login`,
         {
           email: data.email,
           password: data.password,
         }
       );
 
+
       const { accessToken, refreshToken } = response.data;
-      setTokens(accessToken, refreshToken);
-      console.log("Login realizado com sucesso");
-      navigate("/job-offers"); // Redireciona após login bem-sucedido
+      saveAuthResponse(accessToken, refreshToken);
+      navigate("/vagas");
     } catch (error) {
       console.error("Erro no login:", error);
     }
@@ -80,8 +80,8 @@ const Login: React.FC = () => {
 
   const handleRegister = async (data: RegisterFormData) => {
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/register",
+      await axios.post(
+       `${import.meta.env.VITE_API_URL as string}auth/register`,
         {
           email: data.email,
           password: data.password,
@@ -89,9 +89,7 @@ const Login: React.FC = () => {
         }
       );
 
-      console.log("Registro realizado com sucesso:", response.data.message);
-      navigate("/profile"); // Redireciona após registro bem-sucedido
-    } catch (error) {
+      } catch (error) {
       
         if (axios.isAxiosError(error)) {
           console.error(
@@ -133,7 +131,6 @@ const Login: React.FC = () => {
                 <p className="text-red-500">{errors.email.message}</p>
               )}
 
-              <Label htmlFor="password">Senha:</Label>
               <Input
                 label="Senha:"
                 type="password"
@@ -148,7 +145,7 @@ const Login: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full text-white bg-black hover:bg-gray-800"
+                className="w-full text-white bg-primary hover:bg-gray-800"
               >
                 Entrar
               </Button>
@@ -230,7 +227,7 @@ const Login: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full text-white bg-black hover:bg-gray-800"
+                className="w-full text-white bg-primary hover:bg-gray-800"
               >
                 Cadastrar-se
               </Button>

@@ -6,6 +6,10 @@ This project is a NestJS backend application that uses MySQL as the database. Th
 
 Before running the application, ensure that you have Docker and Docker Compose installed on your machine.
 
+## Documentation
+
+The API documentation is available in the `/api/docs` route. You can find detailed information about each module, including routes, request and response structures, and any necessary authentication details.
+
 ## Installation Guide
 
 ### Install Docker
@@ -135,7 +139,7 @@ cd server
    DATABASE_HOST=mysql
    DATABASE_PORT=3306
    DATABASE_USER=root
-   DATABASE_PASSWORD=TCC_2024_INATEL@
+   DATABASE_PASSWORD=TCC_2024_INATEL@  
    DATABASE_NAME=unijobs
    ```
 

@@ -3,13 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Param,
   Put,
   UseGuards,
   Req,
   HttpCode,
   HttpStatus,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -31,26 +29,18 @@ export class CompanyController {
     return this.companyService.createCompanyProfile(createCompanyDto, req);
   }
 
-  @Get('profile/:userId')
+  @Get('profile/')
   @HttpCode(HttpStatus.OK)
-  async getCompanyProfile(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.companyService.getCompanyProfile(userId, req);
+  async getCompanyProfile(@Req() req: RequestWithUser) {
+    return this.companyService.getCompanyProfile(req);
   }
 
-  @Put('profile/:userId')
+  @Put('profile/')
   @HttpCode(HttpStatus.OK)
   async updateCompanyProfile(
-    @Param('userId', ParseIntPipe) userId: number,
     @Body() updateCompanyDto: UpdateCompanyDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.companyService.updateCompanyProfile(
-      userId,
-      updateCompanyDto,
-      req,
-    );
+    return this.companyService.updateCompanyProfile(updateCompanyDto, req);
   }
 }

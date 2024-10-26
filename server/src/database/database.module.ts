@@ -7,7 +7,6 @@ import { Company } from '../entities/company.entity';
 import { College } from '../entities/college.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
 import { Field } from '../entities/field.entity';
-import { Course } from '../entities/course.entity';
 import { Job } from '../entities/job.entity';
 import { Service } from '../entities/service.entity';
 import { JobPublication } from '../entities/job-publication.entity';
@@ -20,7 +19,7 @@ import { JobTag } from '../entities/job-tag.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
       host: process.env.DATABASE_HOST,
       port: parseInt(process.env.DATABASE_PORT, 10),
       username: process.env.DATABASE_USER,
@@ -34,7 +33,6 @@ import { JobTag } from '../entities/job-tag.entity';
         College,
         ValidEmail,
         Field,
-        Course,
         Job,
         Service,
         JobPublication,

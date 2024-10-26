@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Job } from './job.entity';
 import { Tag } from './tag.entity';
 
-@Entity()
+@Entity('job_tag')
 export class JobTag {
   @PrimaryGeneratedColumn()
   id: number;

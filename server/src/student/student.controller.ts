@@ -34,23 +34,19 @@ export class StudentController {
     return this.studentService.createProfile(createStudentProfileDto, req);
   }
 
-  @Put('profile/:id')
+  @Put('profile')
   @HttpCode(HttpStatus.OK)
   async updateProfile(
-    @Param('id', ParseIntPipe) id: number,
     @Body() updateStudentProfileDto: UpdateStudentProfileDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.studentService.updateProfile(id, updateStudentProfileDto, req);
+    return this.studentService.updateProfile(updateStudentProfileDto, req);
   }
 
-  @Get('profile/user/:userId')
+  @Get('profile')
   @HttpCode(HttpStatus.OK)
-  async getProfileByUserId(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Req() req: RequestWithUser,
-  ) {
-    return this.studentService.getProfileByUserId(userId, req);
+  async getProfileByUser(@Req() req: RequestWithUser) {
+    return this.studentService.getProfileByUser(req);
   }
 
   @Post('experience')
@@ -95,18 +91,18 @@ export class StudentController {
   @Post('favorite-job/:jobId')
   @HttpCode(HttpStatus.CREATED)
   async favoriteJob(
-    @Param('jobId', ParseIntPipe) jobId: number,
+    @Param('jobId', ParseIntPipe) jobPublicationId: number,
     @Req() req: RequestWithUser,
   ) {
-    return this.studentService.favoriteJob(jobId, req);
+    return this.studentService.favoriteJob(jobPublicationId, req);
   }
 
   @Delete('favorite-job/:jobId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async unfavoriteJob(
-    @Param('jobId', ParseIntPipe) jobId: number,
+    @Param('jobId', ParseIntPipe) jobPublicationId: number,
     @Req() req: RequestWithUser,
   ) {
-    await this.studentService.unfavoriteJob(jobId, req);
+    await this.studentService.unfavoriteJob(jobPublicationId, req);
   }
 }

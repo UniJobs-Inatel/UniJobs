@@ -101,18 +101,18 @@ export class AuthService {
     }
     const payload = {
       email: user.email,
-      sub: user.id,
+      id: user.id,
       type: user.type,
       status: user.status,
     };
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload, { expiresIn: '15min' }),
       refreshToken: this.generateRefreshToken(user.id),
     };
   }
 
   generateRefreshToken(userId: number): string {
-    const payload = { sub: userId };
+    const payload = { id: userId };
     return this.jwtService.sign(payload, { expiresIn: '7d' });
   }
 
@@ -122,14 +122,14 @@ export class AuthService {
     try {
       const payload = this.jwtService.verify(refreshToken);
 
-      if (!payload.sub) {
+      if (!payload.id) {
         throw new UnauthorizedException(
           'Token inválido: ID de usuário não encontrado no payload.',
         );
       }
 
       const user = await this.userRepository.findOne({
-        where: { id: payload.sub },
+        where: { id: payload.id },
       });
 
       if (!user) {
