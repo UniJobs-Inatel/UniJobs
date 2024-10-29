@@ -29,21 +29,22 @@ export class DatabaseResetService {
     ];
 
     try {
-      await queryRunner.query(`SET FOREIGN_KEY_CHECKS = 0;`);
+      await queryRunner.query(`SET session_replication_role = 'replica';`);
 
       for (const table of tables) {
-        const [result] = await queryRunner.query(
-          `SHOW TABLES LIKE '${table}';`,
+        const result = await queryRunner.query(
+          `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '${table}');`,
         );
-        if (result) {
+
+        if (result[0]?.exists) {
           console.log(`Truncating table: ${table}`);
-          await queryRunner.query(`TRUNCATE TABLE \`${table}\`;`);
+          await queryRunner.query(`TRUNCATE TABLE "${table}" CASCADE;`);
         } else {
           console.warn(`Table ${table} does not exist, skipping...`);
         }
       }
 
-      await queryRunner.query(`SET FOREIGN_KEY_CHECKS = 1;`);
+      await queryRunner.query(`SET session_replication_role = 'origin';`);
     } catch (error) {
       console.error('Error resetting database:', error);
       throw error;

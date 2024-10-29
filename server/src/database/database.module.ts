@@ -42,7 +42,7 @@ import { JobTag } from '../entities/job-tag.entity';
         StudentProficiency,
         JobTag,
       ],
-      synchronize: true, // Set to 'false' in production
+      synchronize: false,
     }),
   ],
 })
