@@ -1,6 +1,6 @@
 
 import { Job } from "@/domain/job";
-import instance from "../api/axios"
+import instance from "@/lib/axios";
 import { JobData } from "@/pages/jobForm";
 
 export const getJobsByCompany = async (companyId:number) => {

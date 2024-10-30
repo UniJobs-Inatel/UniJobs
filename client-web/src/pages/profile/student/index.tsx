@@ -16,10 +16,10 @@ import { useEffect, useState } from "react";
 import { EditIcon, Trash2Icon, X } from "lucide-react";
 import { MultiSelectInput } from "@/components/ui/multiSelectInput";
 import { Tag } from "@/domain/tags";
-import { getAllTags } from "@/services/repositories/tags";
+import { getAllTags } from "@/services/repositories/tag/tag";
 import { createStudentProfile } from "@/services/repositories";
 import { Experience, ICreateStudentProfile } from "@/domain/student";
-import { isoFormatter, onlyNumbers } from "@/lib/utils";
+import { isoFormatter, onlyNumbers } from "@/lib/cn";
 import useAuthStore from "@/stores/authStore";
 import { useNavigate } from "react-router-dom";
 

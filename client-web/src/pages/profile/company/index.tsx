@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ICreateCompanyProfile } from "@/domain/company";
-import { onlyNumbers } from "@/lib/utils";
+import { onlyNumbers } from "@/lib/cn";
 import { createCompanyProfile, getCompanyData, getJobsByCompany } from "@/services/repositories";
 import { cnpjValidator, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,7 +49,7 @@ const CompanyProfile = () => {
     register,
     handleSubmit,
     control,
-    setValue,
+    reset,
     formState: { errors },
   } = useForm<CompleteRegistrationData>({
     resolver: zodResolver(completeRegistrationSchema),
@@ -62,29 +62,29 @@ const CompanyProfile = () => {
   const getCompanyInfo = async () => {
     const response = await getCompanyData();
     if(response?.status !== 200) return;
-    
-    setValue("name", response.data.name)
-    setValue("cnpj", response.data.cnpj)
-    setValue("contact_website", response.data.contact_website)
-    setValue("description", response.data.description)
-    setValue("field_of_activity", response.data.field_of_activity)
+
+    reset({
+      cnpj:response.data.cnpj,
+      name:response.data.name,
+      contact_website:response.data.cnpj,
+      description:response.data.description,
+      field_of_activity:response.data.field_of_activity,
+    })
 
     if(!response.data.id) return;
 
     const jobResponse = await getJobsByCompany(response.data.id)
     if(!jobResponse?.data) return;
-
+    
     setJobs(jobResponse.data)
 
   } 
-
-
 
   useEffect(() => {
     getCompanyInfo()
   },[])
 
-  const handleLogin = async (data: CompleteRegistrationData) => {
+  const onSubmit = async (data: CompleteRegistrationData) => {
     const creationData: ICreateCompanyProfile = {
       ...data,
       cnpj: onlyNumbers(data.cnpj),
@@ -177,7 +177,7 @@ const CompanyProfile = () => {
         </section>
         <div className="flex justify-end mt-4 ">
           <Button
-            onClick={handleSubmit(handleLogin)}
+            onClick={handleSubmit(onSubmit)}
             className="w-[160px] h-10 text-white bg-primary"
           >
             Salvar

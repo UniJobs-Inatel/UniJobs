@@ -157,9 +157,16 @@ export class JobService {
   async getJobsByCompany(req: RequestWithUser) {
     const userId = req.user.userId;
 
+    console.log('USER ID: ', userId);
+    console.log('USER ID TYPE: ', typeof userId);
+
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
     });
+
+    if (!company) {
+      throw new Error('Company not found for this user');
+    }
 
     return await this.jobRepository.find({
       where: { company: { id: company.id } },

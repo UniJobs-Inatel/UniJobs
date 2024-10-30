@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react";
-import { createJob } from "@/services/repositories/job";
 
 const Layout = lazy(() => import("@/components/ui/layout"));
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import useAuthStore from "@/stores/authStore";
+import { createJob } from "@/services/job/job";
 
 const JobList = lazy(() => import("@pages/jobList"));
 const Login = lazy(() => import("@pages/login"));

@@ -1,5 +1,5 @@
-import instance from "../api/axios"
-import { Tag } from "../../domain/tags"
+import { Tag } from "@/domain/tags"
+import instance from "@/lib/axios"
 
 export const getAllTags = async () => {
     try{

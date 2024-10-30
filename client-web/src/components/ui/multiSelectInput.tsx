@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/cn";
 import { useEffect, useState } from "react";
 import { Tag } from "@/domain/tags";
 import { Label } from "@radix-ui/react-label";

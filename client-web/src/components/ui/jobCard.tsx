@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "./accordion";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/cn";
 import { Job } from "@/domain/job";
 import { currencyFormatter } from "@/utils";
 

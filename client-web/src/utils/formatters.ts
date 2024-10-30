@@ -27,3 +27,13 @@ export function currencyFormatter(value: number | string, currencySign?: boolean
   
     return numericValue.toLocaleString(locale, options);
   }
+
+  /**
+ * Remove all non-numeric characters from a string
+ *
+ * @param value string to be formatted
+ * @returns string with only numbers
+ */
+export function onlyNumbers(value: string): string {
+  return value.replace(/\D/g, '');
+}
