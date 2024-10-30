@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Job } from './job.entity';
@@ -30,6 +31,7 @@ export class Company {
   contact_website: string;
 
   @ManyToOne(() => User, (user) => user.companies, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @OneToMany(() => Job, (job) => job.company)

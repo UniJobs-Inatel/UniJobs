@@ -164,11 +164,15 @@ export class TagService {
   }
 
   async deleteStudentProficiency(
-    id: number,
+    studentId: number,
+    tagId: number,
     req: RequestWithUser,
   ): Promise<void> {
     const proficiency = await this.studentProficiencyRepository.findOne({
-      where: { id },
+      where: {
+        student: { id: studentId },
+        tag: { id: tagId },
+      },
       relations: ['student', 'student.user'],
     });
 
@@ -178,7 +182,10 @@ export class TagService {
       );
     }
 
-    await this.studentProficiencyRepository.delete(id);
+    await this.studentProficiencyRepository.delete({
+      student: { id: studentId },
+      tag: { id: tagId },
+    });
   }
 
   /* --------------- JobTag --------------- */
@@ -225,9 +232,16 @@ export class TagService {
     });
   }
 
-  async deleteJobTag(id: number, req: RequestWithUser): Promise<void> {
+  async deleteJobTag(
+    jobId: number,
+    tagId: number,
+    req: RequestWithUser,
+  ): Promise<void> {
     const jobTag = await this.jobTagRepository.findOne({
-      where: { id },
+      where: {
+        job: { id: jobId },
+        tag: { id: tagId },
+      },
       relations: ['job', 'job.company', 'job.company.user'],
     });
 
@@ -237,6 +251,9 @@ export class TagService {
       );
     }
 
-    await this.jobTagRepository.delete(id);
+    await this.jobTagRepository.delete({
+      job: { id: jobId },
+      tag: { id: tagId },
+    });
   }
 }

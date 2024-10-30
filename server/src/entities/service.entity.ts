@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { College } from './college.entity';
 import { Student } from './student.entity';
 
@@ -19,10 +25,12 @@ export class Service {
   @ManyToOne(() => College, (college) => college.services, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'college_id' })
   college: College;
 
   @ManyToOne(() => Student, (student) => student.services, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'student_id' })
   student: Student;
 }

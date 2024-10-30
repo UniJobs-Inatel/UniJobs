@@ -222,7 +222,7 @@ export class JobService {
     return { message: 'Vaga deletada com sucesso.' };
   }
 
-  /* Job Publication */
+  /* ---------------------Job Publication -----------------------------------*/
 
   async searchJobPublications(
     filters: {
