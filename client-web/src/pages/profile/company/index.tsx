@@ -1,9 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ICreateCompanyProfile } from "@/domain/company";
-import { onlyNumbers } from "@/lib/cn";
-import { createCompanyProfile, getCompanyData, getJobsByCompany } from "@/services/repositories";
-import { cnpjValidator, requiredString } from "@/utils";
+import { cnpjValidator, onlyNumbers, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,6 +10,8 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { JobCard } from "@/components/ui/jobCard";
 import { Job } from "@/domain/job";
 import { useEffect, useState } from "react";
+import { createCompanyProfile, getCompanyData, getJobsByCompany } from "@/services";
+import { ICreateCompanyProfileRequest } from "@/services/company/interface";
 
 const CompanyProfile = () => {
   const { user } = useAuthStore();
@@ -85,7 +84,7 @@ const CompanyProfile = () => {
   },[])
 
   const onSubmit = async (data: CompleteRegistrationData) => {
-    const creationData: ICreateCompanyProfile = {
+    const creationData: ICreateCompanyProfileRequest = {
       ...data,
       cnpj: onlyNumbers(data.cnpj),
       user_id: 11,
