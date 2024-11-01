@@ -161,6 +161,10 @@ export class JobService {
       where: { user: { id: userId } },
     });
 
+    if (!company) {
+      throw new Error('Company not found for this user.');
+    }
+
     return await this.jobRepository.find({
       where: { company: { id: company.id } },
       relations: ['company'],
@@ -332,6 +336,7 @@ export class JobService {
 
   async getJobPublicationsByCompany(req: RequestWithUser) {
     const userId = req.user.userId;
+    console.log(userId);
 
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
