@@ -1,10 +1,11 @@
-import { JobData } from "@/pages/jobForm";
-import instance from "../api/axios";
+// services/repositories/jobRepository.ts
+import { Job } from "@/domain/job";
+import instance from "@/services/api/axios";
 
-export const createJob = async (jobData: JobData) => {
+export const createJob = async (jobData: Job) => {
   try {
-    const response = await instance.post(`jobs`, jobData);
-    return response;
+    const response = await instance.post(`/job`, jobData);
+    return response.data;
   } catch (error) {
     console.error("Erro ao criar vaga:", error);
     throw error;
@@ -13,7 +14,7 @@ export const createJob = async (jobData: JobData) => {
 
 export const getAllJobs = async () => {
   try {
-    const response = await instance.get(`jobs`);
+    const response = await instance.get(`/job`);
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar vagas:", error);
@@ -23,7 +24,7 @@ export const getAllJobs = async () => {
 
 export const getJobById = async (id: string) => {
   try {
-    const response = await instance.get(`jobs/${id}`);
+    const response = await instance.get(`/job/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Erro ao buscar vaga com ID ${id}:`, error);
@@ -31,9 +32,9 @@ export const getJobById = async (id: string) => {
   }
 };
 
-export const updateJob = async (id: string, jobData: JobData) => {
+export const updateJob = async (id: string, jobData: Job) => {
   try {
-    const response = await instance.put(`jobs/${id}`, jobData);
+    const response = await instance.put(`/job/${id}`, jobData);
     return response.data;
   } catch (error) {
     console.error(`Erro ao atualizar vaga com ID ${id}:`, error);
@@ -43,10 +44,19 @@ export const updateJob = async (id: string, jobData: JobData) => {
 
 export const deleteJob = async (id: string) => {
   try {
-    const response = await instance.delete(`jobs/${id}`);
-    return response.data;
+    await instance.delete(`/job/${id}`);
   } catch (error) {
     console.error(`Erro ao deletar vaga com ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const publishJob = async (jobId: number, companyId: number, collegeId: number) => {
+  try {
+    const response = await instance.post(`/job/publish`, { job_id: jobId, company_id: companyId, college_id: collegeId });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao publicar vaga:", error);
     throw error;
   }
 };
