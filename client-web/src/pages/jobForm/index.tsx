@@ -31,8 +31,8 @@ const jobSchema = z.object({
   salary: z.number().min(1, "O salário é obrigatório"),
   requirements: requiredString(),
   //tags: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
-  field_id: z.number().min(1, "Campo obrigatório"),
-  company_id: z.number().min(1, "Campo obrigatório"),
+  //field_id: z.number().min(1, "Campo obrigatório"),
+  //company_id: z.number().min(1, "Campo obrigatório"),
 });
 
 export type JobData = z.infer<typeof jobSchema>;
@@ -76,7 +76,7 @@ const JobForm = () => {
       };
       await createJob(jobData);
       alert("Vaga cadastrada com sucesso!");
-      navigate("/jobList");
+      navigate("/vagas");
     } catch (error) {
       alert("Erro ao cadastrar a vaga. Tente novamente.");
       console.error("Erro ao cadastrar vaga:", error);
