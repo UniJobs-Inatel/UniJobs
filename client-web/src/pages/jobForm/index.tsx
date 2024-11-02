@@ -8,8 +8,8 @@ import { requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { createJob } from "@/services/repositories";
 import { useNavigate } from "react-router-dom";
+import { createJob } from "@/services";
 //import { MultiSelectInput } from "@/components/ui/multiSelectInput";
 //import { Tag } from '@/domain/tags';
 /*
