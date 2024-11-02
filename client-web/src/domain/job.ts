@@ -1,5 +1,5 @@
 export interface Job {
-  id: number;
+  id?: number;
   job_name: string;
   type: "freelance" | "trainee" | "clt" | "pj" | "internship";
   description: string;
@@ -9,4 +9,6 @@ export interface Job {
   benefits: string;
   salary: number;
   requirements: string;
+  field_id?: number;
+  //company_id: number;
 }

@@ -97,13 +97,14 @@ export class TagController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('student-proficiencies/:id')
+  @Delete('student-proficiencies')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteStudentProficiency(
-    @Param('id') id: number,
+    @Body('studentId') studentId: number,
+    @Body('tagId') tagId: number,
     @Req() req: RequestWithUser,
   ) {
-    await this.tagService.deleteStudentProficiency(id, req);
+    await this.tagService.deleteStudentProficiency(studentId, tagId, req);
   }
 
   /* --------------- JobTag (JWT Required) --------------- */
@@ -126,9 +127,13 @@ export class TagController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('job-tags/:id')
+  @Delete('job-tags')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteJobTag(@Param('id') id: number, @Req() req: RequestWithUser) {
-    await this.tagService.deleteJobTag(id, req);
+  async deleteJobTag(
+    @Body('jobId') jobId: number,
+    @Body('tagId') tagId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    await this.tagService.deleteJobTag(jobId, tagId, req);
   }
 }

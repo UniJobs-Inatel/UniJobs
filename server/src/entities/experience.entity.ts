@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Student } from './student.entity';
 
 @Entity()
@@ -19,6 +25,7 @@ export class Experience {
   @ManyToOne(() => Student, (student) => student.experiences, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'student_id' })
   student: Student;
 
   @Column({ type: 'varchar', length: 255 })

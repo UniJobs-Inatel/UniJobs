@@ -7,7 +7,7 @@ const Layout = () => {
 
   return (
     <>
-      {!isRootPath && <Navbar />} {/* Renderiza a Navbar somente se não estiver na rota "/" */}
+      {!isRootPath && <Navbar />}
       <Outlet />
     </>
   );

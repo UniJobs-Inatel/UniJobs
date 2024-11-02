@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Field } from './field.entity';
 import { JobTag } from './job-tag.entity';
@@ -46,9 +47,11 @@ export class Job {
   requirements: string;
 
   @ManyToOne(() => Field, (field) => field.jobs, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'field_id' })
   field: Field;
 
   @ManyToOne(() => Company, (company) => company.jobs, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'company_id' })
   company: Company;
 
   @OneToMany(() => JobTag, (jobTag) => jobTag.job)

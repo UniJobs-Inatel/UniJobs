@@ -49,6 +49,7 @@ const Login: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
+
   const {
     register: registerRegisterForm,
     handleSubmit: handleRegisterSubmit,
@@ -103,7 +104,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex items-center justify-center min-h-screen bg-white ">
       <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg min-h-[28rem] max-h-[40rem]">
         <Tabs defaultValue="login" className="mb-6">
           <TabsList>

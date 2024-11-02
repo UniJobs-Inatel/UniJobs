@@ -14,10 +14,10 @@ export class User {
   password: string;
 
   @Column({ type: 'enum', enum: ['created', 'confirmed', 'complete'] })
-  status: string;
+  status: 'created' | 'confirmed' | 'complete';
 
   @Column({ type: 'enum', enum: ['student', 'college', 'company'] })
-  type: string;
+  type: 'student' | 'college' | 'company';
 
   @OneToMany(() => Student, (student) => student.user)
   students: Student[];
