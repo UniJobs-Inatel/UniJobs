@@ -1,13 +1,14 @@
 export interface Job {
-    job_name: string;
-    description: string;
-    location: string;
-    type: 'freelance' | 'trainee' | 'clt' | 'pj' | 'internship';
-    weekly_hours: number;
-    mode: 'on_site' | 'hybrid' | 'remote';
-    benefits: string;
-    salary: number;
-    requirements: string;
-    field_id: number;
-    //company_id: number;
+  id?: number;
+  job_name: string;
+  type: "freelance" | "trainee" | "clt" | "pj" | "internship";
+  description: string;
+  location: string;
+  weekly_hours: number;
+  mode: "on_site" | "hybrid" | "remote";
+  benefits: string;
+  salary: number;
+  requirements: string;
+  field_id?: number;
+  //company_id: number;
 }

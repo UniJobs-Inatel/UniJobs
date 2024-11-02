@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { cpfValidator, requiredString } from "@/utils";
+import { cpfValidator, onlyNumbers, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -16,12 +16,12 @@ import { useEffect, useState } from "react";
 import { EditIcon, Trash2Icon, X } from "lucide-react";
 import { MultiSelectInput } from "@/components/ui/multiSelectInput";
 import { Tag } from "@/domain/tags";
-import { getAllTags } from "@/services/repositories/tags";
-import { createStudentProfile } from "@/services/repositories";
-import { Experience, ICreateStudentProfile } from "@/domain/student";
-import { isoFormatter, onlyNumbers } from "@/lib/utils";
+import { Experience} from "@/domain/student";
 import useAuthStore from "@/stores/authStore";
 import { useNavigate } from "react-router-dom";
+import { isoFormatter } from "@/lib/cn";
+import { ICreateStudentProfileRequest } from "@/services/student/interface";
+import { createStudentProfile, getAllTags } from "@/services";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -73,7 +73,7 @@ const StudentProfile = () => {
         }) as Experience
     );
 
-    const creationData: ICreateStudentProfile = {
+    const creationData: ICreateStudentProfileRequest = {
       student: { ...data, cpf: onlyNumbers(data.cpf) },
       userId: 8,
       experiences: experiencesFormatted,

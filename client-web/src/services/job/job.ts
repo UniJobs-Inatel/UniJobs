@@ -1,6 +1,16 @@
-// services/repositories/jobRepository.ts
+
 import { Job } from "@/domain/job";
-import instance from "@/services/api/axios";
+import instance from "@/lib/axios";
+
+export const getJobsByCompany = async (companyId:number) => {
+  try {
+    const response = await instance.get<Job[]>(`/job/company/${companyId}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
 export const createJob = async (jobData: Job) => {
   try {
