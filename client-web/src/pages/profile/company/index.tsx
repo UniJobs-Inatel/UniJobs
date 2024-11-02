@@ -12,9 +12,12 @@ import { Job } from "@/domain/job";
 import { useEffect, useState } from "react";
 import { createCompanyProfile, getCompanyData, getJobsByCompany } from "@/services";
 import { ICreateCompanyProfileRequest } from "@/services/company/interface";
+import { useModalStore } from "@/stores/modalStore";
+import IesSelectModal from "./components/IesSelectModal";
 
 const CompanyProfile = () => {
   const { user } = useAuthStore();
+  const { openModal} = useModalStore();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([
     {
@@ -81,6 +84,9 @@ const CompanyProfile = () => {
 
   useEffect(() => {
     getCompanyInfo()
+    openModal({
+      children:<IesSelectModal/>
+    })
   },[])
 
   const onSubmit = async (data: CompleteRegistrationData) => {
