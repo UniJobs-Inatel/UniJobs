@@ -9,7 +9,6 @@ export class DocsService {
 
   async getDoc(filename: string = 'docs.md'): Promise<string> {
     const filePath = path.join(this.docsDir, filename);
-    console.log('Reading documentation from:', filePath);
 
     if (!fs.existsSync(filePath)) {
       console.error('File not found:', filePath);

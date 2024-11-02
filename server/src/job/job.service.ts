@@ -39,22 +39,15 @@ export class JobService {
   ) {}
 
   async createJob(createJobDto: CreateJobDto, req: RequestWithUser) {
-    const { company_id, field_id, ...jobData } = createJobDto;
+    const { field_id, ...jobData } = createJobDto;
     const userId = req.user.userId;
 
     const company = await this.companyRepository.findOne({
-      where: { id: company_id },
-      relations: ['user'],
+      where: { user: { id: userId } },
     });
 
     if (!company) {
       throw new NotFoundException('Empresa não encontrada.');
-    }
-
-    if (company.user.id !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a criar uma vaga para esta empresa.',
-      );
     }
 
     const field = await this.fieldRepository.findOne({
@@ -336,7 +329,6 @@ export class JobService {
 
   async getJobPublicationsByCompany(req: RequestWithUser) {
     const userId = req.user.userId;
-    console.log(userId);
 
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
