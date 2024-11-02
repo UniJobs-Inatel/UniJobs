@@ -31,7 +31,7 @@ const jobSchema = z.object({
   salary: z.number().min(1, "O salário é obrigatório"),
   requirements: requiredString(),
   //tags: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
-  //field_id: z.number().min(1, "Campo obrigatório"),
+  field_id: z.number().min(1, "Campo obrigatório"),
   //company_id: z.number().min(1, "Campo obrigatório"),
 });
 
@@ -47,7 +47,7 @@ const JobForm = () => {
     control,
     formState: { errors },
   } = useForm<JobData>({
-    resolver: zodResolver(jobSchema),
+    resolver: zodResolver(jobSchema)
   });
 
   const jobTypeMapping: Record<string, string> = {
@@ -64,8 +64,22 @@ const JobForm = () => {
     "Remoto": "remote"
   };
 
+  const fieldMaping: Record<string, string> = {
+    "TI": "1",
+    "Engenharia": "2",
+    "Ciências Exatas": "3",
+    "Ciências Humanas": "4",
+    "Negócios": "5",
+    "Saúde": "6",
+    "Artes": "7",
+    "Agricultura": "8",
+    "Direito": "9",
+    "Educação": "10",
+  };
+
   const jobTypes = Object.keys(jobTypeMapping) as Array<keyof typeof jobTypeMapping>;
   const modalities = Object.keys(modalityMapping) as Array<keyof typeof modalityMapping>;
+  const fields = Object.keys(fieldMaping) as Array<keyof typeof fieldMaping>;
 
   const onSubmit = async (data: JobData) => {
     setLoading(true);
@@ -88,7 +102,7 @@ const JobForm = () => {
   return (
     <div className="max-w-xxl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
       <h2 className="text-2xl text-primary font-bold mb-4">Cadastro de Vaga</h2>
-      <form className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6" onSubmit={handleSubmit(onSubmit)}>
+      <form className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6" onSubmit={handleSubmit(onSubmit, (error) => console.log(error))}>
         <Input label="Nome da Vaga:" {...register("job_name")} error={errors.job_name?.message} />
         <Input label="Local:" {...register("location")} error={errors.location?.message} />
 
@@ -134,6 +148,27 @@ const JobForm = () => {
         />
         </Label>
 
+        <Label className="text-primary">Área de atuação:
+        <Controller
+          name="field_id"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString() || ''}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a área de atuação" />
+              </SelectTrigger>
+              <SelectContent>
+                {fields.map((option) => (
+                  <SelectItem key={option} value={fieldMaping[option]}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        </Label>
+
         <Input label="Carga Horária Semanal:" type="number" {...register("weekly_hours", { valueAsNumber: true })} error={errors.weekly_hours?.message} />
         <Input label="Faixa Salarial:" type="number" {...register("salary", { valueAsNumber: true })} error={errors.salary?.message} />
 
@@ -141,9 +176,6 @@ const JobForm = () => {
         <Textarea label="Descrição:" {...register("description")} error={errors.description?.message} />
         <Textarea label="Requisitos:" {...register("requirements")} error={errors.requirements?.message} />
         <Textarea label="Benefícios:" {...register("benefits")} error={errors.benefits?.message} />
-
-        {/*<Input label="ID da Área:" type="number" {...register("field_id", { valueAsNumber: true })} error={errors.field_id?.message} />
-        <Input label="ID da Empresa:" type="number" {...register("company_id", { valueAsNumber: true })} error={errors.company_id?.message} />*/}
 
         <Button type="submit" className="w-full md:col-span-2" disabled={loading}>
           {loading ? "Cadastrando..." : "Cadastrar Vaga"}

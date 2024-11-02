@@ -8,6 +8,6 @@ export interface Job {
     benefits: string;
     salary: number;
     requirements: string;
-    //field_id: number;
+    field_id: number;
     //company_id: number;
 }
