@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { College } from './college.entity';
@@ -27,11 +28,13 @@ export class Student {
   cpf: string;
 
   @ManyToOne(() => User, (user) => user.students, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne(() => College, (college) => college.students, {
     onDelete: 'SET NULL',
   })
+  @JoinColumn({ name: 'college_id' })
   college: College;
 
   @OneToMany(() => Experience, (experience) => experience.student)

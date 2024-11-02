@@ -12,10 +12,10 @@ export class Verification {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   verificationCode: string;
 
   @OneToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

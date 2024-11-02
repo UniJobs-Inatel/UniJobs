@@ -27,7 +27,7 @@ export class AuthService {
   async register(
     email: string,
     password: string,
-    type: string,
+    type: 'student' | 'college' | 'company',
   ): Promise<{ message: string; verificationLink: string }> {
     const existingUser = await this.userRepository.findOne({
       where: { email },

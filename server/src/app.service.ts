@@ -71,8 +71,18 @@ export class AppService {
       <h1>Hello There</h1>
       <img src="https://c.tenor.com/h8ESfI_EBaQAAAAC/star-wars-general-grievous.gif" alt="Hello There" >
       <div class="button-container">
-        <form action="/api/dev/database-reset" method="get">
+        <form action="/api/dev/devRouteDatabaseReset-c121092u" method="get">
           <button type="submit">Reset Database</button>
+        </form>
+      </div>
+      <div class="button-container">
+        <form action="/api/dev/devRoutePopulate-c121092u" method="get">
+          <button type="submit">Pre-Populate Database</button>
+        </form>
+      </div>
+      <div class="button-container">
+        <form action="/api/docs" method="get">
+          <button type="submit">API Docs</button>
         </form>
       </div>
     </div>

@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Job } from './job.entity';
 import { College } from './college.entity';
 import { Company } from './company.entity';
@@ -9,16 +15,19 @@ export class JobPublication {
   id: number;
 
   @ManyToOne(() => Job, (job) => job.jobPublications, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'job_id' })
   job: Job;
 
   @ManyToOne(() => College, (college) => college.jobPublications, {
     onDelete: 'SET NULL',
   })
+  @JoinColumn({ name: 'college_id' })
   college: College;
 
   @ManyToOne(() => Company, (company) => company.jobPublications, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'company_id' })
   company: Company;
 
   @Column({

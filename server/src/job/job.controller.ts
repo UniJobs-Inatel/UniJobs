@@ -73,16 +73,16 @@ export class JobController {
     return this.jobService.searchJobs(filters, pagination);
   }
 
-  @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  async getJobById(@Param('id') id: number) {
-    return this.jobService.getJobById(id);
-  }
-
   @Get('company')
   @HttpCode(HttpStatus.OK)
   async getJobsByCompany(@Req() req: RequestWithUser) {
     return this.jobService.getJobsByCompany(req);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getJobById(@Param('id') id: number) {
+    return this.jobService.getJobById(id);
   }
 
   @Put(':id')

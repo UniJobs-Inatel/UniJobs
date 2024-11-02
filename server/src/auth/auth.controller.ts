@@ -24,7 +24,17 @@ export class AuthController {
     @Body('password') password: string,
     @Body('type') type: string,
   ): Promise<{ message: string; verificationLink: string }> {
-    return this.authService.register(email, password, type);
+    if (!['student', 'college', 'company'].includes(type)) {
+      throw new BadRequestException(
+        'Invalid type. Expected one of: student, college, company.',
+      );
+    }
+
+    return this.authService.register(
+      email,
+      password,
+      type as 'student' | 'college' | 'company',
+    );
   }
 
   @Get('verify')

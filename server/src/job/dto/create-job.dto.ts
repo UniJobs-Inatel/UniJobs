@@ -9,5 +9,4 @@ export class CreateJobDto {
   salary: number;
   requirements: string;
   field_id: number;
-  company_id: number;
 }
