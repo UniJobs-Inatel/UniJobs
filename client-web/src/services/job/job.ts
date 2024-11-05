@@ -1,10 +1,20 @@
 
 import { Job } from "@/domain/job";
 import instance from "@/lib/axios";
+import { AvailablesIesResponse, publishJobRequest } from "./interface";
 
-export const getJobsByCompany = async (companyId:number) => {
+export const getJobsByCompany = async () => {
   try {
-    const response = await instance.get<Job[]>(`/job/company/${companyId}`);
+    const response = await instance.get<Job[]>(`/job/company`);
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getAvailablesIEsByJob = async (jobId:number) => {
+  try {
+    const response = await instance.get<AvailablesIesResponse[]>(`/job/colleges/${jobId}`);
     return response;
   } catch (error) {
     console.error(error);
@@ -52,19 +62,19 @@ export const updateJob = async (id: string, jobData: Job) => {
   }
 };
 
-export const deleteJob = async (id: string) => {
+export const deleteJob = async (id: number) => {
   try {
-    await instance.delete(`/job/${id}`);
+    return await instance.delete(`/job/${id}`);
   } catch (error) {
     console.error(`Erro ao deletar vaga com ID ${id}:`, error);
     throw error;
   }
 };
 
-export const publishJob = async (jobId: number, companyId: number, collegeId: number) => {
+export const publishJob = async ({job_id, company_id, college_id}:publishJobRequest) => {
   try {
-    const response = await instance.post(`/job/publish`, { job_id: jobId, company_id: companyId, college_id: collegeId });
-    return response.data;
+    const response = await instance.post(`/job/publish`, { job_id: job_id, company_id: company_id, college_id: college_id });
+    return response;
   } catch (error) {
     console.error("Erro ao publicar vaga:", error);
     throw error;

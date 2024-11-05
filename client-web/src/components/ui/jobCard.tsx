@@ -5,13 +5,51 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./accordion";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { cn } from "@/lib/cn";
 import { Job } from "@/domain/job";
 import { currencyFormatter } from "@/utils";
+import { deleteJob } from "@/services";
+import { useModalStore } from "@/stores/modalStore";
+import { FeedBackModal } from "./feedbackModal.";
 
-const JobCard = ({ job }: { job: Job }) => {
+interface JobCardProps {
+  job: Job;
+  publishJob?: ({
+    jobId,
+    companyId,
+  }: {
+    jobId: number;
+    companyId: number;
+  }) => void;
+  onDeleteClick?: () => Promise<void>;
+}
+
+const JobCard = ({ job, publishJob, onDeleteClick }: JobCardProps) => {
   const [accordionValue, setAccordionValue] = useState<string | null>(null);
+  const { openModal } = useModalStore();
+
+  const removeJob = async (jobId: number) => {
+    const response = await deleteJob(jobId);
+
+    if (response) {
+      openModal({
+        children: (
+          <FeedBackModal
+            onOkayClick={async () => onDeleteClick && (await onDeleteClick())}
+            title={"Vaga removida com sucesso"}
+          />
+        ),
+      });
+      return;
+    }
+
+    openModal({
+      children: (
+        <FeedBackModal variant={"error"} title={"Erro ao apagar a vaga"} />
+      ),
+    });
+  };
 
   return (
     <Accordion
@@ -22,38 +60,55 @@ const JobCard = ({ job }: { job: Job }) => {
       collapsible
     >
       <AccordionItem value="item-1" className="border-none">
-        <AccordionTrigger className="m-0 px-2 py-4">
+        <AccordionTrigger className="m-0 px-2 py-4 border-primary">
           <div className="flex w-full justify-between">
             <div className="text-left w-[60%]">
-              <h2 className=" lg:text-[20px]">{job.job_name}</h2>
+              <h2 className=" lg:text-[20px] ">{job.job_name}</h2>
               <div>
-                <h4 className="text-[12px] lg:text-[14px]">
+                <h4 className="text-[12px] lg:text-[14px] ">
                   {job.job_name} - {job.location}
                 </h4>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md">
+              <div
+                onClick={() => {
+                  setAccordionValue("");
+                  publishJob &&
+                    publishJob({
+                      jobId: job.id ?? 0,
+                      companyId: job.company.id ?? 0,
+                    });
+                }}
+                className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md"
+              >
                 Publicar
               </div>
+              <TrashIcon
+                onClick={() => {
+                  setAccordionValue("");
+                  removeJob(job.id ?? 0);
+                }}
+                className="w-5 fill-red-500"
+              />
               <ChevronDownIcon
                 className={cn(
-                  "h-7 w-7 shrink-0 transition-transform duration-200",
+                  "h-7 w-7 shrink-0 transition-transform duration-200  fill-primary",
                   accordionValue == "item-1" && "rotate-180"
                 )}
               />
             </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="flex flex-col px-2 justify-center gap-4 md:!pb-0 text-primary">
+        <AccordionContent className="flex flex-col px-2 justify-center gap-4 md:!pb-0 ">
           <div className="flex justify-start gap-2 ">
-            <p className="bg-primary-50 border border-primary text-primary px-2 py-0.5 pb-[6px] rounded-md">
+            <p className="bg-primary-50 border border-primary  px-2 py-0.5 pb-[6px] rounded-md">
               {job.mode}
             </p>
-            <p className="bg-primary-50 border border-primary text-primary px-2 py-0.5 pb-[6px] rounded-md">
+            <p className="bg-primary-50 border border-primary  px-2 py-0.5 pb-[6px] rounded-md">
               {job.type}
             </p>
-            <p className="bg-primary-50 border border-primary text-primary px-2 py-0.5 pb-[6px] rounded-md">
+            <p className="bg-primary-50 border border-primary  px-2 py-0.5 pb-[6px] rounded-md">
               {job.weekly_hours}hrs
             </p>
           </div>
@@ -64,7 +119,7 @@ const JobCard = ({ job }: { job: Job }) => {
             <h6 className="font-bold mb-0.5 mt-1">Benefícios</h6>
             <p>{job.benefits}</p>
           </div>
-          <p className="self-end font-bold text-primary pe-2 text-[18px]">
+          <p className="self-end font-bold  pe-2 text-[18px]">
             {currencyFormatter(job.salary)}
           </p>
         </AccordionContent>

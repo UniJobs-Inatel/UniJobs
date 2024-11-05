@@ -14,7 +14,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full">
         <Label
-          className="font-medium text-[14px] text-primary"
+          className="font-medium text-[14px] "
           htmlFor={props.id}
         >
           {label}

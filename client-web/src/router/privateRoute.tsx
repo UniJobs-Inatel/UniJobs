@@ -10,7 +10,7 @@ const PrivateRoute = () => {
   }
 
   if (user.status != UserStatus.COMPLETE) {
-    return <Navigate to={user.type == UserType.COLLEGE ? '/perfil-estudante' : '/perfil-empresa' } />;
+     <Navigate to={user.type == UserType.COLLEGE ? '/perfil-estudante' : '/perfil-empresa' } />;
   }
 
   return <Outlet />;

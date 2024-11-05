@@ -15,13 +15,14 @@ const PublishedJobs = () => {
           benefits: "Health insurance, 401k",
           salary: 80000,
           requirements: "3+ years experience with Node.js and React",
-          id: 1
+          id: 1,
+          company:{}
         }
       ])
 
   return (
     <div>
-      <h3 className="text-primary text-[20px] font-bold mb-6">
+      <h3 className=" text-[20px] font-bold mb-6">
         Vagas publicadas
       </h3>
 

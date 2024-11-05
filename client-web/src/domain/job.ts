@@ -1,3 +1,5 @@
+import { IGetCompanyResponse } from "@/services/company/interface";
+
 export interface Job {
   id?: number;
   job_name: string;
@@ -10,5 +12,6 @@ export interface Job {
   salary: number;
   requirements: string;
   field_id?: number;
+  company:Partial<IGetCompanyResponse>
   //company_id: number;
 }

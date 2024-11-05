@@ -101,12 +101,12 @@ const JobForm = () => {
 
   return (
     <div className="max-w-xxl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-      <h2 className="text-2xl text-primary font-bold mb-4">Cadastro de Vaga</h2>
+      <h2 className="text-2xl  font-bold mb-4">Cadastro de Vaga</h2>
       <form className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6" onSubmit={handleSubmit(onSubmit, (error) => console.error(error))}>
         <Input label="Nome da Vaga:" {...register("job_name")} error={errors.job_name?.message} />
         <Input label="Local:" {...register("location")} error={errors.location?.message} />
 
-        <Label className="text-primary">Tipo de vaga:
+        <Label className="">Tipo de vaga:
         <Controller
           name="type"
           control={control}
@@ -127,7 +127,7 @@ const JobForm = () => {
         />
         </Label>
 
-        <Label className="text-primary">Modalidade:
+        <Label className="">Modalidade:
         <Controller
           name="mode"
           control={control}
@@ -148,7 +148,7 @@ const JobForm = () => {
         />
         </Label>
 
-        <Label className="text-primary">Área de atuação:
+        <Label className="">Área de atuação:
         <Controller
           name="field_id"
           control={control}

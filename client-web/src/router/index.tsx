@@ -1,9 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 
 const Layout = lazy(() => import("@/components/ui/layout"));
 import { createBrowserRouter } from "react-router-dom";
-import { createJob } from "@/services/job/job";
 import PrivateRoute from "./privateRoute";
 
 const Login = lazy(() => import("@pages/login"));
@@ -22,40 +21,26 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Layout />
+      </Suspense>
+    ),
     children: [
+      { path: "*", element: <NotFound /> },
+      { path: "/", element: <Login /> },
       {
-        path: "*",
-        element: <NotFound />,
-      },
-      {
-        path: "",
-        element: <Login />,
-      },
-      {
-        element: <PrivateRoute />,
+        element: <PrivateRoute />, // Somente para rotas protegidas
         children: [
           { path: "/perfil-estudante", element: <StudentProfile /> },
           { path: "/perfil-empresa", element: <CompanyProfile /> },
           { path: "/vagas", element: <JobList /> },
-          {
-            path: "/cadastrar-vaga",
-            element: <JobForm addNewJob={createJob} />,
-          },
-          {
-            path: "/vagas-publicadas",
-            element: <PublishedJobs />,
-          },
-          {
-            path: "/vagas-favoritadas",
-            element: <FavoriteJobs />,
-          },
-          {
-            path: "/cadastrar-vaga",
-            element: <JobForm addNewJob={createJob} />,
-          },
+          { path: "/cadastrar-vaga", element: <JobForm /> },
+          { path: "/vagas-publicadas", element: <PublishedJobs /> },
+          { path: "/vagas-favoritadas", element: <FavoriteJobs /> },
         ],
       },
     ],
   },
 ]);
+

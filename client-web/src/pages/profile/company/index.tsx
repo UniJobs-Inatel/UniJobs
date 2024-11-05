@@ -10,30 +10,21 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { JobCard } from "@/components/ui/jobCard";
 import { Job } from "@/domain/job";
 import { useEffect, useState } from "react";
-import { createCompanyProfile, getCompanyData, getJobsByCompany } from "@/services";
+import {
+  createCompanyProfile,
+  getCompanyData,
+  getJobsByCompany,
+} from "@/services";
 import { ICreateCompanyProfileRequest } from "@/services/company/interface";
 import { useModalStore } from "@/stores/modalStore";
 import IesSelectModal from "./components/IesSelectModal";
+import { UserStatus } from "@/domain/user";
 
 const CompanyProfile = () => {
   const { user } = useAuthStore();
-  const { openModal} = useModalStore();
+  const { openModal } = useModalStore();
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState<Job[]>([
-    {
-      job_name: "Software Engineer",
-      description: "Develop and maintain software solutions.",
-      location: "New York",
-      type: "clt",
-      weekly_hours: 40,
-      mode: "remote",
-      benefits: "Health insurance, 401k",
-      salary: 80000,
-      requirements: "3+ years experience with Node.js and React",
-      id: 1
-    }
-  ])
-
+  const [jobs, setJobs] = useState<Job[]>([]);
 
   const completeRegistrationSchema = z.object({
     name: requiredString(),
@@ -61,33 +52,33 @@ const CompanyProfile = () => {
     },
   });
 
+  const getJobs = async () => {
+    const jobResponse = await getJobsByCompany();
+    if (!jobResponse?.data) return;
+
+    setJobs(jobResponse.data);
+  };
+
   const getCompanyInfo = async () => {
     const response = await getCompanyData();
-    if(response?.status !== 200) return;
+    if (response?.status !== 200) return;
 
     reset({
-      cnpj:response.data.cnpj,
-      name:response.data.name,
-      contact_website:response.data.cnpj,
-      description:response.data.description,
-      field_of_activity:response.data.field_of_activity,
-    })
+      cnpj: response.data.cnpj,
+      name: response.data.name,
+      contact_website: response.data.cnpj,
+      description: response.data.description,
+      field_of_activity: response.data.field_of_activity,
+    });
 
-    if(!response.data.id) return;
+    if (!response.data.id) return;
 
-    const jobResponse = await getJobsByCompany(response.data.id)
-    if(!jobResponse?.data) return;
-    
-    setJobs(jobResponse.data)
-
-  } 
+    await getJobs();
+  };
 
   useEffect(() => {
-    getCompanyInfo()
-    openModal({
-      children:<IesSelectModal/>
-    })
-  },[])
+    getCompanyInfo();
+  }, []);
 
   const onSubmit = async (data: CompleteRegistrationData) => {
     const creationData: ICreateCompanyProfileRequest = {
@@ -102,12 +93,23 @@ const CompanyProfile = () => {
     if (response?.status == 201) console.log("Deu certo");
   };
 
+  const publishJob = ({
+    jobId,
+    companyId,
+  }: {
+    jobId: number;
+    companyId: number;
+  }) => {
+    openModal({
+      children: <IesSelectModal getJobs={getJobs} companyId={companyId} jobId={jobId} />,
+    });
+  };
 
   return (
     <div className="pb-5">
-      <h3 className="text-primary text-[20px] font-bold mb-6">Meu perfil</h3>
+      <h3 className=" text-[20px] font-bold mb-6">Meu perfil</h3>
       <section>
-        <h4 className="text-primary text-[16px] font-bold mb-4">
+        <h4 className=" text-[16px] font-bold mb-4">
           Informações Empresariais
         </h4>
         <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -163,24 +165,27 @@ const CompanyProfile = () => {
             />
           </div>
         </form>
-        <section className="mt-6">
-          <div className="flex justify-between items-center mb-4">
-            <h4 className="text-primary text-[16px] font-bold mb-4">Vagas</h4>
-            <Button
-              onClick={() => navigate("/job-form")}
-              variant={"outline"}
-              className="h-[32px] w-36 text-sm"
-              prefixIcon={<PlusIcon className="fill-primary w-[18px]" />}
-            >
-              Nova Vaga
-            </Button>
-          </div>
-          <div>
-            {jobs && jobs.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
-          </div>
-        </section>
+        {user?.status == UserStatus.COMPLETE && (
+          <section className="mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className=" text-[16px] font-bold mb-4">Vagas</h4>
+              <Button
+                onClick={() => navigate("/job-form")}
+                variant={"outline"}
+                className="h-[32px] w-36 text-sm"
+                prefixIcon={<PlusIcon className="fill-primary w-[18px]" />}
+              >
+                Nova Vaga
+              </Button>
+            </div>
+            <div className="flex flex-col gap-4">
+              {jobs &&
+                jobs.map((job) => (
+                  <JobCard  publishJob={publishJob} key={job.id} job={job} />
+                ))}
+            </div>
+          </section>
+        )}
         <div className="flex justify-end mt-4 ">
           <Button
             onClick={handleSubmit(onSubmit)}

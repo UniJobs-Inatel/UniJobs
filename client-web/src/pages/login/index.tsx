@@ -108,16 +108,16 @@ const Login: React.FC = () => {
       <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg min-h-[28rem] max-h-[40rem]">
         <Tabs defaultValue="login" className="mb-6">
           <TabsList>
-            <TabsTrigger className="text-primary" value="login">
+            <TabsTrigger className="" value="login">
               Entrar
             </TabsTrigger>
-            <TabsTrigger className="text-primary" value="register">
+            <TabsTrigger className="" value="register">
               Cadastrar-se
             </TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <form onSubmit={handleSubmit(handleLogin)}>
-              <h1 className="mb-6 text-2xl font-bold text-center text-primary">
+              <h1 className="mb-6 text-2xl font-bold text-center ">
                 Entrar
               </h1>
               <Input
@@ -155,7 +155,7 @@ const Login: React.FC = () => {
 
           <TabsContent value="register">
             <form onSubmit={handleRegisterSubmit(handleRegister)}>
-              <h1 className="mb-6 text-2xl font-bold text-center text-primary">
+              <h1 className="mb-6 text-2xl font-bold text-center ">
                 Cadastrar-se
               </h1>
               <Input
