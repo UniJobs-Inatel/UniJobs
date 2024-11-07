@@ -9,19 +9,20 @@ import useAuthStore from "@/stores/authStore";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Importe o useNavigate
 import { Label } from "@/components/ui/label";
+import { useModalStore } from "@/stores/modalStore";
+import { FeedBackModal } from "@/components/ui/feedbackModal.";
 
 const loginSchema = z.object({
   email: z.string().nonempty("O e-mail é obrigatório").email("E-mail inválido"),
-  password: z
-    .string()
-    // .min(1, "A senha deve ter no mínimo 8 caracteres")
-    // .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
-    // .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
-    // .regex(/[0-9]/, "A senha deve conter pelo menos um número")
-    // .regex(
-    //   /[@$!%*?&#]/,
-    //   "A senha deve conter pelo menos um caractere especial"
-    // ),
+  password: z.string(),
+  // .min(1, "A senha deve ter no mínimo 8 caracteres")
+  // .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
+  // .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
+  // .regex(/[0-9]/, "A senha deve conter pelo menos um número")
+  // .regex(
+  //   /[@$!%*?&#]/,
+  //   "A senha deve conter pelo menos um caractere especial"
+  // ),
 });
 
 const registerSchema = loginSchema
@@ -40,7 +41,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Login: React.FC = () => {
-  const navigate = useNavigate(); // Utilize o hook useNavigate
+  const navigate = useNavigate();
+  const { openModal } = useModalStore();
   const {
     register,
     handleSubmit,
@@ -48,7 +50,6 @@ const Login: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
-
 
   const {
     register: registerRegisterForm,
@@ -70,36 +71,49 @@ const Login: React.FC = () => {
         }
       );
 
-
       const { accessToken, refreshToken } = response.data;
       saveAuthResponse(accessToken, refreshToken);
       navigate("/vagas");
     } catch (error) {
       console.error("Erro no login:", error);
+      openModal({
+        children: (
+          <FeedBackModal
+            title={
+              axios.isAxiosError(error)
+                ? error.response?.data.message
+                : "Erro ao abrir fazer login"
+            }
+            variant={"error"}
+          />
+        ),
+      });
     }
   };
 
   const handleRegister = async (data: RegisterFormData) => {
     try {
       await axios.post(
-       `${import.meta.env.VITE_API_URL as string}auth/register`,
+        `${import.meta.env.VITE_API_URL as string}auth/register`,
         {
           email: data.email,
           password: data.password,
           type: data.role,
         }
       );
-
-      } catch (error) {
-      
-        if (axios.isAxiosError(error)) {
-          console.error(
-            "Erro no registro:",
-            error.response?.data  || error.message
-          );
-        } else {
-          console.error("Erro desconhecido:", error);
-        }
+    } catch (error) {
+      openModal({
+        children: (
+          <FeedBackModal
+            title={
+              axios.isAxiosError(error)
+                ? error.response?.data.message
+                : "Erro ao abrir fazer registro"
+            }
+            variant={"error"}
+          />
+        ),
+      });
     }
   };
 
@@ -117,39 +131,33 @@ const Login: React.FC = () => {
           </TabsList>
           <TabsContent value="login">
             <form onSubmit={handleSubmit(handleLogin)}>
-              <h1 className="mb-6 text-2xl font-bold text-center ">
-                Entrar
-              </h1>
-              <Input
-                label="E-mail:"
-                type="email"
-                id="email"
-                {...register("email")}
-                placeholder="Entre com seu e-mail"
-                className="mb-4"
-              />
-              {errors.email && (
-                <p className="text-red-500">{errors.email.message}</p>
-              )}
-
-              <Input
-                label="Senha:"
-                type="password"
-                id="password"
-                {...register("password")}
-                placeholder="Entre com sua senha"
-                className="mb-4"
-              />
-              {errors.password && (
-                <p className="text-red-500">{errors.password.message}</p>
-              )}
-
-              <Button
-                type="submit"
-                className="w-full text-white bg-primary hover:bg-gray-800"
-              >
-                Entrar
-              </Button>
+              <h1 className="mb-6 text-2xl font-bold text-center ">Entrar</h1>
+              <div className="flex flex-col gap-2" >
+                <Input
+                  label="E-mail:"
+                  type="email"
+                  id="email"
+                  error={errors.email?.message}
+                  {...register("email")}
+                  placeholder="Entre com seu e-mail"
+                />
+  
+                <Input
+                  label="Senha:"
+                  type="password"
+                  id="password"
+                  error={errors.password?.message}
+                  {...register("password")}
+                  placeholder="Entre com sua senha"
+                />
+                
+                <Button
+                  type="submit"
+                  className="w-full mt-2 text-white bg-primary hover:bg-gray-800"
+                >
+                  Entrar
+                </Button>
+              </div>
             </form>
           </TabsContent>
 
@@ -158,80 +166,71 @@ const Login: React.FC = () => {
               <h1 className="mb-6 text-2xl font-bold text-center ">
                 Cadastrar-se
               </h1>
-              <Input
-                label="E-mail:"
-                type="email"
-                id="email"
-                {...registerRegisterForm("email")}
-                placeholder="Entre com seu e-mail"
-                className="mb-4"
-              />
-              {registerErrors.email && (
-                <p className="text-red-500">{registerErrors.email.message}</p>
-              )}
-
-              <Input
-                label="Senha:"
-                type="password"
-                id="password"
-                {...registerRegisterForm("password")}
-                placeholder="Entre com sua senha"
-                className="mb-4"
-              />
-              {registerErrors.password && (
-                <p className="text-red-500">
-                  {registerErrors.password.message}
-                </p>
-              )}
-
-              <Input
-                label="Confirmar senha:"
-                type="password"
-                id="confirm-pass"
-                {...registerRegisterForm("confirmPass")}
-                placeholder="Confirme sua senha"
-                className="mb-4"
-              />
-              {registerErrors.confirmPass && (
-                <p className="text-red-500">
-                  {registerErrors.confirmPass.message}
-                </p>
-              )}
-
-              <Label className="flex items-center mb-4">
-                Você é:
-                <div className="flex items-center ml-4">
-                  <Label className="flex items-center mr-4">
-                    <Input
-                      type="radio"
-                      value="student"
-                      {...registerRegisterForm("role")}
-                      className="mr-2"
-                    />
-                    Aluno
-                  </Label>
+              
+              <div className="flex flex-col gap-3" >
+                <Input
+                  label="E-mail:"
+                  type="email"
+                  id="email"
+                  error={registerErrors.email?.message}
+                  {...registerRegisterForm("email")}
+                  placeholder="Entre com seu e-mail"
+                />
+  
+                <Input
+                  label="Senha:"
+                  type="password"
+                  id="password"
+                  error={registerErrors.password?.message}
+                  {...registerRegisterForm("password")}
+                  placeholder="Entre com sua senha"
+                  />
+  
+                <Input
+                  label="Confirmar senha:"
+                  type="password"
+                  id="confirm-pass"
+                  error={registerErrors.confirmPass?.message}
+                  {...registerRegisterForm("confirmPass")}
+                  placeholder="Confirme sua senha"
+                />
+  
+               <div>
                   <Label className="flex items-center">
-                    <Input
-                      type="radio"
-                      value="company"
-                      {...registerRegisterForm("role")}
-                      className="mr-2"
-                    />
-                    Empresa
+                    Você é:
+                    <div className="flex items-center ml-4">
+                      <Label className="flex items-center mr-4">
+                        <Input
+                          type="radio"
+                          value="student"
+                          {...registerRegisterForm("role")}
+                        />
+                        Aluno
+                      </Label>
+                      <Label className="flex items-center">
+                        <Input
+                          type="radio"
+                          value="company"
+                          {...registerRegisterForm("role")}
+                          className="mr-2"
+                        />
+                        Empresa
+                      </Label>
+                    </div>
                   </Label>
-                </div>
-              </Label>
-
-              {registerErrors.role && (
-                <p className="text-red-500">{registerErrors.role.message}</p>
-              )}
-
-              <Button
-                type="submit"
-                className="w-full text-white bg-primary hover:bg-gray-800"
-              >
-                Cadastrar-se
-              </Button>
+                  {registerErrors.role && (
+                    <p className="text-red-500 text-[12px]">{registerErrors.role.message}</p>
+                  )}
+               </div>
+  
+  
+                <Button
+                  type="submit"
+                  className="w-full mt-2 text-white bg-primary hover:bg-gray-800"
+                >
+                  Cadastrar-se
+                </Button>
+              </div>
             </form>
           </TabsContent>
         </Tabs>

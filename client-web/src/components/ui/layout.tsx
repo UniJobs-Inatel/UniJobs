@@ -8,7 +8,9 @@ const Layout = () => {
   return (
     <>
       {!isRootPath && <Navbar />}
+      <div className="pt-[60px]" >
       <Outlet />
+      </div>
     </>
   );
 };

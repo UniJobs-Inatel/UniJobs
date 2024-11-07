@@ -18,7 +18,7 @@ const NavBar = () => {
   };
 
   return (
-    <nav className="bg-primary p-4 shadow-lg w-full">
+    <nav className="bg-primary p-4 shadow-lg fixed top-0 left-0 w-screen">
       <div className="flex items-center justify-between mx-auto">
         <button
           className="md:hidden text-white focus:outline-none"
