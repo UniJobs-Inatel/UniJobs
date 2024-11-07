@@ -23,7 +23,7 @@ const PrivateRoute = () => {
 
   const isRouteAllowed = allowedRoutes[user.type]?.includes(location.pathname);
   if (!isRouteAllowed) {
-    return <Navigate to="/perfil-empresa" />; // Redireciona para uma página de acesso negado
+    return <Navigate to="/perfil-empresa" />;
   }
 
   return <Outlet />;
