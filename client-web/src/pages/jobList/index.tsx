@@ -15,75 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Job } from '@/domain/job'
 import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
-
-
-const jobs: Job[] = [
-  {
-    id: 1,
-    job_name: "Fullstack Developer",
-    description: "Desenvolvedor fullstack com experiência em Node.js e PHP.",
-    location: "São Paulo",
-    type: "internship",
-    salary: 2000,
-    requirements: "MySQL, PHP, Git, Node.js",
-    benefits: "Vale alimentação, Gympass, Horário Flexível",
-    mode: "remote",
-    weekly_hours: 20,
-    field_id: 1,
-  },
-  {
-    id: 2,
-    job_name: "Backend C# .Net Developer (Sênior)",
-    description: "Desenvolvedor backend experiente em C# e .NET Core.",
-    location: "Curitiba",
-    type: "freelance",
-    salary: 15000,
-    requirements: "API, C#, .NET Core, Microsoft SQL Server",
-    benefits: "Vale Transporte, Plano de saúde, Gympass",
-    mode: "on_site",
-    weekly_hours: 20,
-    field_id: 1,
-  },
-  {
-    id: 3,
-    job_name: "Tech Lead (Python)",
-    description: "Líder técnico com forte conhecimento em Python.",
-    location: "Campinas",
-    type: "clt",
-    salary: 5000,
-    requirements: "JavaScript, Linux, Python",
-    benefits: "Vale alimentação, Plano de saúde, Day off aniversário",
-    mode: "hybrid",
-    weekly_hours: 20,
-    field_id: 1,
-  },
-  {
-    id: 4,
-    job_name: "Agile Master",
-    description: "Especialista em metodologias ágeis como Scrum e Kanban.",
-    location: "Florianópolis",
-    type: "pj",
-    salary: 20000,
-    requirements: "SCRUM, Agile, Kanban",
-    benefits: "Plano de saúde, Plano odontológico, Horário flexível",
-    mode: "remote",
-    weekly_hours: 20,
-    field_id: 3,
-  },
-  {
-    id: 5,
-    job_name: "Estágio em FrontEnd",
-    description: "Desenvolvedor FrontEnd",
-    location: "São Paulo",
-    type: "internship",
-    salary: 2000,
-    requirements: "HTML, CSS, JavaScript",
-    benefits: "Vale alimentação, Gympass, Horário Flexível",
-    mode: "on_site",
-    weekly_hours: 20,
-    field_id: 1,
-  },
-];
+import { getAllJobs } from '@/services';
 
 const JobCard: React.FC<{ job: Job }> = ({ job }) => {
   const [isFavorited, setIsFavorited] = useState(false);
@@ -146,11 +78,22 @@ const JobList: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [jobs, setJobs] = useState<Job[]>([]);
 
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
+    const fetchJobs = async () => {
+      setLoading(true);
+      try {
+        const jobData = await getAllJobs();
+        setJobs(jobData);
+      } catch (error) {
+        console.error("Erro ao carregar as vagas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
   }, []);
 
   useEffect(() => {
@@ -193,7 +136,7 @@ const JobList: React.FC = () => {
     (filters.requirements === '' || filters.requirements === job.requirements) &&
     (filters.mode === 'todos' || job.mode === filters.mode) &&
     (filters.weekly_hours === '' || job.weekly_hours?.toString() === filters.weekly_hours) &&
-    (filters.field_id === 'todos' || job.field_id?.toString() === filters.field_id)
+    (filters.field_id === 'todos' || job.field?.id?.toString() === filters.field_id)
   );
 
   const itemsPerPage = 5;
