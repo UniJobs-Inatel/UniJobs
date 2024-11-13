@@ -323,14 +323,8 @@ export class StudentService {
     return this.favoriteJobsRepository.save(favoriteJob);
   }
 
-  async getFavoriteJobs(userId: number, req: RequestWithUser) {
-    const jwtUserId = req.user.userId;
-
-    if (jwtUserId !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a acessar esta lista de favoritos.',
-      );
-    }
+  async getFavoriteJobs(req: RequestWithUser) {
+    const userId = req.user.userId;
 
     const student = await this.studentRepository.findOne({
       where: { user: { id: userId } },

@@ -398,6 +398,28 @@ export class JobService {
     return colleges;
   }
 
+  async checkIfJobIsPublishedOnAllColleges(jobId: number) {
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+    });
+
+    if (!job) {
+      throw new NotFoundException('Vaga não encontrada.');
+    }
+
+    const colleges = await this.collegeRepository
+      .createQueryBuilder('college')
+      .leftJoin(
+        'college.jobPublications',
+        'jobPublication',
+        'jobPublication.job_id = :jobId',
+        { jobId },
+      )
+      .getMany();
+
+    return colleges.length === 0;
+  }
+
   async updateJobPublication(
     id: number,
     updateJobPublicationDto: UpdateJobPublicationDto,
