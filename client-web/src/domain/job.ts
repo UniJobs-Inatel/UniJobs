@@ -10,5 +10,9 @@ export interface Job {
   salary: number;
   requirements: string;
   field_id?: number;
+  field?: {
+    id: number;
+    field: string;
+  }
   //company_id: number;
 }
