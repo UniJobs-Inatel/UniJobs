@@ -17,10 +17,12 @@ import { Job } from '@/domain/job'
 import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
 import { getAllJobs } from '@/services';
 
-const JobCard: React.FC<{ job: Job }> = ({ job }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
-
-  const toggleFavorite = () => setIsFavorited(!isFavorited);
+const JobCard: React.FC<{
+  job: Job;
+  favoritedJobs: number[];
+  toggleFavorite: (jobId: number) => void;
+}> = ({ job, favoritedJobs, toggleFavorite }) => {
+  const isFavorited = favoritedJobs.includes(job.id!);
 
   const getTranslatedValue = (value: string, mapping: Record<string, string>): string => {
     const translatedKey = Object.keys(mapping).find(key => mapping[key] === value);
@@ -31,7 +33,7 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
     <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full">
       <button
         className={`absolute top-2 right-2 ${isFavorited ? 'text-red-500' : 'text-gray-400'}`}
-        onClick={toggleFavorite}
+        onClick={() => toggleFavorite(job.id!)}
       >
         {isFavorited ? <FaHeart /> : <FaRegHeart />}
       </button>
@@ -72,6 +74,7 @@ const JobList: React.FC = () => {
     mode: 'todos',
     weekly_hours: '',
     field_id: 'todos',
+    showFavorites: false,
   });
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -79,6 +82,7 @@ const JobList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [favoritedJobs, setFavoritedJobs] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -103,6 +107,11 @@ const JobList: React.FC = () => {
     }
   }, [user, navigate]);
 
+  const toggleFavorite = (jobId: number) => {
+    setFavoritedJobs((prev) =>
+      prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]
+    );
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -124,6 +133,7 @@ const JobList: React.FC = () => {
       mode: 'todos',
       weekly_hours: '',
       field_id: 'todos',
+      showFavorites: false,
     });
     setLocationTerm('');
   };
@@ -136,7 +146,8 @@ const JobList: React.FC = () => {
     (filters.requirements === '' || filters.requirements === job.requirements) &&
     (filters.mode === 'todos' || job.mode === filters.mode) &&
     (filters.weekly_hours === '' || job.weekly_hours?.toString() === filters.weekly_hours) &&
-    (filters.field_id === 'todos' || job.field?.id?.toString() === filters.field_id)
+    (filters.field_id === 'todos' || job.field?.id?.toString() === filters.field_id) &&
+    (!filters.showFavorites || favoritedJobs.includes(job.id!))
   );
 
   const itemsPerPage = 5;
@@ -161,6 +172,11 @@ const JobList: React.FC = () => {
           />
           <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center">
             <FaSearch />
+          </button>
+          <button
+            className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
+            onClick={() => setFilters((prev) => ({ ...prev, showFavorites: !prev.showFavorites }))}>
+            <FaHeart />
           </button>
           <button
             className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
@@ -199,7 +215,7 @@ const JobList: React.FC = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value='todos'>
                       Todos
                     </SelectItem>
                     {jobTypes.map((option) => (
@@ -232,7 +248,7 @@ const JobList: React.FC = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value='todos'>
                       Todos
                     </SelectItem>
                     {modalities.map((option) => (
@@ -261,7 +277,7 @@ const JobList: React.FC = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value='todos'>
                       Todos
                     </SelectItem>
                     {fields.map((option) => (
@@ -290,7 +306,12 @@ const JobList: React.FC = () => {
 
       <div className="grid gap-4">
         {paginatedJobs.map(job => (
-          <JobCard key={job.id} job={job} />
+          <JobCard
+            key={job.id}
+            job={job}
+            favoritedJobs={favoritedJobs}
+            toggleFavorite={toggleFavorite}
+          />
         ))}
       </div>
 
