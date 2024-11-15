@@ -16,15 +16,28 @@ import {
 import { Job } from '@/domain/job'
 import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
 import { getAllJobs } from '@/services';
+import JobDetailsModal from './jobDetailsModal';
 
 const JobCard: React.FC<{ job: Job }> = ({ job }) => {
   const [isFavorited, setIsFavorited] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleFavorite = () => setIsFavorited(!isFavorited);
 
   const getTranslatedValue = (value: string, mapping: Record<string, string>): string => {
     const translatedKey = Object.keys(mapping).find(key => mapping[key] === value);
     return translatedKey || value;
+  };
+
+  const handleJobClick = (job: Job) => {
+    setSelectedJob(job);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedJob(null);
   };
 
   return (
@@ -54,9 +67,14 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
         </div>
       </div>
 
-      <Button className="bg-primary text-white hover:bg-primary text-xs md:text-sm rounded right-0">
+      <Button className="bg-primary text-white hover:bg-primary text-xs md:text-sm rounded right-0"
+        onClick={() => handleJobClick(job)}>
         Ver Vaga
       </Button>
+
+      {isModalOpen && selectedJob && (
+        <JobDetailsModal job={selectedJob} onClose={handleCloseModal} />
+      )}
     </div>
 
   );
@@ -76,20 +94,17 @@ const JobList: React.FC = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [jobs, setJobs] = useState<Job[]>([]);
 
   useEffect(() => {
     const fetchJobs = async () => {
-      setLoading(true);
       try {
         const jobData = await getAllJobs();
         setJobs(jobData);
       } catch (error) {
         console.error("Erro ao carregar as vagas:", error);
       } finally {
-        setLoading(false);
       }
     };
 
@@ -199,7 +214,7 @@ const JobList: React.FC = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value='todos'>
                       Todos
                     </SelectItem>
                     {jobTypes.map((option) => (
@@ -232,7 +247,7 @@ const JobList: React.FC = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value='todos'>
                       Todos
                     </SelectItem>
                     {modalities.map((option) => (
@@ -261,7 +276,7 @@ const JobList: React.FC = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value='todos'>
                       Todos
                     </SelectItem>
                     {fields.map((option) => (
