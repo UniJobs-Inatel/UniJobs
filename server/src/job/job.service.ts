@@ -384,18 +384,25 @@ export class JobService {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
-    const colleges = await this.collegeRepository
+    const collegesWithCompanies = await this.collegeRepository
       .createQueryBuilder('college')
       .leftJoin(
         'college.jobPublications',
         'jobPublication',
         'jobPublication.job_id = :jobId',
-        { jobId },
+        {
+          jobId,
+        },
       )
+      .innerJoin('college.company', 'company')
       .where('jobPublication.id IS NULL')
-      .getMany();
+      .select(['college.id AS collegeId', 'company.name AS companyName'])
+      .getRawMany();
 
-    return colleges;
+    return collegesWithCompanies.map((item) => ({
+      collegeId: item.collegeId,
+      companyName: item.companyName,
+    }));
   }
 
   async checkIfJobIsPublishedOnAllColleges(jobId: number) {
