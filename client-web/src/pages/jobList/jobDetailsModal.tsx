@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Job } from '@/domain/job';
 
 interface JobDetailsModalProps {
