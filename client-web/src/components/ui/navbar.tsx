@@ -1,9 +1,10 @@
 import * as React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/cn";
 
 const NavBar = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // Para navegar após o logout
   const [isOpen, setIsOpen] = React.useState(false);
 
   const navLinks = [
@@ -17,6 +18,11 @@ const NavBar = () => {
     setIsOpen(!isOpen);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("session");
+    navigate("/");
+  };
+
   return (
     <nav className="bg-primary p-4 shadow-lg fixed top-0 left-0 w-screen">
       <div className="flex items-center justify-between mx-auto">
@@ -26,7 +32,7 @@ const NavBar = () => {
         >
           {isOpen ? 'Fechar' : 'Menu'}
         </button>
-        <ul className={`flex-col md:flex-row md:space-x-6 items-center justify-center ${isOpen ? 'flex' : 'hidden md:flex'}`}>
+        <ul className={`flex-col md:flex-row md:space-x-6 items-center justify-center ${isOpen ? 'flex mr-10' : 'hidden md:flex'}`}>
           {navLinks.map((link) => (
             <li key={link.path} className="my-2 md:my-0">
               <Link
@@ -43,6 +49,12 @@ const NavBar = () => {
             </li>
           ))}
         </ul>
+        <button
+          onClick={handleLogout}
+          className="absolute top-4 right-4 text-white font-medium transition duration-300 ease-in-out transform hover:text-gray-300 hover:scale-105"
+        >
+          Sair
+        </button>
       </div>
     </nav>
   );
