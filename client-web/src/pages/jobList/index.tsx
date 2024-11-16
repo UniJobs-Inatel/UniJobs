@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,12 +13,13 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Job } from '@/domain/job'
+import { Job, JobFilters, JobPublication } from '@/domain/job'
 import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
-import { getAllJobs } from '@/services';
+import { favoriteJob, unfavoriteJob, getFavoriteJobs, getJobPublications } from '@/services';
 import JobDetailsModal from './jobDetailsModal';
 
-const JobCard: React.FC<{ job: Job }> = ({ job }) => {
+
+const JobCard: React.FC<{ jobPublication: JobPublication }> = ({ jobPublication: { job, id: jobPublicationId } }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,13 +41,26 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
     setSelectedJob(null);
   };
 
+  async function handleFavoriteClick() {
+    if (jobPublicationId) {
+      await favoriteJob(jobPublicationId)
+    }
+  }
+
+  async function handleUnfavoriteClick() {
+
+    if (jobPublicationId) {
+      await unfavoriteJob(jobPublicationId)
+    }
+  }
+
   return (
     <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full">
       <button
         className={`absolute top-2 right-2 ${isFavorited ? 'text-red-500' : 'text-gray-400'}`}
         onClick={toggleFavorite}
       >
-        {isFavorited ? <FaHeart /> : <FaRegHeart />}
+        {isFavorited ? <FaHeart onClick={handleUnfavoriteClick} /> : <FaRegHeart onClick={handleFavoriteClick} />}
       </button>
 
       <div className="flex-grow mb-4 md:mb-0">
@@ -83,9 +97,10 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
 const JobList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationTerm, setLocationTerm] = useState('');
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<JobFilters>({
     type: 'todos',
-    salary: '',
+    minSalary: '',
+    maxSalary: '',
     requirements: '',
     mode: 'todos',
     weekly_hours: '',
@@ -95,19 +110,20 @@ const JobList: React.FC = () => {
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobPublications, setJobPublication] = useState<JobPublication[]>([]);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+
+  const fetchJobs = useCallback(async () => {
+    try {
+      const jobData = await getJobPublications();
+      setJobPublication(jobData.publications);
+    } catch (error) {
+      console.error("Erro ao carregar as vagas:", error);
+    }
+  }, [getJobPublications, setJobPublication]);
+
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const jobData = await getAllJobs();
-        setJobs(jobData);
-      } catch (error) {
-        console.error("Erro ao carregar as vagas:", error);
-      } finally {
-      }
-    };
-
     fetchJobs();
   }, []);
 
@@ -117,7 +133,6 @@ const JobList: React.FC = () => {
       user.type === UserType.COMPANY && navigate('/perfil-empresa');
     }
   }, [user, navigate]);
-
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -131,10 +146,16 @@ const JobList: React.FC = () => {
     setLocationTerm(e.target.value);
   };
 
+  const handleShowFavoritesToggle = async () => {
+    await fetchJobs()
+    setShowOnlyFavorites(prev => !prev)
+  };
+
   const handleClearFilters = () => {
     setFilters({
       type: 'todos',
-      salary: '',
+      minSalary: '',
+      maxSalary: '',
       requirements: '',
       mode: 'todos',
       weekly_hours: '',
@@ -143,21 +164,16 @@ const JobList: React.FC = () => {
     setLocationTerm('');
   };
 
-  const filteredJobs = jobs.filter(job =>
-    job.job_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    job.location.toLowerCase().includes(locationTerm.toLowerCase()) &&
-    (filters.type === 'todos' || job.type === filters.type) &&
-    (filters.salary === '' || job.salary?.toString() === filters.salary) &&
-    (filters.requirements === '' || filters.requirements === job.requirements) &&
-    (filters.mode === 'todos' || job.mode === filters.mode) &&
-    (filters.weekly_hours === '' || job.weekly_hours?.toString() === filters.weekly_hours) &&
-    (filters.field_id === 'todos' || job.field?.id?.toString() === filters.field_id)
-  );
+  const handleApplyFiters = async () => {
+    const jobData = await getJobPublications(filters);
+    setJobPublication(jobData.publications);
+    setIsFilterOpen(false)
+  }
 
   const itemsPerPage = 5;
-  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  const totalPages = Math.ceil(jobPublications.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedJobs = filteredJobs.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedJobsPublications = jobPublications.slice(startIndex, startIndex + itemsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) setCurrentPage(page);
@@ -176,6 +192,10 @@ const JobList: React.FC = () => {
           />
           <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center">
             <FaSearch />
+          </button>
+          <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
+            onClick={handleShowFavoritesToggle}>
+            <FaHeart className={showOnlyFavorites ? 'text-red-500' : 'text-gray-400'} />
           </button>
           <button
             className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
@@ -231,11 +251,23 @@ const JobList: React.FC = () => {
                   <div className="flex gap-2">
                     <Input
                       type="number"
-                      label="Salário:"
-                      name="salary"
-                      value={filters.salary}
-                      placeholder="ex: 2000"
-                      onChange={(e) => handleFilterChange("salary", e.target.value)}
+                      label="Salário mínimo:"
+                      name="minSalary"
+                      value={filters.minSalary}
+                      placeholder="ex: 1000"
+                      onChange={(e) => handleFilterChange("minSalary", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      label="Salário máximo:"
+                      name="maxSalary"
+                      value={filters.maxSalary}
+                      placeholder="ex: 3000"
+                      onChange={(e) => handleFilterChange("maxSalary", e.target.value)}
                     />
                   </div>
                 </div>
@@ -292,9 +324,7 @@ const JobList: React.FC = () => {
                 <Button className="bg-red-500 text-white hover:bg-red-600 mr-2" onClick={handleClearFilters}>
                   Limpar Filtros
                 </Button>
-                <Button className="bg-primary text-white hover:bg-primary ml-2" onClick={() => {
-                  setIsFilterOpen(false)
-                }}>
+                <Button className="bg-primary text-white hover:bg-primary ml-2" onClick={handleApplyFiters}>
                   Aplicar Filtros
                 </Button>
               </div>
@@ -304,8 +334,8 @@ const JobList: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {paginatedJobs.map(job => (
-          <JobCard key={job.id} job={job} />
+        {paginatedJobsPublications.map(jobPublication => (
+          <JobCard key={jobPublication.id} jobPublication={jobPublication} />
         ))}
       </div>
 
