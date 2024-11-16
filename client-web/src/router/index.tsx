@@ -14,9 +14,6 @@ const StudentProfile = lazy(() => import("@/pages/profile/student"));
 const CompanyProfile = lazy(() => import("@/pages/profile/company"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
-// function PrivateRoute({ children }: { children: React.ReactNode }) {
-//   return useAuthStore.getState().user ? children : <Navigate to="/" />;
-// }
 
 export const router = createBrowserRouter([
   {

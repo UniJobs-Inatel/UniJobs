@@ -384,6 +384,36 @@ export class JobService {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
+    const collegesWithCompanies = await this.collegeRepository
+      .createQueryBuilder('college')
+      .leftJoin(
+        'college.jobPublications',
+        'jobPublication',
+        'jobPublication.job_id = :jobId',
+        {
+          jobId,
+        },
+      )
+      .innerJoin('college.company', 'company')
+      .where('jobPublication.id IS NULL')
+      .select(['college.id AS collegeId', 'company.name AS companyName'])
+      .getRawMany();
+
+    return collegesWithCompanies.map((item) => ({
+      collegeId: item.collegeId,
+      companyName: item.companyName,
+    }));
+  }
+
+  async checkIfJobIsPublishedOnAllColleges(jobId: number) {
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+    });
+
+    if (!job) {
+      throw new NotFoundException('Vaga não encontrada.');
+    }
+
     const colleges = await this.collegeRepository
       .createQueryBuilder('college')
       .leftJoin(
@@ -392,10 +422,9 @@ export class JobService {
         'jobPublication.job_id = :jobId',
         { jobId },
       )
-      .where('jobPublication.id IS NULL')
       .getMany();
 
-    return colleges;
+    return colleges.length === 0;
   }
 
   async updateJobPublication(

@@ -134,6 +134,12 @@ export class JobController {
     return this.jobService.searchJobPublications(filters, pagination);
   }
 
+  @Get('colleges/check/:jobId')
+  @HttpCode(HttpStatus.OK)
+  async checkIfJobIsPublishedOnAllColleges(@Param('jobId') jobId: number) {
+    return this.jobService.checkIfJobIsPublishedOnAllColleges(jobId);
+  }
+
   @Get('colleges/:jobId')
   @HttpCode(HttpStatus.OK)
   async getCollegesWhereJobIsNotPublished(@Param('jobId') jobId: number) {

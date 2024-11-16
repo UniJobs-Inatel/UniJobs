@@ -85,7 +85,7 @@ export class StudentController {
   @Get('favorite-jobs')
   @HttpCode(HttpStatus.OK)
   async getFavoriteJobs(@Req() req: RequestWithUser) {
-    return this.studentService.getFavoriteJobs(req.user.userId, req);
+    return this.studentService.getFavoriteJobs(req);
   }
 
   @Post('favorite-job/:jobId')

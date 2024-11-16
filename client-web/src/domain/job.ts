@@ -13,5 +13,9 @@ export interface Job {
   requirements: string;
   field_id?: number;
   company:Partial<IGetCompanyResponse>
+  field?: {
+    id: number;
+    field: string;
+  }
   //company_id: number;
 }
