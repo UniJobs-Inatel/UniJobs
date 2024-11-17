@@ -71,9 +71,9 @@ export const deleteJob = async (id: number) => {
   }
 };
 
-export const publishJob = async ({job_id, company_id, college_id}:publishJobRequest) => {
+export const publishJob = async ({job_id, college_id}:publishJobRequest) => {
   try {
-    const response = await instance.post(`/job/publish`, { job_id: job_id, company_id: company_id, college_id: college_id });
+    const response = await instance.post(`/job/publish`, { job_id: job_id,  college_id: college_id });
     return response;
   } catch (error) {
     console.error("Erro ao publicar vaga:", error);

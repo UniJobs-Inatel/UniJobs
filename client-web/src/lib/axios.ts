@@ -44,7 +44,9 @@ instance.interceptors.response.use(
         }
       } catch (refreshError) {
         console.error("Erro ao atualizar o token:", refreshError);
-        window.location.href = '/';
+        if(useAuthStore.getState().accessToken){
+          window.location.href = '/';
+        }
         return Promise.reject(refreshError);
       }
     }

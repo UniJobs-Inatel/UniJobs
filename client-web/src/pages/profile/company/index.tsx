@@ -95,13 +95,11 @@ const CompanyProfile = () => {
 
   const publishJob = ({
     jobId,
-    companyId,
   }: {
     jobId: number;
-    companyId: number;
   }) => {
     openModal({
-      children: <IesSelectModal getJobs={getJobs} companyId={companyId} jobId={jobId} />,
+      children: <IesSelectModal getJobs={getJobs}  jobId={jobId} />,
     });
   };
 
@@ -170,7 +168,7 @@ const CompanyProfile = () => {
             <div className="flex justify-between items-center mb-4">
               <h4 className=" text-[16px] font-bold mb-4">Vagas</h4>
               <Button
-                onClick={() => navigate("/job-form")}
+                onClick={() => navigate("/cadastrar-vaga")}
                 variant={"outline"}
                 className="h-[32px] w-36 text-sm"
                 prefixIcon={<PlusIcon className="fill-primary w-[18px]" />}

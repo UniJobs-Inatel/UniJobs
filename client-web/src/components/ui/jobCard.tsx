@@ -71,7 +71,7 @@ const JobCard = ({ job, publishJob, onDeleteClick }: JobCardProps) => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div
+              {!job.isPublishedOnAllColleges && <div
                 onClick={() => {
                   setAccordionValue("");
                   publishJob &&
@@ -83,7 +83,7 @@ const JobCard = ({ job, publishJob, onDeleteClick }: JobCardProps) => {
                 className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md"
               >
                 Publicar
-              </div>
+              </div>}
               <TrashIcon
                 onClick={() => {
                   setAccordionValue("");

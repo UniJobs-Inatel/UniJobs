@@ -7,11 +7,9 @@ import { useEffect, useState } from "react";
 
 const IesSelectModal = ({
   jobId,
-  companyId,
   getJobs
 }: {
   jobId: number;
-  companyId: number;
   getJobs:() => Promise<void>
 }) => {
   const [availablesIes, setAvailablesIes] = useState<AvailablesIesResponse[]>();
@@ -30,7 +28,6 @@ const IesSelectModal = ({
     const response = await publishJob({
       job_id: jobId,
       college_id,
-      company_id: companyId,
     });
     let modalTitle = "Vaga publicada com sucesso";
 

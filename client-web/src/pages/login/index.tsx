@@ -93,7 +93,6 @@ const Login: React.FC = () => {
         role: data.role,
       });
     } catch (error) {
-      console.log('ERRRO')
       openModal({
         children: (
           <FeedBackModal

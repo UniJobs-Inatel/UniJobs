@@ -1,6 +1,5 @@
 import { JobCard } from "@/components/ui/jobCard";
 import { Job } from "@/domain/job";
-import { publishJob } from "@/services";
 import { useState } from "react";
 
 const FavoriteJobs = () => {
@@ -16,7 +15,9 @@ const FavoriteJobs = () => {
           benefits: "Health insurance, 401k",
           salary: 80000,
           requirements: "3+ years experience with Node.js and React",
-          id: 1
+          id: 1,
+          isPublishedOnAllColleges:false,
+          company:{}
         }
       ])
 
