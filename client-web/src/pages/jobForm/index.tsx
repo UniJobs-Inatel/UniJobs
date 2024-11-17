@@ -70,9 +70,9 @@ const JobForm = () => {
   };
 
   return (
-    <div className="max-w-xxl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+    <div className="max-w-5xl mx-auto pb-10 ">
       <h2 className="text-2xl  font-bold mb-4">Cadastro de Vaga</h2>
-      <form className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6" onSubmit={handleSubmit(onSubmit, (error) => console.error(error))}>
+      <form className="grid grid-cols-1 gap-x-2 gap-y-4 md:grid-cols-2" onSubmit={handleSubmit(onSubmit, (error) => console.error(error))}>
         <Input label="Nome da Vaga:" {...register("job_name")} error={errors.job_name?.message} />
         <Input label="Local:" {...register("location")} error={errors.location?.message} />
 
@@ -82,7 +82,7 @@ const JobForm = () => {
           control={control}
           render={({ field }) => (
             <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
+              <SelectTrigger className="mt-1" >
                 <SelectValue placeholder="Selecione o tipo de vaga" />
               </SelectTrigger>
               <SelectContent>
@@ -103,7 +103,7 @@ const JobForm = () => {
           control={control}
           render={({ field }) => (
             <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
+              <SelectTrigger className="mt-1" >
                 <SelectValue placeholder="Selecione a modalidade" />
               </SelectTrigger>
               <SelectContent>
@@ -118,13 +118,13 @@ const JobForm = () => {
         />
         </Label>
 
-        <Label className="">Área de atuação:
+        <Label className="mt-[7px]" >Área de atuação:
         <Controller
           name="field_id"
           control={control}
           render={({ field }) => (
-            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString() || ''}>
-              <SelectTrigger>
+            <Select  onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString() || ''}>
+              <SelectTrigger className="mt-1" >
                 <SelectValue placeholder="Selecione a área de atuação" />
               </SelectTrigger>
               <SelectContent>

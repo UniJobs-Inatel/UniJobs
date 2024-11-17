@@ -175,13 +175,13 @@ const JobList: React.FC = () => {
             className="border p-2 w-full rounded"
           />
           <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center">
-            <FaSearch />
+            <FaSearch className='fill-white' />
           </button>
           <button
             className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
             onClick={() => setIsFilterOpen(true)}
           >
-            <FaFilter />
+            <FaFilter className='fill-white' />
           </button>
         </div>
 

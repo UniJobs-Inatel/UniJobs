@@ -1,4 +1,5 @@
 import Navbar from "@/components/ui/navbar";
+import { cn } from "@/lib/cn";
 import { Outlet, useLocation } from "react-router-dom";
 
 const Layout = () => {
@@ -8,7 +9,7 @@ const Layout = () => {
   return (
     <>
       {!isRootPath && <Navbar />}
-      <div className="pt-[60px]" >
+      <div className={cn(!isRootPath && "pt-[72px] px-4")} >
       <Outlet />
       </div>
     </>
