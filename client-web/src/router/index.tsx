@@ -29,14 +29,14 @@ export const router = createBrowserRouter([
       {
         element: <PrivateRoute />, // Somente para rotas protegidas
         children: [
-          { path: "/perfil-estudante", element: <StudentProfile /> },
-          { path: "/perfil-empresa", element: <CompanyProfile /> },
-          { path: "/vagas", element: <JobList /> },
-          { path: "/cadastrar-vaga", element: <JobForm /> },
-          { path: "/vagas-publicadas", element: <PublishedJobs /> },
           { path: "/vagas-favoritadas", element: <FavoriteJobs /> },
         ],
       },
+      { path: "/vagas", element: <JobList /> },
+      { path: "/perfil-estudante", element: <StudentProfile /> },
+      { path: "/vagas-publicadas", element: <PublishedJobs /> },
+      { path: "/cadastrar-vaga", element: <JobForm /> },
+      { path: "/perfil-empresa", element: <CompanyProfile /> },
     ],
   },
 ]);

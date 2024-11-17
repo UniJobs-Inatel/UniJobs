@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom"; // Importe o useNavigate
 import { Label } from "@/components/ui/label";
 import { useModalStore } from "@/stores/modalStore";
 import { FeedBackModal } from "@/components/ui/feedbackModal.";
+import { loginUser, registerUser } from "@/services/auth";
 
 const loginSchema = z.object({
   email: z.string().nonempty("O e-mail é obrigatório").email("E-mail inválido"),
@@ -61,17 +62,10 @@ const Login: React.FC = () => {
 
   const { saveAuthResponse } = useAuthStore();
 
-  const handleLogin = async (data: LoginFormData) => {
+  const handleLogin = async ({email, password}: LoginFormData) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL as string}auth/login`,
-        {
-          email: data.email,
-          password: data.password,
-        }
-      );
+      const {accessToken, refreshToken} = await loginUser({email, password})
 
-      const { accessToken, refreshToken } = response.data;
       saveAuthResponse(accessToken, refreshToken);
       navigate("/vagas");
     } catch (error) {
@@ -93,15 +87,13 @@ const Login: React.FC = () => {
 
   const handleRegister = async (data: RegisterFormData) => {
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL as string}auth/register`,
-        {
-          email: data.email,
-          password: data.password,
-          type: data.role,
-        }
-      );
+      await registerUser({
+        email: data.email,
+        password: data.password,
+        role: data.role,
+      });
     } catch (error) {
+      console.log('ERRRO')
       openModal({
         children: (
           <FeedBackModal
@@ -113,14 +105,15 @@ const Login: React.FC = () => {
             variant={"error"}
           />
         ),
+        contentClassName:'w-[86vw]'
       });
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white ">
-      <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg min-h-[28rem] max-h-[40rem]">
-        <Tabs defaultValue="login" className="mb-6">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-primary-800 to-primary-400 ">
+      <div className="w-[86vw] max-w-[26rem] p-4 md:p-8 bg-white rounded-lg shadow-lg max-h-[40rem]">
+        <Tabs defaultValue="login">
           <TabsList>
             <TabsTrigger className="" value="login">
               Entrar
@@ -132,7 +125,7 @@ const Login: React.FC = () => {
           <TabsContent value="login">
             <form onSubmit={handleSubmit(handleLogin)}>
               <h1 className="mb-6 text-2xl font-bold text-center ">Entrar</h1>
-              <div className="flex flex-col gap-2" >
+              <div className="flex flex-col gap-2">
                 <Input
                   label="E-mail:"
                   type="email"
@@ -141,7 +134,7 @@ const Login: React.FC = () => {
                   {...register("email")}
                   placeholder="Entre com seu e-mail"
                 />
-  
+
                 <Input
                   label="Senha:"
                   type="password"
@@ -150,7 +143,7 @@ const Login: React.FC = () => {
                   {...register("password")}
                   placeholder="Entre com sua senha"
                 />
-                
+
                 <Button
                   type="submit"
                   className="w-full mt-2 text-white bg-primary hover:bg-gray-800"
@@ -166,8 +159,8 @@ const Login: React.FC = () => {
               <h1 className="mb-6 text-2xl font-bold text-center ">
                 Cadastrar-se
               </h1>
-              
-              <div className="flex flex-col gap-3" >
+
+              <div className="flex flex-col gap-3">
                 <Input
                   label="E-mail:"
                   type="email"
@@ -176,7 +169,7 @@ const Login: React.FC = () => {
                   {...registerRegisterForm("email")}
                   placeholder="Entre com seu e-mail"
                 />
-  
+
                 <Input
                   label="Senha:"
                   type="password"
@@ -184,8 +177,8 @@ const Login: React.FC = () => {
                   error={registerErrors.password?.message}
                   {...registerRegisterForm("password")}
                   placeholder="Entre com sua senha"
-                  />
-  
+                />
+
                 <Input
                   label="Confirmar senha:"
                   type="password"
@@ -194,12 +187,12 @@ const Login: React.FC = () => {
                   {...registerRegisterForm("confirmPass")}
                   placeholder="Confirme sua senha"
                 />
-  
-               <div>
-                  <Label className="flex items-center">
+
+                <div>
+                  <Label className="flex items-center gap-4">
                     Você é:
-                    <div className="flex items-center ml-4">
-                      <Label className="flex items-center mr-4">
+                    <div className="flex items-center gap-4">
+                      <Label className="flex items-center gap-0.5  ">
                         <Input
                           type="radio"
                           value="student"
@@ -207,23 +200,23 @@ const Login: React.FC = () => {
                         />
                         Aluno
                       </Label>
-                      <Label className="flex items-center">
+                      <Label className="flex items-center gap-0.5">
                         <Input
                           type="radio"
                           value="company"
                           {...registerRegisterForm("role")}
-                          className="mr-2"
                         />
                         Empresa
                       </Label>
                     </div>
                   </Label>
                   {registerErrors.role && (
-                    <p className="text-red-500 text-[12px]">{registerErrors.role.message}</p>
+                    <p className="text-red-500 text-[12px]">
+                      {registerErrors.role.message}
+                    </p>
                   )}
-               </div>
-  
-  
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full mt-2 text-white bg-primary hover:bg-gray-800"

@@ -1,6 +1,5 @@
 import useAuthStore from "@/stores/authStore";
 import axios, { AxiosError } from "axios";
-import { useNavigate } from 'react-router-dom';
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_URL as string,
@@ -15,33 +14,45 @@ const instance = axios.create({
 instance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.status == 401) {
-      const failedRequest = error.config;
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL as string}auth/refresh-token`,
-        {
-          refreshToken: useAuthStore.getState().refreshToken,
-        }
-      );
+    if (error.response?.status === 401) {
+      try {
+        const failedRequest = error.config;
 
-      if(response.status != 200){
-        const navigate = useNavigate(); 
-        navigate('/')
-      }
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL as string}auth/refresh-token`,
+          {
+            refreshToken: useAuthStore.getState().refreshToken,
+          }
+        );
 
-      const { accessToken, refreshToken } = response.data;
-      useAuthStore.getState().saveAuthResponse(accessToken, refreshToken);
-      instance.defaults.headers.common["Authorization"] =
-        `Bearer ${accessToken}`;
-      if (failedRequest) {
-        if (failedRequest.headers) {
-          failedRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+        if (response.status !== 200) {
+          window.location.href = '/';
+          return Promise.reject(error);
         }
-        return instance(failedRequest);
+
+        const { accessToken, refreshToken } = response.data;
+
+        useAuthStore.getState().saveAuthResponse(accessToken, refreshToken);
+
+        instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+        if (failedRequest) {
+          if (failedRequest.headers) {
+            failedRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+          }
+          return instance(failedRequest); 
+        }
+      } catch (refreshError) {
+        console.error("Erro ao atualizar o token:", refreshError);
+        window.location.href = '/';
+        return Promise.reject(refreshError);
       }
     }
+
+    return Promise.reject(error);
   }
 );
+
 
 export interface ErrorResponse {
   message: string;

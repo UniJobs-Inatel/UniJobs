@@ -124,7 +124,7 @@ const StudentProfile = () => {
 
   return (
     <div className="pb-5">
-      <h3 className=" text-[20px] font-bold mb-6">Meu perfil</h3>
+      <h3 className=" text-2xl font-bold mb-6">Meu perfil</h3>
       <section>
         <h4 className=" text-[16px] font-bold mb-4">
           Informações Pessoais

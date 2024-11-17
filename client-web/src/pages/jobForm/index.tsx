@@ -71,7 +71,7 @@ const JobForm = () => {
 
   return (
     <div className="max-w-5xl mx-auto pb-10 ">
-      <h2 className="text-2xl  font-bold mb-4">Cadastro de Vaga</h2>
+      <h2 className="text-2xl font-bold mb-4">Cadastro de Vaga</h2>
       <form className="grid grid-cols-1 gap-x-2 gap-y-4 md:grid-cols-2" onSubmit={handleSubmit(onSubmit, (error) => console.error(error))}>
         <Input label="Nome da Vaga:" {...register("job_name")} error={errors.job_name?.message} />
         <Input label="Local:" {...register("location")} error={errors.location?.message} />
