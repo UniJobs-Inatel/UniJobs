@@ -150,9 +150,6 @@ export class JobService {
   async getJobsByCompany(req: RequestWithUser) {
     const userId = req.user.userId;
 
-    console.log('USER ID: ', userId);
-    console.log('USER ID TYPE: ', typeof userId);
-
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -161,10 +158,20 @@ export class JobService {
       throw new Error('Company not found for this user');
     }
 
-    return await this.jobRepository.find({
+    const jobList = await this.jobRepository.find({
       where: { company: { id: company.id } },
       relations: ['company'],
     });
+
+    const jobListWithPublicationStatus = await Promise.all(
+      jobList.map(async (job) => {
+        const isPublishedOnAllColleges =
+          await this.checkIfJobIsPublishedOnAllColleges(job.id);
+        return { ...job, isPublishedOnAllColleges };
+      }),
+    );
+
+    return jobListWithPublicationStatus;
   }
 
   async updateJob(
@@ -416,17 +423,18 @@ export class JobService {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
-    const colleges = await this.collegeRepository
-      .createQueryBuilder('college')
-      .leftJoin(
-        'college.jobPublications',
-        'jobPublication',
-        'jobPublication.job_id = :jobId',
-        { jobId },
-      )
-      .getMany();
+    const colleges = await this.collegeRepository.find();
 
-    return colleges.length === 0;
+    const publications = await this.jobPublicationRepository.find({
+      where: { job: { id: jobId } },
+      relations: ['college'],
+    });
+
+    const collegeIds = publications.map(
+      (publication) => publication.college.id,
+    );
+
+    return colleges.every((college) => collegeIds.includes(college.id));
   }
 
   async updateJobPublication(
