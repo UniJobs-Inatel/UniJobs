@@ -295,19 +295,21 @@ export class JobService {
     const job = await this.jobRepository.findOne({
       where: { id: createJobPublicationDto.job_id },
     });
-    const company = await this.companyRepository.findOne({
-      where: { id: createJobPublicationDto.company_id },
-      relations: ['user'],
-    });
 
-    if (!job || !company) {
-      throw new NotFoundException('Vaga ou empresa não encontrada.');
+    if (!job) {
+      throw new NotFoundException('Vaga não encontrada.');
     }
 
-    if (company.user.id !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a criar esta publicação.',
-      );
+    const company = await this.companyRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Empresa não encontrada.');
+    }
+
+    if (job.company.id !== company.id) {
+      throw new UnauthorizedException('Vaga não pertence a empresa informada.');
     }
 
     let college = null;
@@ -432,6 +434,7 @@ export class JobService {
     updateJobPublicationDto: UpdateJobPublicationDto,
     req: RequestWithUser,
   ) {
+    const userId = req.user.userId;
     const jobPublication = await this.jobPublicationRepository.findOne({
       where: { id },
       relations: ['college', 'company'],
@@ -441,26 +444,37 @@ export class JobService {
       throw new NotFoundException('Publicação de vaga não encontrada.');
     }
 
-    const userId = req.user.userId;
+    const companyRelatedtoUser = await this.companyRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!companyRelatedtoUser) {
+      throw new NotFoundException('Usuário não é uma empresa ou IE.');
+    }
+
+    const collegeRelatedToUser = await this.collegeRepository.findOne({
+      where: { company: { id: companyRelatedtoUser.id } },
+    });
+
+    const collegeRelatedToUser_id = collegeRelatedToUser
+      ? collegeRelatedToUser.id
+      : null; // Either the ID or null, for comparison purposes
 
     if (
       updateJobPublicationDto.status === 'approved' ||
       updateJobPublicationDto.status === 'reproved'
     ) {
-      if (
-        jobPublication.college &&
-        jobPublication.college.company.user.id !== userId
-      ) {
+      if (jobPublication.college.id !== collegeRelatedToUser_id) {
         throw new UnauthorizedException(
-          'Apenas a faculdade pode aprovar ou reprovar uma publicação.',
+          'Apenas a faculdade pode aprovar ou reprovar essa publicação.',
         );
       }
     }
 
     if (updateJobPublicationDto.status === 'removed') {
       if (
-        jobPublication.company.user.id !== userId &&
-        jobPublication.college?.company.user.id !== userId
+        jobPublication.company.id !== companyRelatedtoUser.id && // Empresa que publicou é diferente da empresa administrada pelo usuário
+        jobPublication.college.id !== collegeRelatedToUser_id // Faculdade que recebeu a publicação é diferente da faculdade administrada pelo usuário
       ) {
         throw new UnauthorizedException(
           'Apenas a empresa ou a faculdade pode remover uma publicação.',
@@ -469,7 +483,7 @@ export class JobService {
     }
 
     if (updateJobPublicationDto.status === 'pending') {
-      if (jobPublication.company.user.id !== userId) {
+      if (jobPublication.company.id !== companyRelatedtoUser.id) {
         throw new UnauthorizedException(
           'Apenas a empresa pode republicar uma publicação.',
         );
