@@ -43,9 +43,9 @@ import { JobTag } from '../entities/job-tag.entity';
         JobTag,
       ],
       synchronize: false,
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      // ssl: {
+      //   rejectUnauthorized: false,
+      // },
     }),
   ],
 })
