@@ -359,14 +359,32 @@ export class JobService {
       where: { user: { id: userId } },
     });
 
+    if (!company) {
+      throw new Error('Company not found for the current user.');
+    }
+
     const college = await this.collegeRepository.findOne({
       where: { company: { id: company.id } },
     });
 
-    return await this.jobPublicationRepository.find({
+    if (!college) {
+      throw new Error('College not found for the current company.');
+    }
+
+    const jobPublications = await this.jobPublicationRepository.find({
       where: { college: { id: college.id } },
-      relations: ['job', 'college', 'company'],
+      relations: [
+        'job',
+        'job.field',
+        'job.company',
+        'job.tags',
+        'job.tags.tag',
+        'college',
+        'college.company',
+      ],
     });
+
+    return jobPublications;
   }
 
   async getJobPublicationsByUserCollege(req: RequestWithUser) {
