@@ -81,7 +81,16 @@ export const publishJob = async ({job_id, college_id}:PublishJobRequest) => {
   }
 };
 
-export const getAlllJobToValidate = async () :Promise<JobPublicationResponse[]> => {
+export const getAllJobToValidate = async () :Promise<JobPublicationResponse[]> => {
+  try {
+    const response = await instance.get<JobPublicationResponse[]>(`/job/publications/college`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao publicar vaga:", error);
+    throw error;
+  }
+};
+export const getAllPublisedCompanyJob = async () :Promise<JobPublicationResponse[]> => {
   try {
     const response = await instance.get<JobPublicationResponse[]>(`/job/publications/college`);
     return response.data;

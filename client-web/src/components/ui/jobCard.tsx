@@ -12,10 +12,12 @@ import { currencyFormatter } from "@/utils";
 import { deleteJob } from "@/services";
 import { useModalStore } from "@/stores/modalStore";
 import { FeedBackModal } from "./feedbackModal.";
+import { StatusBadge } from "./badge";
+import { JobStatus, jobStatusMapper } from "@/utils/mappers";
 
 interface JobCardProps {
   job: Job;
-  validateJobFromCard?:() => void,
+  validateJobFromCard?: () => void;
   publishJob?: ({
     jobId,
     companyId,
@@ -24,9 +26,16 @@ interface JobCardProps {
     companyId: number;
   }) => void;
   onDeleteClick?: () => Promise<void>;
+  status?: JobStatus;
 }
 
-const JobCard = ({ job, publishJob, onDeleteClick, validateJobFromCard }: JobCardProps) => {
+const JobCard = ({
+  job,
+  publishJob,
+  onDeleteClick,
+  validateJobFromCard,
+  status,
+}: JobCardProps) => {
   const [accordionValue, setAccordionValue] = useState<string | null>(null);
   const { openModal } = useModalStore();
 
@@ -62,43 +71,54 @@ const JobCard = ({ job, publishJob, onDeleteClick, validateJobFromCard }: JobCar
     >
       <AccordionItem value="item-1" className="border-none">
         <AccordionTrigger className="m-0 px-2 py-4 border-primary">
-          <div className="flex w-full justify-between">
-            <div className="text-left w-[60%]">
-              <h2 className=" lg:text-[20px] ">{job.job_name}</h2>
-              <div>
-                <h4 className="text-[12px] lg:text-[14px] ">
-                  {job.job_name} - {job.location}
-                </h4>
+          <div className="flex flex-col gap-1">
+            {status && (
+              <StatusBadge
+              className="self-end"
+                label={jobStatusMapper[status].label}
+                variant={jobStatusMapper[status].variant}
+              />
+            )}
+            <div className="flex w-full justify-between">
+              <div className="text-left w-[60%]">
+                <h2 className=" lg:text-[20px] ">{job.job_name}</h2>
+                <div>
+                  <h4 className="text-[12px] lg:text-[14px] ">
+                    {job.job_name} - {job.location}
+                  </h4>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {!job.isPublishedOnAllColleges && <div
-                onClick={() => {
-                  setAccordionValue("");
-                  validateJobFromCard && validateJobFromCard()
-                  publishJob &&
-                    publishJob({
-                      jobId: job.id ?? 0,
-                      companyId: job.company.id ?? 0,
-                    });
-                }}
-                className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md"
-              >
-                Publicar
-              </div>}
-              <TrashIcon
-                onClick={() => {
-                  setAccordionValue("");
-                  removeJob(job.id ?? 0);
-                }}
-                className="w-5 fill-red-500"
-              />
-              <ChevronDownIcon
-                className={cn(
-                  "h-7 w-7 shrink-0 transition-transform duration-200  fill-primary",
-                  accordionValue == "item-1" && "rotate-180"
+              <div className="flex items-center gap-2">
+                {!job.isPublishedOnAllColleges && (
+                  <div
+                    onClick={() => {
+                      setAccordionValue("");
+                      validateJobFromCard && validateJobFromCard();
+                      publishJob &&
+                        publishJob({
+                          jobId: job.id ?? 0,
+                          companyId: job.company.id ?? 0,
+                        });
+                    }}
+                    className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md"
+                  >
+                    Publicar
+                  </div>
                 )}
-              />
+                <TrashIcon
+                  onClick={() => {
+                    setAccordionValue("");
+                    removeJob(job.id ?? 0);
+                  }}
+                  className="w-5 fill-red-500"
+                />
+                <ChevronDownIcon
+                  className={cn(
+                    "h-7 w-7 shrink-0 transition-transform duration-200  fill-primary",
+                    accordionValue == "item-1" && "rotate-180"
+                  )}
+                />
+              </div>
             </div>
           </div>
         </AccordionTrigger>

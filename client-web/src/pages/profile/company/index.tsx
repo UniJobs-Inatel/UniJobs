@@ -12,7 +12,7 @@ import { Job, JobPublication } from "@/domain/job";
 import { useEffect, useState } from "react";
 import {
   createCompanyProfile,
-  getAlllJobToValidate,
+  getAllJobToValidate,
   getCompanyData,
   getJobsByCompany,
   validateJob,
@@ -61,7 +61,7 @@ const CompanyProfile = () => {
 
   const getJobToValidation = async () => {
     try {
-      const response = await getAlllJobToValidate();
+      const response = await getAllJobToValidate();
       setJobsToValidate(response);
     } catch (error) {
       openModal({

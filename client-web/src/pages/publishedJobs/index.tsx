@@ -1,33 +1,27 @@
 import { JobCard } from "@/components/ui/jobCard";
-import { Job } from "@/domain/job";
-import { useState } from "react";
+import {  JobPublication } from "@/domain/job";
+import { getAllPublisedCompanyJob } from "@/services";
+import { useEffect, useState } from "react";
 
 const PublishedJobs = () => {
+  const [publishedJobs, setPublishedJobs] = useState<JobPublication[]>([]);
 
-    const [jobs] = useState<Job[]>([
-        {
-          job_name: "Software Engineer",
-          description: "Develop and maintain software solutions.",
-          location: "New York",
-          type: "clt",
-          weekly_hours: 40,
-          mode: "remote",
-          benefits: "Health insurance, 401k",
-          salary: 80000,
-          requirements: "3+ years experience with Node.js and React",
-          id: 1,
-          company:{}
-        }
-      ])
+  const getPublichedJob = async() => {
+    const response = await getAllPublisedCompanyJob()
+    setPublishedJobs(response)
+  }
+
+  useEffect(() => {
+    getPublichedJob()
+  },[])
 
   return (
     <div>
+      <section>
       <h3 className=" text-[20px] font-bold mb-6">
         Vagas publicadas
       </h3>
-
-      <section>
-        {jobs && jobs.map((job) => <JobCard key={job.id} job={job} />)}
+        {publishedJobs && publishedJobs.map((publishedJob) => <JobCard  key={publishedJob.id} job={publishedJob.job} />)}
       </section>
     </div>
   );
