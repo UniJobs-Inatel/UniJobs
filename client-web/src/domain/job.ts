@@ -1,4 +1,5 @@
 import { IGetCompanyResponse } from "@/services/company/interface";
+import { JobStatus } from "@/utils/mappers";
 
 export interface Job {
   id?: number;
@@ -19,4 +20,10 @@ export interface Job {
     field: string;
   }
   //company_id: number;
+}
+
+export interface JobPublication {
+  id:number;
+  status:JobStatus;
+  job:Job;
 }

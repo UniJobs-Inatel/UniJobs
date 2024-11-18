@@ -1,7 +1,7 @@
 
 import { Job } from "@/domain/job";
 import instance from "@/lib/axios";
-import { AvailablesIesResponse, publishJobRequest } from "./interface";
+import { AvailablesIesResponse, JobPublicationResponse, PublishJobRequest, ValidateJobRequest } from "./interface";
 
 export const getJobsByCompany = async () => {
   try {
@@ -71,7 +71,7 @@ export const deleteJob = async (id: number) => {
   }
 };
 
-export const publishJob = async ({job_id, college_id}:publishJobRequest) => {
+export const publishJob = async ({job_id, college_id}:PublishJobRequest) => {
   try {
     const response = await instance.post(`/job/publish`, { job_id: job_id,  college_id: college_id });
     return response;
@@ -80,3 +80,24 @@ export const publishJob = async ({job_id, college_id}:publishJobRequest) => {
     throw error;
   }
 };
+
+export const getAlllJobToValidate = async () :Promise<JobPublicationResponse[]> => {
+  try {
+    const response = await instance.get<JobPublicationResponse[]>(`/job/publications/college`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao publicar vaga:", error);
+    throw error;
+  }
+};
+
+export const validateJob = async ({status, jobPublicationId}:ValidateJobRequest) => {
+  try {
+    const response = await instance.post(`/job/publications/${jobPublicationId}`,{status});
+    return response;
+  } catch (error) {
+    console.error("Erro ao publicar vaga:", error);
+    throw error;
+  }
+};
+ 

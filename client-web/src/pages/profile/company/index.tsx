@@ -8,23 +8,30 @@ import useAuthStore from "@/stores/authStore";
 import { useNavigate } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { JobCard } from "@/components/ui/jobCard";
-import { Job } from "@/domain/job";
+import { Job, JobPublication } from "@/domain/job";
 import { useEffect, useState } from "react";
 import {
   createCompanyProfile,
+  getAlllJobToValidate,
   getCompanyData,
   getJobsByCompany,
+  validateJob,
 } from "@/services";
 import { ICreateCompanyProfileRequest } from "@/services/company/interface";
 import { useModalStore } from "@/stores/modalStore";
 import IesSelectModal from "./components/IesSelectModal";
-import { UserStatus } from "@/domain/user";
+import { UserStatus, UserType } from "@/domain/user";
+import { FeedBackModal } from "@/components/ui/feedbackModal.";
+import axios from "axios";
+import { ConfirmationModal } from "@/components/ui/confirmationModal";
+import { ValidateJobRequest } from "@/services/job/interface";
 
 const CompanyProfile = () => {
   const { user } = useAuthStore();
   const { openModal } = useModalStore();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobsToValidate, setJobsToValidate] = useState<JobPublication[]>([]);
 
   const completeRegistrationSchema = z.object({
     name: requiredString(),
@@ -52,6 +59,26 @@ const CompanyProfile = () => {
     },
   });
 
+  const getJobToValidation = async () => {
+    try {
+      const response = await getAlllJobToValidate();
+      setJobsToValidate(response);
+    } catch (error) {
+      openModal({
+        children: (
+          <FeedBackModal
+            title={
+              axios.isAxiosError(error)
+                ? error.response?.data.message
+                : "Erro ao abrir fazer login"
+            }
+            variant={"error"}
+          />
+        ),
+      });
+    }
+  };
+
   const getJobs = async () => {
     const jobResponse = await getJobsByCompany();
     if (!jobResponse?.data) return;
@@ -74,6 +101,7 @@ const CompanyProfile = () => {
     if (!response.data.id) return;
 
     await getJobs();
+    await getJobToValidation();
   };
 
   useEffect(() => {
@@ -89,18 +117,19 @@ const CompanyProfile = () => {
 
     const response = await createCompanyProfile(creationData);
 
-    //Adcionar modal de sucesso
     if (response?.status == 201) console.log("Deu certo");
   };
 
-  const publishJob = ({
-    jobId,
-  }: {
-    jobId: number;
-  }) => {
+  const publishJob = ({ jobId }: { jobId: number }) => {
     openModal({
-      children: <IesSelectModal getJobs={getJobs}  jobId={jobId} />,
+      children: <IesSelectModal getJobs={getJobs} jobId={jobId} />,
     });
+  };
+
+  const handleValidateJobClick = async (
+    validateJobRequest: ValidateJobRequest
+  ) => {
+    await validateJob(validateJobRequest);
   };
 
   return (
@@ -179,11 +208,45 @@ const CompanyProfile = () => {
             <div className="flex flex-col gap-4">
               {jobs &&
                 jobs.map((job) => (
-                  <JobCard  publishJob={publishJob} key={job.id} job={job} />
+                  <JobCard publishJob={publishJob} key={job.id} job={job} />
                 ))}
             </div>
           </section>
         )}
+
+        { user?.type == UserType.COLLEGE && <section>
+          <h4 className="text-[16px] font-bold mb-4">Validação</h4>
+
+          <div>
+            {jobsToValidate &&
+              jobsToValidate.map((jobsToValidate) => (
+                <JobCard
+                  key={jobsToValidate.id}
+                  validateJobFromCard={() => openModal({
+                    children: (
+                      <ConfirmationModal
+                        onAgreeClick={() =>
+                          handleValidateJobClick({
+                            status: "approved",
+                            jobPublicationId: jobsToValidate.id,
+                          })
+                        }
+                        onDeclineClick={() =>
+                          handleValidateJobClick({
+                            status: "reproved",
+                            jobPublicationId: jobsToValidate.id,
+                          })
+                        }
+                        title={"Deseja validar essa vaga?"}
+                      />
+                    ),
+                  })}
+                  job={jobsToValidate.job}
+                />
+              ))}
+          </div>
+        </section>}
+
         <div className="flex justify-end mt-4 ">
           <Button
             onClick={handleSubmit(onSubmit)}

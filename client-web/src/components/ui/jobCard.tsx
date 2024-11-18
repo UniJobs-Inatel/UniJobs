@@ -15,6 +15,7 @@ import { FeedBackModal } from "./feedbackModal.";
 
 interface JobCardProps {
   job: Job;
+  validateJobFromCard?:() => void,
   publishJob?: ({
     jobId,
     companyId,
@@ -25,7 +26,7 @@ interface JobCardProps {
   onDeleteClick?: () => Promise<void>;
 }
 
-const JobCard = ({ job, publishJob, onDeleteClick }: JobCardProps) => {
+const JobCard = ({ job, publishJob, onDeleteClick, validateJobFromCard }: JobCardProps) => {
   const [accordionValue, setAccordionValue] = useState<string | null>(null);
   const { openModal } = useModalStore();
 
@@ -74,6 +75,7 @@ const JobCard = ({ job, publishJob, onDeleteClick }: JobCardProps) => {
               {!job.isPublishedOnAllColleges && <div
                 onClick={() => {
                   setAccordionValue("");
+                  validateJobFromCard && validateJobFromCard()
                   publishJob &&
                     publishJob({
                       jobId: job.id ?? 0,
