@@ -324,7 +324,7 @@ export class StudentService {
 
     return this.favoriteJobsRepository.find({
       where: { student: { id: student.id } },
-      relations: ['job'],
+      relations: ['jobPublication'],
     });
   }
 }

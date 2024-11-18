@@ -359,14 +359,32 @@ export class JobService {
       where: { user: { id: userId } },
     });
 
+    if (!company) {
+      throw new Error('Company not found for the current user.');
+    }
+
     const college = await this.collegeRepository.findOne({
       where: { company: { id: company.id } },
     });
 
-    return await this.jobPublicationRepository.find({
+    if (!college) {
+      throw new Error('College not found for the current company.');
+    }
+
+    const jobPublications = await this.jobPublicationRepository.find({
       where: { college: { id: college.id } },
-      relations: ['job', 'college', 'company'],
+      relations: [
+        'job',
+        'job.field',
+        'job.company',
+        'job.tags',
+        'job.tags.tag',
+        'college',
+        'college.company',
+      ],
     });
+
+    return jobPublications;
   }
 
   async getJobPublicationsByUserCollege(req: RequestWithUser) {
@@ -393,25 +411,18 @@ export class JobService {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
-    const collegesWithCompanies = await this.collegeRepository
-      .createQueryBuilder('college')
-      .leftJoin(
-        'college.jobPublications',
-        'jobPublication',
-        'jobPublication.job_id = :jobId',
-        {
-          jobId,
-        },
-      )
-      .innerJoin('college.company', 'company')
-      .where('jobPublication.id IS NULL')
-      .select(['college.id AS collegeId', 'company.name AS companyName'])
-      .getRawMany();
+    const colleges = await this.collegeRepository.find();
 
-    return collegesWithCompanies.map((item) => ({
-      collegeId: item.collegeId,
-      companyName: item.companyName,
-    }));
+    const publications = await this.jobPublicationRepository.find({
+      where: { job: { id: jobId } },
+      relations: ['college'],
+    });
+
+    const collegeIds = publications.map(
+      (publication) => publication.college.id,
+    );
+
+    return colleges.filter((college) => !collegeIds.includes(college.id));
   }
 
   async checkIfJobIsPublishedOnAllColleges(jobId: number) {
