@@ -17,6 +17,7 @@ import { Company } from '../entities/company.entity';
 import { Student } from 'src/entities/student.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
+import { FavoriteJobs } from 'src/entities/favorite-jobs.entity';
 import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Injectable()
@@ -36,6 +37,8 @@ export class JobService {
     private readonly fieldRepository: Repository<Field>,
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
+    @InjectRepository(FavoriteJobs)
+    private readonly favoriteJobsRepository: Repository<FavoriteJobs>,
   ) {}
 
   async createJob(createJobDto: CreateJobDto, req: RequestWithUser) {
@@ -301,6 +304,7 @@ export class JobService {
 
     const job = await this.jobRepository.findOne({
       where: { id: createJobPublicationDto.job_id },
+      relations: ['company'],
     });
 
     if (!job) {
@@ -387,19 +391,37 @@ export class JobService {
     return jobPublications;
   }
 
-  async getJobPublicationsByUserCollege(req: RequestWithUser) {
+  async getJobPublicationsByUser(req: RequestWithUser) {
+    //Gets publications user is allows to see as a student and add favorite status
     const student = await this.studentRepository.findOne({
       where: { user: { id: req.user.userId } },
+      relations: ['college'],
     });
 
     const college = await this.collegeRepository.findOne({
       where: { id: student.college.id },
     });
 
-    return await this.jobPublicationRepository.find({
-      where: { college: { id: college.id } },
+    const publications = await this.jobPublicationRepository.find({
+      where: { college: { id: college.id }, status: 'approved' },
       relations: ['job', 'college', 'company'],
     });
+
+    const favorites = await this.favoriteJobsRepository.find({
+      where: { student: { id: student.id } },
+      relations: ['jobPublication'],
+    });
+
+    const jobPublications = publications.map((publication) => {
+      const isFavorite = favorites.some(
+        (favorite) => favorite.jobPublication.id === publication.id,
+      );
+      return { ...publication, isFavorite };
+    });
+
+    console.log(jobPublications);
+
+    return jobPublications;
   }
 
   async getCollegesWhereJobIsNotPublished(jobId: number) {

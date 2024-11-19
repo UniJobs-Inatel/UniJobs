@@ -169,8 +169,8 @@ export class JobController {
 
   @Get('publications/student')
   @HttpCode(HttpStatus.OK)
-  async getJobPublicationsByUserCollege(@Req() req: RequestWithUser) {
-    return this.jobService.getJobPublicationsByUserCollege(req);
+  async getJobPublicationsByUser(@Req() req: RequestWithUser) {
+    return this.jobService.getJobPublicationsByUser(req);
   }
 
   @Put('publications/:id')
