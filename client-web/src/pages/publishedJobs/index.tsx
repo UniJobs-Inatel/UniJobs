@@ -21,7 +21,9 @@ const PublishedJobs = () => {
       <h3 className=" text-[20px] font-bold mb-6">
         Vagas publicadas
       </h3>
-        {publishedJobs && publishedJobs.map((publishedJob) => <JobCard  key={publishedJob.id} job={publishedJob.job} />)}
+      <div className="flex flex-col gap-4">
+        {publishedJobs && publishedJobs.map((publishedJob) => <JobCard status={publishedJob.status}  key={publishedJob.id} job={publishedJob.job} />)}
+      </div>
       </section>
     </div>
   );

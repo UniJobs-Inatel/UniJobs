@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 const Layout = lazy(() => import("@/components/ui/layout"));
 import { createBrowserRouter } from "react-router-dom";
 import PrivateRoute from "./privateRoute";
+import { Loader } from "lucide-react";
 
 const Login = lazy(() => import("@pages/login"));
 const JobList = lazy(() => import("@pages/jobList"));
@@ -19,7 +20,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div className="flex w-full h-screen justify-center items-center" > <Loader/> </div>}>
         <Layout />
       </Suspense>
     ),
@@ -27,16 +28,16 @@ export const router = createBrowserRouter([
       { path: "*", element: <NotFound /> },
       { path: "/", element: <Login /> },
       {
-        element: <PrivateRoute />, // Somente para rotas protegidas
+        element: <PrivateRoute />, 
         children: [
           { path: "/vagas-favoritadas", element: <FavoriteJobs /> },
+          { path: "/vagas", element: <JobList /> },
+          { path: "/perfil-estudante", element: <StudentProfile /> },
+          { path: "/vagas-publicadas", element: <PublishedJobs /> },
+          { path: "/cadastrar-vaga", element: <JobForm /> },
+          { path: "/perfil-empresa", element: <CompanyProfile /> },
         ],
       },
-      { path: "/vagas", element: <JobList /> },
-      { path: "/perfil-estudante", element: <StudentProfile /> },
-      { path: "/vagas-publicadas", element: <PublishedJobs /> },
-      { path: "/cadastrar-vaga", element: <JobForm /> },
-      { path: "/perfil-empresa", element: <CompanyProfile /> },
     ],
   },
 ]);

@@ -31,11 +31,11 @@ const IesSelectModal = ({
     });
     let modalTitle = "Vaga publicada com sucesso";
 
-    if (response.status != 201) {
-      modalTitle = "Erro ao publicar a vaga";
+    if (!response.success) {
+      modalTitle = response.error;
     }
 
-    openModal({ children: <FeedBackModal onOkayClick={getJobs}  title={modalTitle} variant={response.status != 201 ? 'error' : 'success'} /> });
+    openModal({ children: <FeedBackModal onOkayClick={getJobs}  title={modalTitle} variant={!response.success ? 'error' : 'success'} /> });
   };
 
   useEffect(() => {
@@ -51,10 +51,10 @@ const IesSelectModal = ({
         {(availablesIes ?? []).map((ies) => {
           return (
             <div className="flex justify-between items-center">
-              <p className="">{ies.id}</p>
+              <p className="">{ies.company.name}</p>
               <Button
                 onClick={() => selectIes(ies.id)}
-                className="w-[100px] h-8"
+                className="w-[82px] h-7 text-[13px] "
               >
                 Publicar
               </Button>

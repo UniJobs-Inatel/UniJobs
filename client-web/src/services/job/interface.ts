@@ -1,6 +1,8 @@
-import {  JobPublication } from '@/domain/job';
+import {  Job, JobPublication } from '@/domain/job';
+import { IGetCompanyResponse } from '../company/interface';
 export interface AvailablesIesResponse {
   id: number;
+  company:Partial<IGetCompanyResponse>
 }
 
 export interface PublishJobRequest {
@@ -13,3 +15,12 @@ export interface ValidateJobRequest {
   status:'approved' | 'reproved';
   jobPublicationId:number;
 }
+
+export interface GetJobsByCompanyResponse{
+  jobs:Job[]
+}
+export interface GetAllJobToValidateResponse{
+  jobPublications:JobPublication[]
+}
+
+export interface GetStudentsJobPublicationList extends GetAllJobToValidateResponse{}

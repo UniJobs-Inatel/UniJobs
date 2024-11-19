@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Job } from "@/domain/job";
+import { Job, JobPublication } from "@/domain/job";
 import {
   jobTypeMapping,
   modalityMapping,
@@ -22,7 +22,7 @@ import {
   modalities,
   fields,
 } from "@/utils/mappings";
-import { getAllJobs } from "@/services";
+import {  getStudentsJobPublicationList } from "@/services";
 import JobDetailsModal from "./jobDetailsModal";
 
 const JobCard: React.FC<{ job: Job }> = ({ job }) => {
@@ -125,16 +125,16 @@ const JobList: React.FC = () => {
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<JobPublication[]>([]);
 
   useEffect(() => {
     const fetchJobs = async () => {
-      try {
-        const jobData = await getAllJobs();
-        setJobs(jobData);
-      } catch (error) {
-        console.error("Erro ao carregar as vagas:", error);
-      }
+        const response = await getStudentsJobPublicationList();
+        if(!response.success){
+          return;
+        }
+        setJobs(response.jobPublications);
+      
     };
 
     fetchJobs();
@@ -172,18 +172,18 @@ const JobList: React.FC = () => {
   };
 
   const filteredJobs = jobs.filter(
-    (job) =>
-      job.job_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      job.location.toLowerCase().includes(locationTerm.toLowerCase()) &&
-      (filters.type === "todos" || job.type === filters.type) &&
-      (filters.salary === "" || job.salary?.toString() === filters.salary) &&
+    (publication) =>
+      publication.job.job_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      publication.job.location.toLowerCase().includes(locationTerm.toLowerCase()) &&
+      (filters.type === "todos" || publication.job.type === filters.type) &&
+      (filters.salary === "" || publication.job.salary?.toString() === filters.salary) &&
       (filters.requirements === "" ||
-        filters.requirements === job.requirements) &&
-      (filters.mode === "todos" || job.mode === filters.mode) &&
+        filters.requirements === publication.job.requirements) &&
+      (filters.mode === "todos" || publication.job.mode === filters.mode) &&
       (filters.weekly_hours === "" ||
-        job.weekly_hours?.toString() === filters.weekly_hours) &&
+        publication.job.weekly_hours?.toString() === filters.weekly_hours) &&
       (filters.field_id === "todos" ||
-        job.field?.id?.toString() === filters.field_id)
+        publication.job.field?.id?.toString() === filters.field_id)
   );
 
   const itemsPerPage = 5;
@@ -363,12 +363,12 @@ const JobList: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {paginatedJobs.map((job) => (
-          <JobCard key={job.id} job={job} />
+        {paginatedJobs.map((publication) => (
+          <JobCard key={publication.id} job={publication.job} />
         ))}
       </div>
 
-      <div className="flex justify-center mt-4 p-5">
+      <div className="flex justify-center mt-4 p-5 items-center ">
         <button
           className="bg-primary text-white px-4 py-2 rounded mx-2"
           onClick={() => handlePageChange(currentPage - 1)}
@@ -376,7 +376,7 @@ const JobList: React.FC = () => {
         >
           Anterior
         </button>
-        <span>
+        <span className="h-fit" >
           {currentPage} de {totalPages}
         </span>
         <button

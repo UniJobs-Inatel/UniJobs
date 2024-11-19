@@ -71,15 +71,9 @@ const JobCard = ({
     >
       <AccordionItem value="item-1" className="border-none">
         <AccordionTrigger className="m-0 px-2 py-4 border-primary">
-          <div className="flex flex-col gap-1">
-            {status && (
-              <StatusBadge
-              className="self-end"
-                label={jobStatusMapper[status].label}
-                variant={jobStatusMapper[status].variant}
-              />
-            )}
-            <div className="flex w-full justify-between">
+          
+            
+            <div className="flex w-full justify-between items-center ">
               <div className="text-left w-[60%]">
                 <h2 className=" lg:text-[20px] ">{job.job_name}</h2>
                 <div>
@@ -88,41 +82,51 @@ const JobCard = ({
                   </h4>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {!job.isPublishedOnAllColleges && (
-                  <div
+              <div className="flex flex-col items-center gap-2" >
+              {status && (
+              <StatusBadge
+              className="self-end"
+                label={jobStatusMapper[status].label}
+                variant={jobStatusMapper[status].variant}
+              />
+            )}
+                <div className="flex items-center gap-2">
+                  {((!job.isPublishedOnAllColleges && publishJob ) || status == JobStatus.pending ) && (
+                    <div
+                      onClick={() => {
+                        setAccordionValue("");
+                        validateJobFromCard && validateJobFromCard();
+                        publishJob &&
+                          publishJob({
+                            jobId: job.id ?? 0,
+                            companyId: job.company.id ?? 0,
+                          });
+                      }}
+                      className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md"
+                    >
+                      {validateJobFromCard ? 'Validar':'Publicar'}
+                    </div>
+                  )}
+                  <TrashIcon
                     onClick={() => {
                       setAccordionValue("");
-                      validateJobFromCard && validateJobFromCard();
-                      publishJob &&
-                        publishJob({
-                          jobId: job.id ?? 0,
-                          companyId: job.company.id ?? 0,
-                        });
+                      removeJob(job.id ?? 0);
                     }}
-                    className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md"
-                  >
-                    Publicar
-                  </div>
-                )}
-                <TrashIcon
-                  onClick={() => {
-                    setAccordionValue("");
-                    removeJob(job.id ?? 0);
-                  }}
-                  className="w-5 fill-red-500"
-                />
-                <ChevronDownIcon
-                  className={cn(
-                    "h-7 w-7 shrink-0 transition-transform duration-200  fill-primary",
-                    accordionValue == "item-1" && "rotate-180"
-                  )}
-                />
+                    className="w-5 fill-red-500"
+                  />
+                  <ChevronDownIcon
+                    className={cn(
+                      "h-7 w-7 shrink-0 transition-transform duration-200  fill-primary",
+                      accordionValue == "item-1" && "rotate-180"
+                    )}
+                  />
+                </div>
               </div>
+             
             </div>
-          </div>
+          
         </AccordionTrigger>
-        <AccordionContent className="flex flex-col px-2 justify-center gap-4 md:!pb-0 ">
+        <AccordionContent className="flex flex-col px-2 justify-center gap-4">
           <div className="flex justify-start gap-2 ">
             <p className="bg-primary-50 border border-primary  px-2 py-0.5 pb-[6px] rounded-md">
               {job.mode}
@@ -134,7 +138,7 @@ const JobCard = ({
               {job.weekly_hours}hrs
             </p>
           </div>
-          <p className="text-center">{job.description}</p>
+          <p>{job.description}</p>
           <div>
             <h6 className="font-bold mb-0.5">Requisitos</h6>
             <p>{job.requirements}</p>

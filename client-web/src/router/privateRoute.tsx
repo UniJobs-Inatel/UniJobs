@@ -3,8 +3,8 @@ import useAuthStore from "@/stores/authStore";
 import { UserStatus, UserType } from "@/domain/user";
 
 
-const allowedRoutes: { [key in UserType]: string[] } = {
-  [UserType.COLLEGE]: ["/perfil-empresa", "/vagas-publicadas", "/cadastrar-vaga",],
+export const allowedRoutes: { [key in UserType]: string[] } = {
+  [UserType.COLLEGE]: ["/perfil-empresa", "/vagas-publicadas", "/cadastrar-vaga"],
   [UserType.COMPANY]: ["/perfil-empresa", "/vagas-publicadas", "/cadastrar-vaga",],
   [UserType.STUDENT]: ["/perfil-estudante",  "/vagas", "/vagas-favoritadas"],
 };
