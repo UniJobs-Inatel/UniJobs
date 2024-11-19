@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { Job } from '../entities/job.entity';
 import { JobPublication } from '../entities/job-publication.entity';
 import { JobTag } from '../entities/job-tag.entity';
@@ -411,8 +411,6 @@ export class JobService {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
-    const colleges = await this.collegeRepository.find();
-
     const publications = await this.jobPublicationRepository.find({
       where: { job: { id: jobId } },
       relations: ['college'],
@@ -422,7 +420,10 @@ export class JobService {
       (publication) => publication.college.id,
     );
 
-    return colleges.filter((college) => !collegeIds.includes(college.id));
+    return await this.collegeRepository.find({
+      where: { id: Not(In(collegeIds)) },
+      relations: ['company'],
+    });
   }
 
   async checkIfJobIsPublishedOnAllColleges(jobId: number) {
