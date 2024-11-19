@@ -18,18 +18,18 @@
     ```json
     {
       "student": {
-        "firstName": "John",
-        "lastName": "Doe",
-        "birthDate": "2000-01-01",
-        "about": "Software engineering student."
+        "first_name": "John",
+        "last_name": "Doe",
+        "cpf": "12345678900"
       },
       "experiences": [
         {
-          "title": "Intern",
-          "company": "Tech Corp",
+          "type": "professional",
           "description": "Developed mobile applications.",
-          "startDate": "2023-01-01",
-          "endDate": "2023-06-01"
+          "company_name": "Tech Corp",
+          "position": "Intern",
+          "start_date": "2023-01-01",
+          "end_date": "2023-06-01"
         }
       ],
       "proficiencies": [
@@ -50,9 +50,9 @@
       ```json
       {
         "id": 1,
-        "firstName": "John",
-        "lastName": "Doe",
-        "about": "Software engineering student.",
+        "first_name": "John",
+        "last_name": "Doe",
+        "cpf": "12345678900",
         "user": {
           "id": 1,
           "email": "john@example.com"
@@ -64,8 +64,9 @@
         "experiences": [
           {
             "id": 1,
-            "title": "Intern",
-            "company": "Tech Corp"
+            "type": "professional",
+            "position": "Intern",
+            "company_name": "Tech Corp"
           }
         ],
         "proficiencies": [
@@ -81,6 +82,8 @@
     - **404 Not Found**: "Usuário não encontrado."
     - **401 Unauthorized**: "Apenas usuários do tipo estudante podem criar perfis de estudante."
 
+---
+
 ### 2. Update Student Profile
 
 - **URL**: `/api/student/profile`
@@ -93,13 +96,19 @@
     ```json
     {
       "student": {
-        "about": "Updated description."
+        "first_name": "John",
+        "last_name": "Smith",
+        "cpf": "98765432100"
       },
       "experiences": [
         {
           "id": 1,
-          "title": "Senior Intern",
-          "company": "Tech Corp"
+          "type": "professional",
+          "description": "Lead mobile app development.",
+          "company_name": "Tech Corp",
+          "position": "Senior Developer",
+          "start_date": "2023-01-01",
+          "end_date": "2023-12-31"
         }
       ],
       "proficiencies": [
@@ -117,7 +126,9 @@
       ```json
       {
         "id": 1,
-        "about": "Updated description.",
+        "first_name": "John",
+        "last_name": "Smith",
+        "cpf": "98765432100",
         ...
       }
       ```
@@ -125,6 +136,8 @@
   - **Errors**:
     - **404 Not Found**: "Perfil de estudante não encontrado."
     - **401 Unauthorized**: "Usuário não autorizado a atualizar este perfil."
+
+---
 
 ### 3. Get Student Profile
 
@@ -140,15 +153,17 @@
       ```json
       {
         "id": 1,
-        "firstName": "John",
-        "lastName": "Doe",
-        "about": "Updated description.",
+        "first_name": "John",
+        "last_name": "Smith",
+        "cpf": "98765432100",
         ...
       }
       ```
 
   - **Errors**:
     - **404 Not Found**: "Perfil de estudante não encontrado."
+
+---
 
 ### 4. Create Experience
 
@@ -161,10 +176,12 @@
 
     ```json
     {
-      "title": "Junior Developer",
-      "company": "Tech Corp",
-      "description": "Developed features for mobile apps.",
-      "startDate": "2024-01-01"
+      "type": "academic",
+      "description": "Research project on AI.",
+      "company_name": "University Lab",
+      "position": "Researcher",
+      "start_date": "2022-01-01",
+      "end_date": "2023-01-01"
     }
     ```
 
@@ -175,20 +192,23 @@
       ```json
       {
         "id": 2,
-        "title": "Junior Developer",
-        "company": "Tech Corp",
-        "description": "Developed features for mobile apps."
+        "type": "academic",
+        "description": "Research project on AI.",
+        "company_name": "University Lab",
+        "position": "Researcher"
       }
       ```
 
   - **Errors**:
     - **401 Unauthorized**: If the JWT token is invalid or missing.
 
+---
+
 ### 5. Get All Experiences
 
 - **URL**: `/api/student/experience`
 - **Method**: `GET`
-- **Description**: Retrieves all experience entries.
+- **Description**: Retrieves all experience entries for the authenticated user.
 - **Request Headers**:
   - `Authorization`: Bearer token for authentication.
 - **Response**:
@@ -199,37 +219,18 @@
       [
         {
           "id": 1,
-          "title": "Intern",
-          "company": "Tech Corp"
+          "type": "professional",
+          "description": "Developed mobile applications.",
+          "company_name": "Tech Corp",
+          "position": "Intern"
         },
         ...
       ]
       ```
 
-### 6. Get Experience by ID
+---
 
-- **URL**: `/api/student/experience/:id`
-- **Method**: `GET`
-- **Description**: Retrieves a specific experience entry by its ID.
-- **Path Parameters**:
-  - `id` (number) - The ID of the experience.
-- **Response**:
-  - **Status**: `200 OK`
-  - **Body**:
-
-      ```json
-      {
-        "id": 1,
-        "title": "Intern",
-        "company": "Tech Corp",
-        ...
-      }
-      ```
-
-  - **Errors**:
-    - **404 Not Found**: "Experiência não encontrada."
-
-### 7. Update Experience
+### 6. Update Experience
 
 - **URL**: `/api/student/experience/:id`
 - **Method**: `PUT`
@@ -240,9 +241,12 @@
 
     ```json
     {
-      "title": "Senior Developer",
-      "company": "Tech Corp",
-      "description": "Lead mobile app development."
+      "type": "professional",
+      "description": "Managed a development team.",
+      "company_name": "Tech Corp",
+      "position": "Team Lead",
+      "start_date": "2023-01-01",
+      "end_date": null
     }
     ```
 
@@ -253,7 +257,8 @@
       ```json
       {
         "id": 1,
-        "title": "Senior Developer",
+        "type": "professional",
+        "description": "Managed a development team.",
         ...
       }
       ```
@@ -261,7 +266,9 @@
   - **Errors**:
     - **404 Not Found**: "Experiência não encontrada."
 
-### 8. Delete Experience
+---
+
+### 7. Delete Experience
 
 - **URL**: `/api/student/experience/:id`
 - **Method**: `DELETE`
@@ -273,13 +280,15 @@
   - **Errors**:
     - **404 Not Found**: "Experiência não encontrada."
 
-### 9. Favorite a Job
+---
 
-- **URL**: `/api/student/favorite-job/:jobId`
+### 8. Favorite a Job
+
+- **URL**: `/api/student/favorite-job/:jobPublicationId`
 - **Method**: `POST`
 - **Description**: Adds a job publication to the student's list of favorites.
 - **Path Parameters**:
-  - `jobId` (number) - The ID of the job publication.
+  - `jobPublicationId` (number) - The ID of the job publication.
 - **Request Headers**:
   - `Authorization`: Bearer token for authentication.
 - **Response**:
@@ -298,15 +307,16 @@
 
   - **Errors**:
     - **404 Not Found**: "Vaga não encontrada."
-    - **401 Unauthorized**: "Usuário não autorizado a favoritar esta vaga."
 
-### 10. Unfavorite a Job
+---
 
-- **URL**: `/api/student/favorite-job/:jobId`
+### 9. Unfavorite a Job
+
+- **URL**: `/api/student/favorite-job/:jobPublicationId`
 - **Method**: `DELETE`
 - **Description**: Removes a job publication from the student's list of favorites.
 - **Path Parameters**:
-  - `jobId` (number) - The ID of the job publication.
+  - `jobPublicationId` (number) - The ID of the job publication.
 - **Request Headers**:
   - `Authorization`: Bearer token for authentication.
 - **Response**:
@@ -314,7 +324,9 @@
   - **Errors**:
     - **404 Not Found**: "Esta vaga não está nos favoritos."
 
-### 11. Get Favorite Jobs
+---
+
+### 10. Get Favorite Jobs
 
 - **URL**: `/api/student/favorite-jobs`
 - **Method**: `GET`
@@ -341,8 +353,9 @@
   - **Errors**:
     - **401 Unauthorized**: "Usuário não autorizado a acessar esta lista de favoritos."
 
+---
+
 ## Notes
 
 - All endpoints require JWT authentication through the `JwtAuthGuard`.
-- The `Authorization` header must be provided with a valid JWT token for every request.
-- The authenticated user must have appropriate permissions to create, update, or delete resources.
+- For profile creation, experiences, and proficiencies are optional fields but highly recommended for a complete profile.
