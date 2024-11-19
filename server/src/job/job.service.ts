@@ -304,6 +304,7 @@ export class JobService {
 
     const job = await this.jobRepository.findOne({
       where: { id: createJobPublicationDto.job_id },
+      relations: ['company'],
     });
 
     if (!job) {
