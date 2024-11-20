@@ -43,18 +43,19 @@ const IesSelectModal = ({
   }, []);
 
   return (
-    <div>
+    <div data-cy='select-ies-modal' >
       <h2 className="mb-3 text-[20px] font-semibold">
         Selecione o IES para publicar sua vaga
       </h2>
       <div className="flex flex-col gap-3 justify-center">
-        {(availablesIes ?? []).map((ies) => {
+        {(availablesIes ?? []).map((ies,index) => {
           return (
             <div className="flex justify-between items-center">
               <p className="">{ies.company.name}</p>
               <Button
                 onClick={() => selectIes(ies.id)}
                 className="w-[82px] h-7 text-[13px] "
+                data-cy={`publish-ies-${index}`}
               >
                 Publicar
               </Button>
