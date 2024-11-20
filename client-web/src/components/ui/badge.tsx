@@ -9,7 +9,8 @@ const statusBadgeVariants = cva(
       variant: {
         approved: 'text-[#00C476] ',
         pending: 'text-[#FFCC00]',
-        removed: 'text-[#FFCC00]',
+        removed: 'text-[#ef4444]',
+        reproved: 'text-[#ef4444]',
       },
       size: {
         default: ' px-2 py-0.5 ',
@@ -25,7 +26,8 @@ const statusBadgeVariants = cva(
 const circleVariant = {
     approved:'bg-[#26D367]',
     pending:'bg-[#FFCC00]',
-    removed:'bg-[#FFCC00]',
+    removed:'bg-[#ef4444]',
+    reproved:'bg-[#ef4444]',
 }
 
 interface StatusBadgeProps

@@ -1,3 +1,6 @@
+import { IGetCompanyResponse } from "@/services/company/interface";
+import { JobStatus } from "@/utils/mappers";
+
 export interface Job {
   id?: number;
   job_name: string;
@@ -10,9 +13,17 @@ export interface Job {
   salary: number;
   requirements: string;
   field_id?: number;
+  isPublishedOnAllColleges:boolean;
+  company:Partial<IGetCompanyResponse>
   field?: {
     id: number;
     field: string;
   }
   //company_id: number;
+}
+
+export interface JobPublication {
+  id:number;
+  status:JobStatus;
+  job:Job;
 }

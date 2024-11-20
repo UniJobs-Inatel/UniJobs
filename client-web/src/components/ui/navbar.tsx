@@ -1,17 +1,21 @@
 import * as React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/cn";
+import { allowedRoutes } from "@/router/privateRoute";
+import useAuthStore from "@/stores/authStore";
 
 const NavBar = () => {
   const location = useLocation();
   const navigate = useNavigate(); // Para navegar após o logout
   const [isOpen, setIsOpen] = React.useState(false);
+  const { user, clearTokens } = useAuthStore()
 
   const navLinks = [
     { path: "/vagas", label: "Lista de Vagas" },
     { path: "/perfil-estudante", label: "Perfil do Estudante" },
     { path: "/perfil-empresa", label: "Perfil da Empresa" },
     { path: "/cadastrar-vaga", label: "Cadastrar Vaga" },
+    { path: "/vagas-publicadas", label: "Vagas Publicadas" },
   ];
 
   const toggleMenu = () => {
@@ -20,11 +24,12 @@ const NavBar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("session");
+    clearTokens()
     navigate("/");
   };
 
   return (
-    <nav className="bg-primary p-4 shadow-lg w-full relative">
+    <nav className="bg-primary p-4 shadow-lg fixed top-0 left-0 w-screen z-50">
       <div className="flex items-center justify-between mx-auto">
         <button
           className="md:hidden text-white focus:outline-none"
@@ -32,8 +37,9 @@ const NavBar = () => {
         >
           {isOpen ? 'Fechar' : 'Menu'}
         </button>
+        
         <ul className={`flex-col md:flex-row md:space-x-6 items-center justify-center ${isOpen ? 'flex mr-10' : 'hidden md:flex'}`}>
-          {navLinks.map((link) => (
+          {user && navLinks.filter((link) => allowedRoutes[user.type]?.includes(link.path) ) .map((link) => (
             <li key={link.path} className="my-2 md:my-0">
               <Link
                 to={link.path}

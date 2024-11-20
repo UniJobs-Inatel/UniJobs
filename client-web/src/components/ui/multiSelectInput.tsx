@@ -67,7 +67,7 @@ const MultiSelectInput = ({
 
   return (
     <div className="w-full" ref={inputRef}>
-      <Label className="font-medium text-[14px] text-primary">{label}</Label>
+      <Label className="font-medium text-[14px] ">{label}</Label>
       <div className="relative w-full">
         <div
           className={cn(

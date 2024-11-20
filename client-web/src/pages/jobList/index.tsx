@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { FaHeart, FaRegHeart, FaFilter, FaSearch } from "react-icons/fa";
 import useAuthStore from "@/stores/authStore";
-import { useNavigate } from 'react-router-dom';
-import { UserType } from '@/domain/user';
+import { useNavigate } from "react-router-dom";
+import { UserType } from "@/domain/user";
 import {
   Select,
   SelectTrigger,
@@ -13,10 +13,17 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Job } from '@/domain/job'
-import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
-import { getAllJobs } from '@/services';
-import JobDetailsModal from './jobDetailsModal';
+import { Job, JobPublication } from "@/domain/job";
+import {
+  jobTypeMapping,
+  modalityMapping,
+  fieldMaping,
+  jobTypes,
+  modalities,
+  fields,
+} from "@/utils/mappings";
+import {  getStudentsJobPublicationList } from "@/services";
+import JobDetailsModal from "./jobDetailsModal";
 
 const JobCard: React.FC<{ job: Job }> = ({ job }) => {
   const [isFavorited, setIsFavorited] = useState(false);
@@ -25,8 +32,13 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
 
   const toggleFavorite = () => setIsFavorited(!isFavorited);
 
-  const getTranslatedValue = (value: string, mapping: Record<string, string>): string => {
-    const translatedKey = Object.keys(mapping).find(key => mapping[key] === value);
+  const getTranslatedValue = (
+    value: string,
+    mapping: Record<string, string>
+  ): string => {
+    const translatedKey = Object.keys(mapping).find(
+      (key) => mapping[key] === value
+    );
     return translatedKey || value;
   };
 
@@ -43,32 +55,51 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
   return (
     <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full">
       <button
-        className={`absolute top-2 right-2 ${isFavorited ? 'text-red-500' : 'text-gray-400'}`}
+        className={`absolute top-2 right-2 ${isFavorited ? "text-red-500" : "text-gray-400"}`}
         onClick={toggleFavorite}
       >
         {isFavorited ? <FaHeart /> : <FaRegHeart />}
       </button>
 
       <div className="flex-grow mb-4 md:mb-0">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-900">{job.job_name}</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+          {job.job_name}
+        </h2>
         <p className="text-xs md:text-sm text-gray-700">{job.location}</p>
-        <p className="text-xs md:text-sm text-gray-700">{getTranslatedValue(job.type, jobTypeMapping)} • {getTranslatedValue(job.mode, modalityMapping)} • R$ {job.salary.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        <p className="text-xs md:text-sm text-gray-700">
+          {getTranslatedValue(job.type, jobTypeMapping)} •{" "}
+          {getTranslatedValue(job.mode, modalityMapping)} • R${" "}
+          {job.salary.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </p>
         <div className="flex">
-          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">Benefícios:</p>
+          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">
+            Benefícios:
+          </p>
           <p className="text-xs md:text-sm text-gray-500">{job.benefits}</p>
         </div>
         <div className="flex">
-          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">Área de atuação:</p>
-          <p className="text-xs md:text-sm text-gray-500">{getTranslatedValue(job.field_id?.toString() || '', fieldMaping)}</p>
+          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">
+            Área de atuação:
+          </p>
+          <p className="text-xs md:text-sm text-gray-500">
+            {getTranslatedValue(job.field_id?.toString() || "", fieldMaping)}
+          </p>
         </div>
         <div className="flex mb-3">
-          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">Requisitos:</p>
+          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">
+            Requisitos:
+          </p>
           <p className="text-xs md:text-sm text-gray-500">{job.requirements}</p>
         </div>
       </div>
 
-      <Button className="bg-primary text-white hover:bg-primary text-xs md:text-sm rounded right-0"
-        onClick={() => handleJobClick(job)}>
+      <Button
+        className="bg-primary text-white hover:bg-primary text-xs md:text-sm rounded right-0"
+        onClick={() => handleJobClick(job)}
+      >
         Ver Vaga
       </Button>
 
@@ -76,55 +107,52 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
         <JobDetailsModal job={selectedJob} onClose={handleCloseModal} />
       )}
     </div>
-
   );
 };
 
 const JobList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [locationTerm, setLocationTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationTerm, setLocationTerm] = useState("");
   const [filters, setFilters] = useState({
-    type: 'todos',
-    salary: '',
-    requirements: '',
-    mode: 'todos',
-    weekly_hours: '',
-    field_id: 'todos',
+    type: "todos",
+    salary: "",
+    requirements: "",
+    mode: "todos",
+    weekly_hours: "",
+    field_id: "todos",
   });
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<JobPublication[]>([]);
 
   useEffect(() => {
     const fetchJobs = async () => {
-      try {
-        const jobData = await getAllJobs();
-        setJobs(jobData);
-      } catch (error) {
-        console.error("Erro ao carregar as vagas:", error);
-      } finally {
-      }
+        const response = await getStudentsJobPublicationList();
+        if(!response.success){
+          return;
+        }
+        setJobs(response.jobPublications);
+      
     };
 
     fetchJobs();
   }, []);
 
   useEffect(() => {
-    if (user && user.status !== 'complete') {
-      user.type === UserType.STUDENT && navigate('/perfil-estudante');
-      user.type === UserType.COMPANY && navigate('/perfil-empresa');
+    if (user && user.status !== "complete") {
+      user.type === UserType.STUDENT && navigate("/perfil-estudante");
+      user.type === UserType.COMPANY && navigate("/perfil-empresa");
     }
   }, [user, navigate]);
-
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
   const handleFilterChange = (name: string, value: string) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,31 +161,38 @@ const JobList: React.FC = () => {
 
   const handleClearFilters = () => {
     setFilters({
-      type: 'todos',
-      salary: '',
-      requirements: '',
-      mode: 'todos',
-      weekly_hours: '',
-      field_id: 'todos',
+      type: "todos",
+      salary: "",
+      requirements: "",
+      mode: "todos",
+      weekly_hours: "",
+      field_id: "todos",
     });
-    setLocationTerm('');
+    setLocationTerm("");
   };
 
-  const filteredJobs = jobs.filter(job =>
-    job.job_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    job.location.toLowerCase().includes(locationTerm.toLowerCase()) &&
-    (filters.type === 'todos' || job.type === filters.type) &&
-    (filters.salary === '' || job.salary?.toString() === filters.salary) &&
-    (filters.requirements === '' || filters.requirements === job.requirements) &&
-    (filters.mode === 'todos' || job.mode === filters.mode) &&
-    (filters.weekly_hours === '' || job.weekly_hours?.toString() === filters.weekly_hours) &&
-    (filters.field_id === 'todos' || job.field?.id?.toString() === filters.field_id)
+  const filteredJobs = jobs.filter(
+    (publication) =>
+      publication.job.job_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      publication.job.location.toLowerCase().includes(locationTerm.toLowerCase()) &&
+      (filters.type === "todos" || publication.job.type === filters.type) &&
+      (filters.salary === "" || publication.job.salary?.toString() === filters.salary) &&
+      (filters.requirements === "" ||
+        filters.requirements === publication.job.requirements) &&
+      (filters.mode === "todos" || publication.job.mode === filters.mode) &&
+      (filters.weekly_hours === "" ||
+        publication.job.weekly_hours?.toString() === filters.weekly_hours) &&
+      (filters.field_id === "todos" ||
+        publication.job.field?.id?.toString() === filters.field_id)
   );
 
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedJobs = filteredJobs.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedJobs = filteredJobs.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) setCurrentPage(page);
@@ -175,13 +210,13 @@ const JobList: React.FC = () => {
             className="border p-2 w-full rounded"
           />
           <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center">
-            <FaSearch />
+            <FaSearch className="fill-white" />
           </button>
           <button
             className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
             onClick={() => setIsFilterOpen(true)}
           >
-            <FaFilter />
+            <FaFilter className="fill-white" />
           </button>
         </div>
 
@@ -202,19 +237,23 @@ const JobList: React.FC = () => {
                   type="text"
                   placeholder="Localização..."
                   className="border p-2 w-full rounded"
-                  label='Localização:'
+                  label="Localização:"
                   value={locationTerm}
                   onChange={handleLocationChange}
                 />
               </div>
 
-              <Label className="text-primary">Tipo de vaga:
-                <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
+              <Label className="text-primary">
+                Tipo de vaga:
+                <Select
+                  value={filters.type}
+                  onValueChange={(value) => handleFilterChange("type", value)}
+                >
                   <SelectTrigger className="border p-2 w-full rounded">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value="todos">
                       Todos
                     </SelectItem>
                     {jobTypes.map((option) => (
@@ -235,19 +274,25 @@ const JobList: React.FC = () => {
                       name="salary"
                       value={filters.salary}
                       placeholder="ex: 2000"
-                      onChange={(e) => handleFilterChange("salary", e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("salary", e.target.value)
+                      }
                     />
                   </div>
                 </div>
               </div>
 
-              <Label className="text-primary">Modalidade:
-                <Select value={filters.mode} onValueChange={(value) => handleFilterChange("mode", value)}>
+              <Label className="text-primary">
+                Modalidade:
+                <Select
+                  value={filters.mode}
+                  onValueChange={(value) => handleFilterChange("mode", value)}
+                >
                   <SelectTrigger className="border p-2 w-full rounded">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value="todos">
                       Todos
                     </SelectItem>
                     {modalities.map((option) => (
@@ -266,17 +311,25 @@ const JobList: React.FC = () => {
                   label="Horas Semanais:"
                   value={filters.weekly_hours}
                   placeholder="Ex: 40"
-                  onChange={(e) => handleFilterChange("weekly_hours", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("weekly_hours", e.target.value)
+                  }
                 />
               </div>
 
-              <Label className="text-primary">Área de atuação:
-                <Select value={filters.field_id} onValueChange={(value) => handleFilterChange("field_id", value)}>
+              <Label className="text-primary">
+                Área de atuação:
+                <Select
+                  value={filters.field_id}
+                  onValueChange={(value) =>
+                    handleFilterChange("field_id", value)
+                  }
+                >
                   <SelectTrigger className="border p-2 w-full rounded">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem key="todos" value='todos'>
+                    <SelectItem key="todos" value="todos">
                       Todos
                     </SelectItem>
                     {fields.map((option) => (
@@ -289,12 +342,18 @@ const JobList: React.FC = () => {
               </Label>
 
               <div className="flex justify-between mt-3">
-                <Button className="bg-red-500 text-white hover:bg-red-600 mr-2" onClick={handleClearFilters}>
+                <Button
+                  className="bg-red-500 text-white hover:bg-red-600 mr-2"
+                  onClick={handleClearFilters}
+                >
                   Limpar Filtros
                 </Button>
-                <Button className="bg-primary text-white hover:bg-primary ml-2" onClick={() => {
-                  setIsFilterOpen(false)
-                }}>
+                <Button
+                  className="bg-primary text-white hover:bg-primary ml-2"
+                  onClick={() => {
+                    setIsFilterOpen(false);
+                  }}
+                >
                   Aplicar Filtros
                 </Button>
               </div>
@@ -304,12 +363,12 @@ const JobList: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {paginatedJobs.map(job => (
-          <JobCard key={job.id} job={job} />
+        {paginatedJobs.map((publication) => (
+          <JobCard key={publication.id} job={publication.job} />
         ))}
       </div>
 
-      <div className="flex justify-center mt-4 p-5">
+      <div className="flex justify-center mt-4 p-5 items-center ">
         <button
           className="bg-primary text-white px-4 py-2 rounded mx-2"
           onClick={() => handlePageChange(currentPage - 1)}
@@ -317,7 +376,9 @@ const JobList: React.FC = () => {
         >
           Anterior
         </button>
-        <span>{currentPage} de {totalPages}</span>
+        <span className="h-fit" >
+          {currentPage} de {totalPages}
+        </span>
         <button
           className="bg-primary text-white px-4 py-2 rounded mx-2"
           onClick={() => handlePageChange(currentPage + 1)}

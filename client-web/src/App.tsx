@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 export function App() {
   return (
-    <main className="mx-auto  px-4 pt-3">
+    <main className="mx-auto ">
       <Suspense fallback={<div>Loading...</div>}>
         <RouterProvider router={router} />
       </Suspense>
