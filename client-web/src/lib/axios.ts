@@ -15,6 +15,7 @@ instance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
+
       try {
         const failedRequest = error.config;
 
@@ -24,28 +25,24 @@ instance.interceptors.response.use(
             refreshToken: useAuthStore.getState().refreshToken,
           }
         );
-
-        if (response.status !== 200) {
-          window.location.href = '/';
-          return Promise.reject(error);
-        }
-
         const { accessToken, refreshToken } = response.data;
 
         useAuthStore.getState().saveAuthResponse(accessToken, refreshToken);
 
-        instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+        instance.defaults.headers.common["Authorization"] =
+          `Bearer ${accessToken}`;
 
         if (failedRequest) {
           if (failedRequest.headers) {
             failedRequest.headers["Authorization"] = `Bearer ${accessToken}`;
           }
-          return instance(failedRequest); 
+          return instance(failedRequest);
         }
       } catch (refreshError) {
         console.error("Erro ao atualizar o token:", refreshError);
-        if(useAuthStore.getState().accessToken){
-          window.location.href = '/';
+        if (useAuthStore.getState().accessToken) {
+          window.location.href = "/";
+          localStorage.removeItem("session");
         }
         return Promise.reject(refreshError);
       }
@@ -54,7 +51,6 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 export interface ErrorResponse {
   message: string;

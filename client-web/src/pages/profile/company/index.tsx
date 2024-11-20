@@ -135,7 +135,21 @@ const CompanyProfile = () => {
 
     const response = await createCompanyProfile(creationData);
 
-    if (response?.status == 201) console.log("Deu certo");
+    if (!response.success) {
+      openModal({
+        children: <FeedBackModal title={response.error} variant={"error"} />,
+      });
+      return;
+    }
+    openModal({
+      children: (
+        <FeedBackModal
+          variant={"success"}
+          title={"Empresa salva com sucesso"}
+        />
+      ),
+    });
+
   };
 
   const publishJob = ({ jobId }: { jobId: number }) => {
@@ -273,9 +287,7 @@ const CompanyProfile = () => {
                       openModal({
                         children: (
                           <ConfirmationModal
-                            onAgreeClick={() =>
-                              removeJob(job.id)
-                            }
+                            onAgreeClick={() => removeJob(job.id)}
                             title={"Deseja remover essa vaga?"}
                           />
                         ),

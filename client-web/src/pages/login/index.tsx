@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import useAuthStore from "@/stores/authStore";
-import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Importe o useNavigate
 import { Label } from "@/components/ui/label";
 import { useModalStore } from "@/stores/modalStore";
 import { FeedBackModal } from "@/components/ui/feedbackModal.";
@@ -42,7 +40,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
   const { openModal } = useModalStore();
   const {
     register,
@@ -62,51 +59,50 @@ const Login: React.FC = () => {
 
   const { saveAuthResponse } = useAuthStore();
 
-  const handleLogin = async ({email, password}: LoginFormData) => {
-    try {
-      const {accessToken, refreshToken} = await loginUser({email, password})
-
-      saveAuthResponse(accessToken, refreshToken);
-      navigate("/vagas");
-    } catch (error) {
-      console.error("Erro no login:", error);
+  const handleLogin = async ({ email, password }: LoginFormData) => {
+    const response = await loginUser({ email, password });
+    if (!response.success) {
       openModal({
-        children: (
-          <FeedBackModal
-            title={
-              axios.isAxiosError(error)
-                ? error.response?.data.message
-                : "Erro ao abrir fazer login"
-            }
-            variant={"error"}
-          />
-        ),
+        children: <FeedBackModal title={response.error} variant={"error"} />,
       });
+      return;
     }
+
+    saveAuthResponse(response.accessToken, response.refreshToken);
   };
 
   const handleRegister = async (data: RegisterFormData) => {
-    try {
-      await registerUser({
+    
+      const response = await registerUser({
         email: data.email,
         password: data.password,
         role: data.role,
       });
-    } catch (error) {
+
+      if(!response.success){
+        openModal({
+          children: (
+            <FeedBackModal
+              title={response.error
+              }
+              variant={"error"}
+            />
+          ),
+          contentClassName: "w-[86vw]",
+        });
+        return;
+      }
       openModal({
         children: (
           <FeedBackModal
-            title={
-              axios.isAxiosError(error)
-                ? error.response?.data.message
-                : "Erro ao abrir fazer registro"
-            }
-            variant={"error"}
+            title='Cadastro realizado com sucesso'
+            variant={"success"}
           />
         ),
-        contentClassName:'w-[86vw]'
+        contentClassName: "w-[86vw]",
       });
-    }
+      
+    
   };
 
   return (

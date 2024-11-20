@@ -4,6 +4,10 @@ export interface RegisterRequest {
     role: "student" | "company";
     password: string;
 }
+export interface RegisterResponse {
+    message: string;
+    verificationLink: string;
+}
 
 export interface LoginRequest {
     email: string;

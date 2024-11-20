@@ -8,7 +8,7 @@ const NavBar = () => {
   const location = useLocation();
   const navigate = useNavigate(); // Para navegar após o logout
   const [isOpen, setIsOpen] = React.useState(false);
-  const { user } = useAuthStore()
+  const { user, clearTokens } = useAuthStore()
 
   const navLinks = [
     { path: "/vagas", label: "Lista de Vagas" },
@@ -24,6 +24,7 @@ const NavBar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("session");
+    clearTokens()
     navigate("/");
   };
 
