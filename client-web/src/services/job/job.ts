@@ -44,9 +44,33 @@ export const getJobPublications = async (filters?: JobFilters) => {
       filters.maxSalary && params.append('maxSalary', filters.maxSalary)
       filters.type && filters.type !== 'todos' && params.append('type', filters.type)
       filters.weekly_hours && params.append('weeklyHours', filters.weekly_hours)
+      filters.location && params.append('location', filters.location)
     }
 
     const response = await instance.get(`/job/publications/search`, { params });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar vagas:", error);
+    throw error;
+  }
+};
+
+export const getJobPublicationsStudent = async (filters?: JobFilters) => {
+  try {
+    const params = new URLSearchParams();
+
+    if (filters) {
+      filters.field_id && filters.field_id !== 'todos' && params.append('fieldId', filters.field_id)
+      filters.mode && filters.mode !== 'todos' && params.append('mode', filters.mode)
+      filters.requirements && params.append('requirements', filters.requirements)
+      filters.minSalary && params.append('minSalary', filters.minSalary)
+      filters.maxSalary && params.append('maxSalary', filters.maxSalary)
+      filters.type && filters.type !== 'todos' && params.append('type', filters.type)
+      filters.weekly_hours && params.append('weeklyHours', filters.weekly_hours)
+      filters.location && params.append('location', filters.location)
+    }
+
+    const response = await instance.get(`/job/publications/student/search`, { params });
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar vagas:", error);

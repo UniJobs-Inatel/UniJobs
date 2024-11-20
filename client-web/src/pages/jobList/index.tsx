@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Job, JobFilters, JobPublication } from '@/domain/job'
 import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
-import { favoriteJob, unfavoriteJob, getFavoriteJobs, getJobPublications } from '@/services';
+import { favoriteJob, unfavoriteJob, getFavoriteJobs, getJobPublicationsStudent } from '@/services';
 import JobDetailsModal from './jobDetailsModal';
 
 
@@ -73,7 +73,7 @@ const JobCard: React.FC<{ jobPublication: JobPublication }> = ({ jobPublication:
         </div>
         <div className="flex">
           <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">Área de atuação:</p>
-          <p className="text-xs md:text-sm text-gray-500">{getTranslatedValue(job.field_id?.toString() || '', fieldMaping)}</p>
+          <p className="text-xs md:text-sm text-gray-500">{getTranslatedValue(job.field?.id.toString() || '', fieldMaping)}</p>
         </div>
         <div className="flex mb-3">
           <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">Requisitos:</p>
@@ -96,7 +96,6 @@ const JobCard: React.FC<{ jobPublication: JobPublication }> = ({ jobPublication:
 
 const JobList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [locationTerm, setLocationTerm] = useState('');
   const [filters, setFilters] = useState<JobFilters>({
     type: 'todos',
     minSalary: '',
@@ -105,6 +104,7 @@ const JobList: React.FC = () => {
     mode: 'todos',
     weekly_hours: '',
     field_id: 'todos',
+    location: '',
   });
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -112,20 +112,43 @@ const JobList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [jobPublications, setJobPublication] = useState<JobPublication[]>([]);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [paginatedJobsPublications, setPaginatedJobsPublications] = useState<JobPublication[]>([]);
+
+  const itemsPerPage = 5;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+
 
   const fetchJobs = useCallback(async () => {
     try {
-      const jobData = await getJobPublications();
+      const jobData = await getJobPublicationsStudent();
+      const totalItems = jobData.publications.length || 0;
+      const pages = Math.ceil(totalItems / itemsPerPage);
+      setTotalPages(pages || 1);
+      setPaginatedJobsPublications(jobData.publications.slice(startIndex, startIndex + itemsPerPage));
+      setJobPublication(jobData.publications);
+    } catch (error) {
+      console.error("Erro ao carregar as vagas:", error);
+      setTotalPages(1);
+    }
+  }, [startIndex, itemsPerPage]);
+
+  /*
+  const fetchJobs = useCallback(async () => {
+    try {
+      const jobData = await getJobPublicationsStudent();
+      setTotalPages(jobData.length / itemsPerPage);
+      setPaginatedJobsPublications(jobData.slice(startIndex, startIndex + itemsPerPage));
       setJobPublication(jobData.publications);
     } catch (error) {
       console.error("Erro ao carregar as vagas:", error);
     }
-  }, [getJobPublications, setJobPublication]);
+  }, [getJobPublicationsStudent, setJobPublication]);*/
 
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [fetchJobs, currentPage]);
 
   useEffect(() => {
     if (user && user.status !== 'complete') {
@@ -142,13 +165,23 @@ const JobList: React.FC = () => {
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocationTerm(e.target.value);
-  };
-
   const handleShowFavoritesToggle = async () => {
-    await fetchJobs()
-    setShowOnlyFavorites(prev => !prev)
+    try {
+      if (showOnlyFavorites) {
+        const jobData = await getJobPublicationsStudent();
+        setTotalPages(jobData.publications.length / itemsPerPage);
+        setPaginatedJobsPublications(jobData.publications.slice(startIndex, startIndex + itemsPerPage));
+        setJobPublication(jobData.publications);
+      } else {
+        const favoriteData = await getFavoriteJobs();
+        setTotalPages(favoriteData.length / itemsPerPage);
+        setPaginatedJobsPublications(favoriteData.slice(startIndex, startIndex + itemsPerPage));
+        setJobPublication(favoriteData.publications);
+      }
+      setShowOnlyFavorites(prev => !prev);
+    } catch (error) {
+      console.error("Erro ao alternar as vagas:", error);
+    }
   };
 
   const handleClearFilters = () => {
@@ -160,23 +193,18 @@ const JobList: React.FC = () => {
       mode: 'todos',
       weekly_hours: '',
       field_id: 'todos',
+      location: '',
     });
-    setLocationTerm('');
   };
 
   const handleApplyFiters = async () => {
-    const jobData = await getJobPublications(filters);
+    const jobData = await getJobPublicationsStudent(filters);
     setJobPublication(jobData.publications);
     setIsFilterOpen(false)
   }
 
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(jobPublications.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedJobsPublications = jobPublications.slice(startIndex, startIndex + itemsPerPage);
-
   const handlePageChange = (page: number) => {
-    if (page > 0 && page <= totalPages) setCurrentPage(page);
+    if (page > 0 && page <= (totalPages ? totalPages : 1)) setCurrentPage(page);
   };
 
   return (
@@ -223,8 +251,8 @@ const JobList: React.FC = () => {
                   placeholder="Localização..."
                   className="border p-2 w-full rounded"
                   label='Localização:'
-                  value={locationTerm}
-                  onChange={handleLocationChange}
+                  value={filters.location}
+                  onChange={(e) => handleFilterChange("location", e.target.value)}
                 />
               </div>
 
@@ -347,7 +375,7 @@ const JobList: React.FC = () => {
         >
           Anterior
         </button>
-        <span>{currentPage} de {totalPages}</span>
+        <span>{currentPage} de {totalPages || 1}</span>
         <button
           className="bg-primary text-white px-4 py-2 rounded mx-2"
           onClick={() => handlePageChange(currentPage + 1)}

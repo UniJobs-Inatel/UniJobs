@@ -33,4 +33,5 @@ export interface JobFilters {
   mode: string
   weekly_hours: string
   field_id: string
+  location: string
 }
