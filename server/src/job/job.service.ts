@@ -234,7 +234,8 @@ export class JobService {
 
   /* ---------------------Job Publication -----------------------------------*/
 
-  async searchJobPublications(
+  async getFilteredJobPublications(
+    req: RequestWithUser,
     filters: {
       location?: string;
       type?: string;
@@ -250,6 +251,24 @@ export class JobService {
       filters;
     const { limit, offset } = pagination;
 
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: req.user.userId } },
+      relations: ['college'],
+    });
+
+    if (!student) {
+      throw new Error('Student not found');
+    }
+
+    const collegeId = student.college.id;
+
+    const favorites = await this.favoriteJobsRepository.find({
+      where: { student: { id: student.id } },
+      relations: ['jobPublication'],
+    });
+
+    const favoriteIds = favorites.map((favorite) => favorite.jobPublication.id);
+
     const query = this.jobPublicationRepository
       .createQueryBuilder('jobPublication')
       .leftJoinAndSelect('jobPublication.job', 'job')
@@ -257,7 +276,8 @@ export class JobService {
       .leftJoinAndSelect('job.company', 'company')
       .leftJoinAndSelect('job.tags', 'jobTags')
       .leftJoinAndSelect('jobTags.tag', 'tag')
-      .where('jobPublication.status = :status', { status: 'approved' });
+      .where('jobPublication.collegeId = :collegeId', { collegeId })
+      .andWhere('jobPublication.status = :status', { status: 'approved' });
 
     if (location) {
       query.andWhere('job.location = :location', { location });
@@ -288,8 +308,13 @@ export class JobService {
 
     const [publications, total] = await query.getManyAndCount();
 
+    const jobPublications = publications.map((publication) => ({
+      ...publication,
+      isFavorite: favoriteIds.includes(publication.id),
+    }));
+
     return {
-      publications,
+      publications: jobPublications,
       total,
       pageCount: Math.ceil(total / limit),
       currentPage: Math.floor(offset / limit) + 1,
@@ -392,7 +417,6 @@ export class JobService {
   }
 
   async getJobPublicationsByUser(req: RequestWithUser) {
-    //Gets publications user is allows to see as a student and add favorite status
     const student = await this.studentRepository.findOne({
       where: { user: { id: req.user.userId } },
       relations: ['college'],
