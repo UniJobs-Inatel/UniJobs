@@ -15,6 +15,7 @@ const NavBar = () => {
     { path: "/perfil-estudante", label: "Perfil do Estudante" },
     { path: "/perfil-empresa", label: "Perfil da Empresa" },
     { path: "/cadastrar-vaga", label: "Cadastrar Vaga" },
+    { path: "/vagas-publicadas", label: "Vagas Publicadas" },
   ];
 
   const toggleMenu = () => {

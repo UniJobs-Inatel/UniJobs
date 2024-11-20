@@ -12,9 +12,11 @@ import { Job, JobPublication } from "@/domain/job";
 import { useEffect, useState } from "react";
 import {
   createCompanyProfile,
+  deleteJob,
   getAllJobToValidate,
   getCompanyData,
   getJobsByCompany,
+  unpublishJob,
   validateJob,
 } from "@/services";
 import { ICreateCompanyProfileRequest } from "@/services/company/interface";
@@ -23,7 +25,10 @@ import IesSelectModal from "./components/IesSelectModal";
 import { UserStatus, UserType } from "@/domain/user";
 import { FeedBackModal } from "@/components/ui/feedbackModal.";
 import { ConfirmationModal } from "@/components/ui/confirmationModal";
-import { ValidateJobRequest } from "@/services/job/interface";
+import {
+  UnpublishJobRequest,
+  ValidateJobRequest,
+} from "@/services/job/interface";
 import { JobStatus } from "@/utils/mappers";
 
 const CompanyProfile = () => {
@@ -101,6 +106,26 @@ const CompanyProfile = () => {
     getCompanyInfo();
   }, []);
 
+  const removeJob = async (jobId?: number) => {
+    if (!jobId) {
+      return;
+    }
+    const response = await deleteJob(jobId);
+
+    if (response) {
+      openModal({
+        children: <FeedBackModal title={"Vaga removida com sucesso"} />,
+      });
+      return;
+    }
+
+    openModal({
+      children: (
+        <FeedBackModal variant={"error"} title={"Erro ao apagar a vaga"} />
+      ),
+    });
+  };
+
   const onSubmit = async (data: CompleteRegistrationData) => {
     const creationData: ICreateCompanyProfileRequest = {
       ...data,
@@ -124,11 +149,44 @@ const CompanyProfile = () => {
   ) => {
     const response = await validateJob(validateJobRequest);
     if (!response.success) {
-      openModal({ children: <FeedBackModal title={response.error} variant={"error"} /> });
+      openModal({
+        children: <FeedBackModal title={response.error} variant={"error"} />,
+      });
       return;
     }
     openModal({
-      children: <FeedBackModal variant={'success'}  title={ validateJobRequest.status == JobStatus.approved ? "Vaga validada com sucesso" : "Vagas reprovada com sucesso"} />,
+      children: (
+        <FeedBackModal
+          variant={"success"}
+          title={
+            validateJobRequest.status == JobStatus.approved
+              ? "Vaga validada com sucesso"
+              : "Vagas reprovada com sucesso"
+          }
+        />
+      ),
+    });
+
+    await getJobToValidation();
+  };
+
+  const handleUnpublishClick = async (
+    unpublishJobRequest: UnpublishJobRequest
+  ) => {
+    const response = await unpublishJob(unpublishJobRequest);
+    if (!response.success) {
+      openModal({
+        children: <FeedBackModal title={response.error} variant={"error"} />,
+      });
+      return;
+    }
+    openModal({
+      children: (
+        <FeedBackModal
+          variant={"success"}
+          title={"Vaga despublicada com sucessos"}
+        />
+      ),
     });
 
     await getJobToValidation();
@@ -210,7 +268,23 @@ const CompanyProfile = () => {
             <div className="flex flex-col gap-4">
               {jobs &&
                 jobs.map((job) => (
-                  <JobCard publishJob={publishJob} key={job.id} job={job} />
+                  <JobCard
+                    onDeleteClick={() =>
+                      openModal({
+                        children: (
+                          <ConfirmationModal
+                            onAgreeClick={() =>
+                              removeJob(job.id)
+                            }
+                            title={"Deseja remover essa vaga?"}
+                          />
+                        ),
+                      })
+                    }
+                    publishJob={publishJob}
+                    key={job.id}
+                    job={job}
+                  />
                 ))}
             </div>
           </section>
@@ -225,6 +299,21 @@ const CompanyProfile = () => {
                 jobsToValidate.map((jobToValidate) => (
                   <JobCard
                     key={jobToValidate.id}
+                    onDeleteClick={() =>
+                      openModal({
+                        children: (
+                          <ConfirmationModal
+                            onAgreeClick={() =>
+                              handleUnpublishClick({
+                                status: "removed",
+                                jobPublicationId: jobToValidate.id,
+                              })
+                            }
+                            title={"Deseja despublicar essa vaga?"}
+                          />
+                        ),
+                      })
+                    }
                     status={jobToValidate.status}
                     validateJobFromCard={() =>
                       openModal({

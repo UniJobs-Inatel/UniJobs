@@ -15,6 +15,10 @@ export interface ValidateJobRequest {
   status:'approved' | 'reproved';
   jobPublicationId:number;
 }
+export interface UnpublishJobRequest {
+  status:'removed';
+  jobPublicationId:number;
+}
 
 export interface GetJobsByCompanyResponse{
   jobs:Job[]
@@ -24,3 +28,4 @@ export interface GetAllJobToValidateResponse{
 }
 
 export interface GetStudentsJobPublicationList extends GetAllJobToValidateResponse{}
+export interface GetCompanyJobPublicationList extends GetAllJobToValidateResponse{}

@@ -9,9 +9,6 @@ import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { cn } from "@/lib/cn";
 import { Job } from "@/domain/job";
 import { currencyFormatter } from "@/utils";
-import { deleteJob } from "@/services";
-import { useModalStore } from "@/stores/modalStore";
-import { FeedBackModal } from "./feedbackModal.";
 import { StatusBadge } from "./badge";
 import { JobStatus, jobStatusMapper } from "@/utils/mappers";
 
@@ -25,7 +22,7 @@ interface JobCardProps {
     jobId: number;
     companyId: number;
   }) => void;
-  onDeleteClick?: () => Promise<void>;
+  onDeleteClick?: () => void;
   status?: JobStatus;
 }
 
@@ -37,29 +34,7 @@ const JobCard = ({
   status,
 }: JobCardProps) => {
   const [accordionValue, setAccordionValue] = useState<string | null>(null);
-  const { openModal } = useModalStore();
 
-  const removeJob = async (jobId: number) => {
-    const response = await deleteJob(jobId);
-
-    if (response) {
-      openModal({
-        children: (
-          <FeedBackModal
-            onOkayClick={async () => onDeleteClick && (await onDeleteClick())}
-            title={"Vaga removida com sucesso"}
-          />
-        ),
-      });
-      return;
-    }
-
-    openModal({
-      children: (
-        <FeedBackModal variant={"error"} title={"Erro ao apagar a vaga"} />
-      ),
-    });
-  };
 
   return (
     <Accordion
@@ -110,7 +85,7 @@ const JobCard = ({
                   <TrashIcon
                     onClick={() => {
                       setAccordionValue("");
-                      removeJob(job.id ?? 0);
+                      onDeleteClick && onDeleteClick()
                     }}
                     className="w-5 fill-red-500"
                   />

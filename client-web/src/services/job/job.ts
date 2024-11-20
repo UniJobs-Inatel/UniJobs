@@ -3,10 +3,12 @@ import instance from "@/lib/axios";
 import {
   AvailablesIesResponse,
   GetAllJobToValidateResponse,
+  GetCompanyJobPublicationList,
   GetJobsByCompanyResponse,
   GetStudentsJobPublicationList,
   JobPublicationResponse,
   PublishJobRequest,
+  UnpublishJobRequest,
   ValidateJobRequest,
 } from "./interface";
 import { ApiResponse } from "../inteface";
@@ -138,19 +140,6 @@ export const getAllJobToValidate = async (): Promise<
     
   }
 };
-export const getAllPublisedCompanyJob = async (): Promise<
-  JobPublicationResponse[]
-> => {
-  try {
-    const response = await instance.get<JobPublicationResponse[]>(
-      `/job/publications/company`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao publicar vaga:", error);
-    throw error;
-  }
-};
 
 export const validateJob = async ({
   status,
@@ -171,6 +160,46 @@ export const validateJob = async ({
     return {
       success: false,
       error: "Erro ao validar vaga",
+    };
+  }
+};
+
+export const unpublishJob = async ({
+  status,
+  jobPublicationId,
+}: UnpublishJobRequest): Promise<ApiResponse<JobPublicationResponse>> => {
+  try {
+    const response = await instance.put<JobPublicationResponse>(
+      `/job/publications/${jobPublicationId}`,
+      { status }
+    );
+    return {
+      ...response.data,
+      success: true,
+    };
+  } catch (error) {
+    console.error("Erro ao despublicar vaga:", error);
+
+    return {
+      success: false,
+      error: "Erro ao despublicar vaga",
+    };
+  }
+};
+
+export const getJobsPublicationByCompany = async (): Promise<
+  ApiResponse<GetCompanyJobPublicationList>
+> => {
+  try {
+    const response = await instance.get<JobPublication[]>(`/job/publications/company`);
+    return {
+      jobPublications: response.data,
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Erro ao buscar vagas publicadas",
     };
   }
 };
