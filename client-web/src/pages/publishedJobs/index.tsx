@@ -1,32 +1,93 @@
+import { ConfirmationModal } from "@/components/ui/confirmationModal";
+import { FeedBackModal } from "@/components/ui/feedbackModal.";
 import { JobCard } from "@/components/ui/jobCard";
-import { Job } from "@/domain/job";
-import { useState } from "react";
+import { JobPublication } from "@/domain/job";
+import { getJobsPublicationByCompany, unpublishJob } from "@/services";
+import { UnpublishJobRequest } from "@/services/job/interface";
+import { useModalStore } from "@/stores/modalStore";
+import { useEffect, useState } from "react";
 
 const PublishedJobs = () => {
+  const [publishedJobs, setPublishedJobs] = useState<JobPublication[]>([]);
+  const { openModal } = useModalStore();
 
-    const [jobs] = useState<Job[]>([
-        {
-          job_name: "Software Engineer",
-          description: "Develop and maintain software solutions.",
-          location: "New York",
-          type: "clt",
-          weekly_hours: 40,
-          mode: "remote",
-          benefits: "Health insurance, 401k",
-          salary: 80000,
-          requirements: "3+ years experience with Node.js and React",
-          id: 1
-        }
-      ])
+  const getPublichedJob = async () => {
+    const response = await getJobsPublicationByCompany();
+    if (!response.success) {
+      if (!response.success) {
+        openModal({
+          children: <FeedBackModal title={response.error} variant={"error"} />,
+        });
+        return;
+      }
+      openModal({
+        children: (
+          <FeedBackModal
+            variant={"success"}
+            title={"Vagas despublicada com sucesso"}
+          />
+        ),
+      });
+      return;
+    }
+    setPublishedJobs(response.jobPublications);
+  };
+
+  useEffect(() => {
+    getPublichedJob();
+  }, []);
+
+  const handleUnpublishClick = async (
+    unpublishJobRequest: UnpublishJobRequest
+  ) => {
+    const response = await unpublishJob(unpublishJobRequest);
+    if (!response.success) {
+      openModal({
+        children: <FeedBackModal title={response.error} variant={"error"} />,
+      });
+      return;
+    }
+    openModal({
+      children: (
+        <FeedBackModal
+          variant={"success"}
+          title={"Vaga despublicada com sucessos"} 
+        />
+      ),
+    });
+
+    await getPublichedJob();
+  };
 
   return (
     <div>
-      <h3 className="text-primary text-[20px] font-bold mb-6">
-        Vagas publicadas
-      </h3>
-
       <section>
-        {jobs && jobs.map((job) => <JobCard key={job.id} job={job} />)}
+        <h3 className=" text-[20px] font-bold mb-6">Vagas publicadas</h3>
+        <div className="flex flex-col gap-4">
+          {publishedJobs &&
+            publishedJobs.map((publishedJob) => (
+              <JobCard
+                onDeleteClick={() =>
+                  openModal({
+                    children: (
+                      <ConfirmationModal
+                        onAgreeClick={() =>
+                          handleUnpublishClick({
+                            status: "removed",
+                            jobPublicationId: publishedJob.id,
+                          })
+                        }
+                        title={"Deseja despublicar essa vaga?"}
+                      />
+                    ),
+                  })
+                }
+                status={publishedJob.status}
+                key={publishedJob.id}
+                job={publishedJob.job}
+              />
+            ))}
+        </div>
       </section>
     </div>
   );

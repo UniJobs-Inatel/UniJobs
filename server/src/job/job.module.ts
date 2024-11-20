@@ -10,12 +10,14 @@ import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
 import { Student } from '../entities/student.entity';
 import { AuthModule } from '../auth/auth.module';
+import { FavoriteJobs } from 'src/entities/favorite-jobs.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Job,
       JobPublication,
+      FavoriteJobs,
       JobTag,
       Company,
       College,

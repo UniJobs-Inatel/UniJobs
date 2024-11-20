@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { Job } from '../entities/job.entity';
 import { JobPublication } from '../entities/job-publication.entity';
 import { JobTag } from '../entities/job-tag.entity';
@@ -17,6 +17,7 @@ import { Company } from '../entities/company.entity';
 import { Student } from 'src/entities/student.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
+import { FavoriteJobs } from 'src/entities/favorite-jobs.entity';
 import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Injectable()
@@ -36,6 +37,8 @@ export class JobService {
     private readonly fieldRepository: Repository<Field>,
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
+    @InjectRepository(FavoriteJobs)
+    private readonly favoriteJobsRepository: Repository<FavoriteJobs>,
   ) {}
 
   async createJob(createJobDto: CreateJobDto, req: RequestWithUser) {
@@ -150,9 +153,6 @@ export class JobService {
   async getJobsByCompany(req: RequestWithUser) {
     const userId = req.user.userId;
 
-    console.log('USER ID: ', userId);
-    console.log('USER ID TYPE: ', typeof userId);
-
     const company = await this.companyRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -161,10 +161,20 @@ export class JobService {
       throw new Error('Company not found for this user');
     }
 
-    return await this.jobRepository.find({
+    const jobList = await this.jobRepository.find({
       where: { company: { id: company.id } },
       relations: ['company'],
     });
+
+    const jobListWithPublicationStatus = await Promise.all(
+      jobList.map(async (job) => {
+        const isPublishedOnAllColleges =
+          await this.checkIfJobIsPublishedOnAllColleges(job.id);
+        return { ...job, isPublishedOnAllColleges };
+      }),
+    );
+
+    return jobListWithPublicationStatus;
   }
 
   async updateJob(
@@ -224,7 +234,8 @@ export class JobService {
 
   /* ---------------------Job Publication -----------------------------------*/
 
-  async searchJobPublications(
+  async getFilteredJobPublications(
+    req: RequestWithUser,
     filters: {
       location?: string;
       type?: string;
@@ -240,6 +251,24 @@ export class JobService {
       filters;
     const { limit, offset } = pagination;
 
+    const student = await this.studentRepository.findOne({
+      where: { user: { id: req.user.userId } },
+      relations: ['college'],
+    });
+
+    if (!student) {
+      throw new Error('Student not found');
+    }
+
+    const collegeId = student.college.id;
+
+    const favorites = await this.favoriteJobsRepository.find({
+      where: { student: { id: student.id } },
+      relations: ['jobPublication'],
+    });
+
+    const favoriteIds = favorites.map((favorite) => favorite.jobPublication.id);
+
     const query = this.jobPublicationRepository
       .createQueryBuilder('jobPublication')
       .leftJoinAndSelect('jobPublication.job', 'job')
@@ -247,7 +276,8 @@ export class JobService {
       .leftJoinAndSelect('job.company', 'company')
       .leftJoinAndSelect('job.tags', 'jobTags')
       .leftJoinAndSelect('jobTags.tag', 'tag')
-      .where('jobPublication.status = :status', { status: 'approved' });
+      .where('jobPublication.collegeId = :collegeId', { collegeId })
+      .andWhere('jobPublication.status = :status', { status: 'approved' });
 
     if (location) {
       query.andWhere('job.location = :location', { location });
@@ -278,8 +308,13 @@ export class JobService {
 
     const [publications, total] = await query.getManyAndCount();
 
+    const jobPublications = publications.map((publication) => ({
+      ...publication,
+      isFavorite: favoriteIds.includes(publication.id),
+    }));
+
     return {
-      publications,
+      publications: jobPublications,
       total,
       pageCount: Math.ceil(total / limit),
       currentPage: Math.floor(offset / limit) + 1,
@@ -294,20 +329,23 @@ export class JobService {
 
     const job = await this.jobRepository.findOne({
       where: { id: createJobPublicationDto.job_id },
-    });
-    const company = await this.companyRepository.findOne({
-      where: { id: createJobPublicationDto.company_id },
-      relations: ['user'],
+      relations: ['company'],
     });
 
-    if (!job || !company) {
-      throw new NotFoundException('Vaga ou empresa não encontrada.');
+    if (!job) {
+      throw new NotFoundException('Vaga não encontrada.');
     }
 
-    if (company.user.id !== userId) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a criar esta publicação.',
-      );
+    const company = await this.companyRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Empresa não encontrada.');
+    }
+
+    if (job.company.id !== company.id) {
+      throw new UnauthorizedException('Vaga não pertence a empresa informada.');
     }
 
     let college = null;
@@ -350,29 +388,64 @@ export class JobService {
       where: { user: { id: userId } },
     });
 
+    if (!company) {
+      throw new Error('Company not found for the current user.');
+    }
+
     const college = await this.collegeRepository.findOne({
       where: { company: { id: company.id } },
     });
 
-    return await this.jobPublicationRepository.find({
+    if (!college) {
+      throw new Error('College not found for the current company.');
+    }
+
+    const jobPublications = await this.jobPublicationRepository.find({
       where: { college: { id: college.id } },
-      relations: ['job', 'college', 'company'],
+      relations: [
+        'job',
+        'job.field',
+        'job.company',
+        'job.tags',
+        'job.tags.tag',
+        'college',
+        'college.company',
+      ],
     });
+
+    return jobPublications;
   }
 
-  async getJobPublicationsByUserCollege(req: RequestWithUser) {
+  async getJobPublicationsByUser(req: RequestWithUser) {
     const student = await this.studentRepository.findOne({
       where: { user: { id: req.user.userId } },
+      relations: ['college'],
     });
 
     const college = await this.collegeRepository.findOne({
       where: { id: student.college.id },
     });
 
-    return await this.jobPublicationRepository.find({
-      where: { college: { id: college.id } },
+    const publications = await this.jobPublicationRepository.find({
+      where: { college: { id: college.id }, status: 'approved' },
       relations: ['job', 'college', 'company'],
     });
+
+    const favorites = await this.favoriteJobsRepository.find({
+      where: { student: { id: student.id } },
+      relations: ['jobPublication'],
+    });
+
+    const jobPublications = publications.map((publication) => {
+      const isFavorite = favorites.some(
+        (favorite) => favorite.jobPublication.id === publication.id,
+      );
+      return { ...publication, isFavorite };
+    });
+
+    console.log(jobPublications);
+
+    return jobPublications;
   }
 
   async getCollegesWhereJobIsNotPublished(jobId: number) {
@@ -384,25 +457,19 @@ export class JobService {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
-    const collegesWithCompanies = await this.collegeRepository
-      .createQueryBuilder('college')
-      .leftJoin(
-        'college.jobPublications',
-        'jobPublication',
-        'jobPublication.job_id = :jobId',
-        {
-          jobId,
-        },
-      )
-      .innerJoin('college.company', 'company')
-      .where('jobPublication.id IS NULL')
-      .select(['college.id AS collegeId', 'company.name AS companyName'])
-      .getRawMany();
+    const publications = await this.jobPublicationRepository.find({
+      where: { job: { id: jobId } },
+      relations: ['college'],
+    });
 
-    return collegesWithCompanies.map((item) => ({
-      collegeId: item.collegeId,
-      companyName: item.companyName,
-    }));
+    const collegeIds = publications.map(
+      (publication) => publication.college.id,
+    );
+
+    return await this.collegeRepository.find({
+      where: { id: Not(In(collegeIds)) },
+      relations: ['company'],
+    });
   }
 
   async checkIfJobIsPublishedOnAllColleges(jobId: number) {
@@ -414,17 +481,18 @@ export class JobService {
       throw new NotFoundException('Vaga não encontrada.');
     }
 
-    const colleges = await this.collegeRepository
-      .createQueryBuilder('college')
-      .leftJoin(
-        'college.jobPublications',
-        'jobPublication',
-        'jobPublication.job_id = :jobId',
-        { jobId },
-      )
-      .getMany();
+    const colleges = await this.collegeRepository.find();
 
-    return colleges.length === 0;
+    const publications = await this.jobPublicationRepository.find({
+      where: { job: { id: jobId } },
+      relations: ['college'],
+    });
+
+    const collegeIds = publications.map(
+      (publication) => publication.college.id,
+    );
+
+    return colleges.every((college) => collegeIds.includes(college.id));
   }
 
   async updateJobPublication(
@@ -432,6 +500,7 @@ export class JobService {
     updateJobPublicationDto: UpdateJobPublicationDto,
     req: RequestWithUser,
   ) {
+    const userId = req.user.userId;
     const jobPublication = await this.jobPublicationRepository.findOne({
       where: { id },
       relations: ['college', 'company'],
@@ -441,26 +510,37 @@ export class JobService {
       throw new NotFoundException('Publicação de vaga não encontrada.');
     }
 
-    const userId = req.user.userId;
+    const companyRelatedtoUser = await this.companyRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!companyRelatedtoUser) {
+      throw new NotFoundException('Usuário não é uma empresa ou IE.');
+    }
+
+    const collegeRelatedToUser = await this.collegeRepository.findOne({
+      where: { company: { id: companyRelatedtoUser.id } },
+    });
+
+    const collegeRelatedToUser_id = collegeRelatedToUser
+      ? collegeRelatedToUser.id
+      : null; // Either the ID or null, for comparison purposes
 
     if (
       updateJobPublicationDto.status === 'approved' ||
       updateJobPublicationDto.status === 'reproved'
     ) {
-      if (
-        jobPublication.college &&
-        jobPublication.college.company.user.id !== userId
-      ) {
+      if (jobPublication.college.id !== collegeRelatedToUser_id) {
         throw new UnauthorizedException(
-          'Apenas a faculdade pode aprovar ou reprovar uma publicação.',
+          'Apenas a faculdade pode aprovar ou reprovar essa publicação.',
         );
       }
     }
 
     if (updateJobPublicationDto.status === 'removed') {
       if (
-        jobPublication.company.user.id !== userId &&
-        jobPublication.college?.company.user.id !== userId
+        jobPublication.company.id !== companyRelatedtoUser.id && // Empresa que publicou é diferente da empresa administrada pelo usuário
+        jobPublication.college.id !== collegeRelatedToUser_id // Faculdade que recebeu a publicação é diferente da faculdade administrada pelo usuário
       ) {
         throw new UnauthorizedException(
           'Apenas a empresa ou a faculdade pode remover uma publicação.',
@@ -469,7 +549,7 @@ export class JobService {
     }
 
     if (updateJobPublicationDto.status === 'pending') {
-      if (jobPublication.company.user.id !== userId) {
+      if (jobPublication.company.id !== companyRelatedtoUser.id) {
         throw new UnauthorizedException(
           'Apenas a empresa pode republicar uma publicação.',
         );

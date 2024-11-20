@@ -255,12 +255,6 @@ export class StudentService {
       where: { user: { id: userId } },
     });
 
-    if (userId !== student.user.id) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a desfavoritar esta vaga.',
-      );
-    }
-
     if (!student) {
       throw new NotFoundException('Perfil de estudante não encontrado.');
     }
@@ -285,12 +279,6 @@ export class StudentService {
     const student = await this.studentRepository.findOne({
       where: { user: { id: userId } },
     });
-
-    if (userId !== student.user.id) {
-      throw new UnauthorizedException(
-        'Usuário não autorizado a favoritar esta vaga.',
-      );
-    }
 
     if (!student) {
       throw new NotFoundException('Perfil de estudante não encontrado.');
@@ -336,7 +324,7 @@ export class StudentService {
 
     return this.favoriteJobsRepository.find({
       where: { student: { id: student.id } },
-      relations: ['job'],
+      relations: ['jobPublication'],
     });
   }
 }

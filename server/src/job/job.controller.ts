@@ -101,9 +101,10 @@ export class JobController {
     await this.jobService.deleteJob(id, req);
   }
 
-  @Get('publications/search')
+  @Get('publications/student/search')
   @HttpCode(HttpStatus.OK)
   async searchJobPublications(
+    @Req() req: RequestWithUser,
     @Query('location') location?: string,
     @Query('type') type?: string,
     @Query('skills') skills?: string,
@@ -131,7 +132,7 @@ export class JobController {
 
     const pagination = { limit, offset };
 
-    return this.jobService.searchJobPublications(filters, pagination);
+    return this.jobService.getFilteredJobPublications(req, filters, pagination);
   }
 
   @Get('colleges/check/:jobId')
@@ -169,8 +170,8 @@ export class JobController {
 
   @Get('publications/student')
   @HttpCode(HttpStatus.OK)
-  async getJobPublicationsByUserCollege(@Req() req: RequestWithUser) {
-    return this.jobService.getJobPublicationsByUserCollege(req);
+  async getJobPublicationsByUser(@Req() req: RequestWithUser) {
+    return this.jobService.getJobPublicationsByUser(req);
   }
 
   @Put('publications/:id')

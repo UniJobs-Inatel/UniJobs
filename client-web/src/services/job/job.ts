@@ -1,16 +1,44 @@
 
-import { Job, JobFilters } from "@/domain/job";
+import { Job, JobFilters, JobPublication } from "@/domain/job";
 import instance from "@/lib/axios";
+import {
+  AvailablesIesResponse,
+  GetAllJobToValidateResponse,
+  GetCompanyJobPublicationList,
+  GetJobsByCompanyResponse,
+  GetStudentsJobPublicationList,
+  JobPublicationResponse,
+  PublishJobRequest,
+  UnpublishJobRequest,
+  ValidateJobRequest,
+} from "./interface";
+import { ApiResponse } from "../inteface";
 
 export const getJobsByCompany = async (companyId: number) => {
   try {
-    const response = await instance.get<Job[]>(`/job/company/${companyId}`);
+    const response = await instance.get<JobPublication[]>(`/job/publications/student`);
+    return {
+      jobPublications: response.data,
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Erro ao buscar vagas",
+    };
+  }
+};
+
+export const getAvailablesIEsByJob = async (jobId: number) => {
+  try {
+    const response = await instance.get<AvailablesIesResponse[]>(
+      `/job/colleges/${jobId}`
+    );
     return response;
   } catch (error) {
     console.error(error);
   }
 };
-
 
 export const createJob = async (jobData: Job) => {
   try {
@@ -98,19 +126,62 @@ export const updateJob = async (id: string, jobData: Job) => {
   }
 };
 
-export const deleteJob = async (id: string) => {
+export const deleteJob = async (id: number) => {
   try {
-    await instance.delete(`/job/${id}`);
+    return await instance.delete(`/job/${id}`);
   } catch (error) {
     console.error(`Erro ao deletar vaga com ID ${id}:`, error);
     throw error;
   }
 };
 
-export const publishJob = async (jobId: number, companyId: number, collegeId: number) => {
+export const publishJob = async ({
+  job_id,
+  college_id,
+}: PublishJobRequest): Promise<ApiResponse<JobPublication>> => {
   try {
-    const response = await instance.post(`/job/publish`, { job_id: jobId, company_id: companyId, college_id: collegeId });
-    return response.data;
+    const response = await instance.post(`/job/publish`, {
+      job_id: job_id,
+      college_id: college_id,
+    });
+    return { ...response.data, success: true };
+  } catch (error) {
+    console.error("Erro ao publicar vaga:", error);
+    return{
+      success:false,
+      error:'Erro ao publicar'
+    }
+  }
+};
+
+export const getAllJobToValidate = async (): Promise<
+  ApiResponse<GetAllJobToValidateResponse>
+> => {
+  try {
+    const response = await instance.get<JobPublicationResponse[]>(
+      `/job/publications/college`
+    );
+    return {jobPublications:response.data, success:true}
+  } catch (error) {
+    console.error("Erro ao buscar vagas pendentes:", error);
+    return {error:"Erro ao buscar vagas pendentes", success:false}
+    
+  }
+};
+
+export const validateJob = async ({
+  status,
+  jobPublicationId,
+}: ValidateJobRequest): Promise<ApiResponse<JobPublicationResponse>> => {
+  try {
+    const response = await instance.put<JobPublicationResponse>(
+      `/job/publications/${jobPublicationId}`,
+      { status }
+    );
+    return {
+      ...response.data,
+      success: true,
+    };
   } catch (error) {
     console.error("Erro ao publicar vaga:", error);
     throw error;

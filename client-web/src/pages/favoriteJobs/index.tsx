@@ -15,18 +15,22 @@ const FavoriteJobs = () => {
           benefits: "Health insurance, 401k",
           salary: 80000,
           requirements: "3+ years experience with Node.js and React",
-          id: 1
+          id: 1,
+          isPublishedOnAllColleges:false,
+          company:{}
         }
       ])
 
   return (
     <div>
-      <h3 className="text-primary text-[20px] font-bold mb-6">
+      <h3 className=" text-[20px] font-bold mb-6">
         Minhas vagas favoritas
       </h3>
 
       <section>
-        {jobs && jobs.map((job) => <JobCard key={job.id} job={job} />)}
+        {jobs && jobs.map((job) => <JobCard  key={job.id} job={job} publishJob={function (jobId: number): void {
+          throw new Error("Function not implemented.");
+        } } />)}
       </section>
     </div>
   );

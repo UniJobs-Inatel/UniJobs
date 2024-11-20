@@ -1,0 +1,1 @@
+export type ApiResponse<T> = (T & {success:true}) | {error:string, success:false};

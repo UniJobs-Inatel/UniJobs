@@ -1,15 +1,14 @@
 
-enum jobStatus {
+export enum JobStatus {
     pending='pending',
     approved='approved',
     reproved='reproved',
     removed='removed',
-
 }
 
 type statusBadgeVariants = 'pending' | 'approved' | 'removed' ;
 
-export const jobStatusMapper:Record<jobStatus, {label:string, variant:statusBadgeVariants}> = {
+export const jobStatusMapper:Record<JobStatus, {label:string, variant:statusBadgeVariants}> = {
 
     pending:{
         label:'Pendente',

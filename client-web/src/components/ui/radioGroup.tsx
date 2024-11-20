@@ -12,9 +12,9 @@ const RadioButton = ({ label, name, value, ...props }: RadioButtonProps) => {
         type="radio"
         name={name}
         value={value}
-        className="form-radio h-4 w-4 text-primary border-gray-300"
+        className="form-radio h-4 w-4  border-gray-300"
       />
-      <span className=" text-primary">{label}</span>
+      <span className=" ">{label}</span>
     </label>
   );
 };

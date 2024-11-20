@@ -19,12 +19,15 @@ const useAuthStore = create<AuthState>((set) => ({
   refreshToken: getTypedLocalStorage<Omit<AuthState, "saveAuthResponse"| "clearTokens" >>('session')?.refreshToken ?? null,
   user: getTypedLocalStorage<Omit<AuthState, "saveAuthResponse"| "clearTokens" >>('session')?.user ?? null,
   saveAuthResponse: (accessToken, refreshToken) => {
+    localStorage.removeItem('session')
+
     const user = decodeJWT<AuthResponse>(accessToken)?? null;
 
 
     localStorage.setItem('session',JSON.stringify({user, accessToken, refreshToken}))
 
     set({ accessToken, refreshToken, user });
+    window.location.href = '/vagas';
   },
   clearTokens: () => set({ accessToken: null, refreshToken: null, user:null }),
 }));
