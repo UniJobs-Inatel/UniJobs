@@ -1,6 +1,6 @@
 import { login } from "../helpers/auth";
 
-describe('routing tests', () => {
+describe('Publish Job', () => {
   
   it('it should publish a job ', () => {
     
