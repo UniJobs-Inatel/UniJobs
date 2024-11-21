@@ -16,7 +16,7 @@ import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { RequestWithUser } from '../auth/request-with-user.interface';
-import { JobPublication } from 'src/entities/job-publication.entity';
+import { JobPublication } from '../entities/job-publication.entity';
 
 @Injectable()
 export class StudentService {
