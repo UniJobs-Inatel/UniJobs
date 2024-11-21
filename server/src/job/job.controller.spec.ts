@@ -61,7 +61,6 @@ describe('JobController', () => {
         salary: 5000,
         requirements: 'Experience in Node.js and React',
         field_id: 1,
-        company_id: 1,
       };
 
       const result = { id: 1, ...createJobDto };
@@ -127,7 +126,6 @@ describe('JobController', () => {
     it('should create a job publication', async () => {
       const createJobPublicationDto: CreateJobPublicationDto = {
         job_id: 1,
-        company_id: 1,
       };
       const result = { id: 1, ...createJobPublicationDto };
 
