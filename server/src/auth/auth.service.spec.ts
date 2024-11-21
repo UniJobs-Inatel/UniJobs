@@ -39,12 +39,12 @@ describe('AuthController', () => {
     it('should register a user and return a verification link', async () => {
       const email = 'test@example.com';
       const password = 'password';
-      const type = 'user';
+      const type = 'student';
       const result = {
         message: 'User registered successfully.',
         verificationLink: 'http://example.com/verify?code=12345',
       };
-      
+
       mockAuthService.register.mockResolvedValue(result);
 
       expect(await controller.register(email, password, type)).toEqual(result);
@@ -74,7 +74,9 @@ describe('AuthController', () => {
         send: jest.fn(),
       } as unknown as Response;
 
-      mockAuthService.verifyAccount.mockRejectedValue(new BadRequestException());
+      mockAuthService.verifyAccount.mockRejectedValue(
+        new BadRequestException(),
+      );
 
       await controller.verifyAccount(code, res);
       expect(service.verifyAccount).toHaveBeenCalledWith(code);
