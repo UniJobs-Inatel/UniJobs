@@ -171,10 +171,7 @@ describe('StudentController', () => {
       mockStudentService.getFavoriteJobs.mockResolvedValue(result);
 
       expect(await controller.getFavoriteJobs(mockRequest)).toEqual(result);
-      expect(service.getFavoriteJobs).toHaveBeenCalledWith(
-        mockRequest.user.userId,
-        mockRequest,
-      );
+      expect(service.getFavoriteJobs).toHaveBeenCalledWith(mockRequest);
     });
   });
 
