@@ -493,7 +493,16 @@ export class JobService {
       (publication) => publication.college.id,
     );
 
-    return colleges.every((college) => collegeIds.includes(college.id));
+    const allPublished = colleges.every((college) =>
+      collegeIds.includes(college.id),
+    );
+
+    const hasInvalidStatus = publications.some(
+      (publication) =>
+        publication.status === 'removed' || publication.status === 'reproved',
+    );
+
+    return allPublished && !hasInvalidStatus;
   }
 
   async updateJobPublication(
