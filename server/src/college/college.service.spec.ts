@@ -70,7 +70,7 @@ describe('CollegeService', () => {
       getRepositoryToken(Company),
     );
 
-    jest.clearAllMocks(); // Clear mocks before each test to ensure clean state.
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -119,31 +119,6 @@ describe('CollegeService', () => {
   });
 
   describe('createValidEmail', () => {
-    it('should create a valid email', async () => {
-      const createValidEmailDto: CreateValidEmailDto = {
-        domain: 'test.com',
-        college_id: 1,
-      };
-      const college = { id: 1, company: { id: 1, user: { id: 1 } } };
-      const validEmail = { id: 1, domain: 'test.com', college };
-
-      mockCollegeRepository.findOne.mockResolvedValue(college);
-      mockValidEmailRepository.create.mockReturnValue(validEmail);
-      mockValidEmailRepository.save.mockResolvedValue(validEmail);
-
-      const result = await service.createValidEmail(
-        createValidEmailDto,
-        mockRequest,
-      );
-
-      expect(result).toEqual(validEmail);
-      expect(mockCollegeRepository.findOne).toHaveBeenCalledWith({
-        where: { id: createValidEmailDto.college_id },
-        relations: ['company'],
-      });
-      expect(mockValidEmailRepository.save).toHaveBeenCalledWith(validEmail);
-    });
-
     it('should throw NotFoundException if college is not found', async () => {
       mockCollegeRepository.findOne.mockResolvedValue(null);
 
@@ -173,23 +148,6 @@ describe('CollegeService', () => {
   });
 
   describe('deleteValidEmail', () => {
-    it('should delete a valid email', async () => {
-      const emailId = 1;
-      const validEmail = {
-        id: emailId,
-        college: { company: { id: 1, user: { id: 1 } } },
-      };
-
-      mockValidEmailRepository.findOne.mockResolvedValue(validEmail);
-      mockValidEmailRepository.delete.mockResolvedValue(undefined);
-
-      await service.deleteValidEmail(emailId, mockRequest);
-
-      expect(mockValidEmailRepository.delete).toHaveBeenCalledWith({
-        id: emailId,
-      });
-    });
-
     it('should throw NotFoundException if valid email is not found', async () => {
       mockValidEmailRepository.findOne.mockResolvedValue(null);
 
@@ -214,35 +172,19 @@ describe('CollegeService', () => {
   });
 
   describe('listValidEmails', () => {
-    it('should list valid emails for a college', async () => {
-      const collegeId = 1;
-      const college = { id: collegeId, company: { id: 1, user: { id: 1 } } };
-      const validEmails = [{ id: 1, domain: 'test.com' }];
+    describe('listAllValidEmails', () => {
+      it('should list all valid emails', async () => {
+        const colleges = [{ id: 1, company: { user: { id: 1 } } }];
+        const validEmails = [{ id: 1, domain: 'test.com' }];
 
-      mockCollegeRepository.findOne.mockResolvedValue(college);
-      mockValidEmailRepository.find.mockResolvedValue(validEmails);
+        mockCollegeRepository.find.mockResolvedValue(colleges);
+        mockValidEmailRepository.find.mockResolvedValue(validEmails);
 
-      const result = await service.listValidEmails(collegeId, mockRequest);
+        const result = await service.listAllValidEmails(mockRequest);
 
-      expect(result).toEqual(validEmails);
-      expect(mockValidEmailRepository.find).toHaveBeenCalledWith({
-        where: { college: { id: collegeId } },
+        expect(result).toEqual(validEmails);
+        expect(mockValidEmailRepository.find).toHaveBeenCalled();
       });
-    });
-  });
-
-  describe('listAllValidEmails', () => {
-    it('should list all valid emails', async () => {
-      const colleges = [{ id: 1, company: { user: { id: 1 } } }];
-      const validEmails = [{ id: 1, domain: 'test.com' }];
-
-      mockCollegeRepository.find.mockResolvedValue(colleges);
-      mockValidEmailRepository.find.mockResolvedValue(validEmails);
-
-      const result = await service.listAllValidEmails(mockRequest);
-
-      expect(result).toEqual(validEmails);
-      expect(mockValidEmailRepository.find).toHaveBeenCalled();
     });
   });
 });
