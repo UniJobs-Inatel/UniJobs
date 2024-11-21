@@ -215,8 +215,9 @@ export class JobService {
   async deleteJob(id: number, req: RequestWithUser) {
     const job = await this.jobRepository.findOne({
       where: { id },
-      relations: ['company'],
+      relations: ['company', 'company.user'],
     });
+
     if (!job) {
       throw new NotFoundException('Vaga não encontrada.');
     }
