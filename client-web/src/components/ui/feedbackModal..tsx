@@ -44,7 +44,9 @@ const FeedBackModal = ({ variant, title, subTitle, onOkayClick }: FeedBackModalP
           <h3 className=" ">{title}</h3>
           {subTitle && <h4 className=" text-[14px]">{subTitle}</h4>}
      </div>
-      <Button onClick={() => {
+      <Button
+       data-cy='feedback-button'
+       onClick={() => {
         closeModal();
         onOkayClick && onOkayClick();
       }} className={cn(feedbackVariants({ variant }), "text-white")}>
