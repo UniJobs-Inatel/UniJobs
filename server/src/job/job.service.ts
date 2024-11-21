@@ -14,10 +14,10 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobPublicationDto } from './dto/create-job-publication.dto';
 import { UpdateJobPublicationDto } from './dto/update-job-publication.dto';
 import { Company } from '../entities/company.entity';
-import { Student } from 'src/entities/student.entity';
+import { Student } from '../entities/student.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
-import { FavoriteJobs } from 'src/entities/favorite-jobs.entity';
+import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Injectable()
@@ -215,8 +215,9 @@ export class JobService {
   async deleteJob(id: number, req: RequestWithUser) {
     const job = await this.jobRepository.findOne({
       where: { id },
-      relations: ['company'],
+      relations: ['company', 'company.user'],
     });
+
     if (!job) {
       throw new NotFoundException('Vaga não encontrada.');
     }
@@ -270,14 +271,14 @@ export class JobService {
     const favoriteIds = favorites.map((favorite) => favorite.jobPublication.id);
 
     const query = this.jobPublicationRepository
-      .createQueryBuilder('jobPublication')
-      .leftJoinAndSelect('jobPublication.job', 'job')
+      .createQueryBuilder('job_publication')
+      .leftJoinAndSelect('job_publication.job', 'job')
       .leftJoinAndSelect('job.field', 'field')
       .leftJoinAndSelect('job.company', 'company')
       .leftJoinAndSelect('job.tags', 'jobTags')
       .leftJoinAndSelect('jobTags.tag', 'tag')
-      .where('jobPublication.collegeId = :collegeId', { collegeId })
-      .andWhere('jobPublication.status = :status', { status: 'approved' });
+      .where('job_publication.college_id = :collegeId', { collegeId })
+      .andWhere('job_publication.status = :status', { status: 'approved' });
 
     if (location) {
       query.andWhere('job.location = :location', { location });
@@ -492,7 +493,16 @@ export class JobService {
       (publication) => publication.college.id,
     );
 
-    return colleges.every((college) => collegeIds.includes(college.id));
+    const allPublished = colleges.every((college) =>
+      collegeIds.includes(college.id),
+    );
+
+    const hasInvalidStatus = publications.some(
+      (publication) =>
+        publication.status === 'removed' || publication.status === 'reproved',
+    );
+
+    return allPublished && !hasInvalidStatus;
   }
 
   async updateJobPublication(
