@@ -22,11 +22,6 @@ export interface Student {
     proficiencies:Tag[];
 }
 
-export interface ICreateStudentProfile{
-   student:Partial<Student>,
-    userId:number,
-    experiences:Experience[];
-    proficiencies:Partial<Tag>[];
-}
+
 
 

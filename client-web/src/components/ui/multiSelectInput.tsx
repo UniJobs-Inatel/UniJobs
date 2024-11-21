@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/cn";
 import { useEffect, useState } from "react";
 import { Tag } from "@/domain/tags";
 import { Label } from "@radix-ui/react-label";
@@ -67,7 +67,7 @@ const MultiSelectInput = ({
 
   return (
     <div className="w-full" ref={inputRef}>
-      <Label className="font-medium text-[14px] text-primary">{label}</Label>
+      <Label className="font-medium text-[14px] ">{label}</Label>
       <div className="relative w-full">
         <div
           className={cn(

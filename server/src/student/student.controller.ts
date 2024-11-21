@@ -85,22 +85,22 @@ export class StudentController {
   @Get('favorite-jobs')
   @HttpCode(HttpStatus.OK)
   async getFavoriteJobs(@Req() req: RequestWithUser) {
-    return this.studentService.getFavoriteJobs(req.user.userId, req);
+    return this.studentService.getFavoriteJobs(req);
   }
 
-  @Post('favorite-job/:jobId')
+  @Post('favorite-job/:jobPublicationId')
   @HttpCode(HttpStatus.CREATED)
   async favoriteJob(
-    @Param('jobId', ParseIntPipe) jobPublicationId: number,
+    @Param('jobPublicationId', ParseIntPipe) jobPublicationId: number,
     @Req() req: RequestWithUser,
   ) {
     return this.studentService.favoriteJob(jobPublicationId, req);
   }
 
-  @Delete('favorite-job/:jobId')
+  @Delete('favorite-job/:jobPublicationId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async unfavoriteJob(
-    @Param('jobId', ParseIntPipe) jobPublicationId: number,
+    @Param('jobPublicationId', ParseIntPipe) jobPublicationId: number,
     @Req() req: RequestWithUser,
   ) {
     await this.studentService.unfavoriteJob(jobPublicationId, req);

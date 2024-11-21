@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { cpfValidator, requiredString } from "@/utils";
+import { cpfValidator, onlyNumbers, requiredString } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -16,12 +16,12 @@ import { useEffect, useState } from "react";
 import { EditIcon, Trash2Icon, X } from "lucide-react";
 import { MultiSelectInput } from "@/components/ui/multiSelectInput";
 import { Tag } from "@/domain/tags";
-import { getAllTags } from "@/services/repositories/tags";
-import { createStudentProfile } from "@/services/repositories";
-import { Experience, ICreateStudentProfile } from "@/domain/student";
-import { isoFormatter, onlyNumbers } from "@/lib/utils";
+import { Experience} from "@/domain/student";
 import useAuthStore from "@/stores/authStore";
 import { useNavigate } from "react-router-dom";
+import { isoFormatter } from "@/lib/cn";
+import { ICreateStudentProfileRequest } from "@/services/student/interface";
+import { createStudentProfile, getAllTags } from "@/services";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -73,7 +73,7 @@ const StudentProfile = () => {
         }) as Experience
     );
 
-    const creationData: ICreateStudentProfile = {
+    const creationData: ICreateStudentProfileRequest = {
       student: { ...data, cpf: onlyNumbers(data.cpf) },
       userId: 8,
       experiences: experiencesFormatted,
@@ -124,9 +124,9 @@ const StudentProfile = () => {
 
   return (
     <div className="pb-5">
-      <h3 className="text-primary text-[20px] font-bold mb-6">Meu perfil</h3>
+      <h3 className=" text-2xl font-bold mb-6">Meu perfil</h3>
       <section>
-        <h4 className="text-primary text-[16px] font-bold mb-4">
+        <h4 className=" text-[16px] font-bold mb-4">
           Informações Pessoais
         </h4>
         <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -179,17 +179,17 @@ const StudentProfile = () => {
       </section>
 
       <section className="mt-4">
-        <h4 className="text-primary text-[16px] font-bold">Experiências</h4>
+        <h4 className=" text-[16px] font-bold">Experiências</h4>
         <Dialog open={isOpen} onOpenChange={() => setIsOpen(true)}>
           <DialogTrigger asChild>
-            <Button className="text-primary mt-3 mb-3" variant="outline">
+            <Button className=" mt-3 mb-3" variant="outline">
               Adicionar Experiência
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-white w-[96vw] max-w-[425px] max-h-[85vh] overflow-y-scroll rounded-lg">
             <DialogHeader>
               <X className="w-4 h-4 self-end" onClick={() => closeModal()} />
-              <DialogTitle className="text-primary ">
+              <DialogTitle className=" ">
                 Adicionar Experiência
               </DialogTitle>
             </DialogHeader>
@@ -221,7 +221,7 @@ const StudentProfile = () => {
                 <div className="h-full flex flex-col justify-between items-end">
                   <EditIcon
                     onClick={() => selectExperience(experience, index)}
-                    className="w-5 h-5 text-primary"
+                    className="w-5 h-5 "
                   />
                   <Trash2Icon
                     onClick={() => deleteExperience(index)}

@@ -73,16 +73,16 @@ export class JobController {
     return this.jobService.searchJobs(filters, pagination);
   }
 
-  @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  async getJobById(@Param('id') id: number) {
-    return this.jobService.getJobById(id);
-  }
-
   @Get('company')
   @HttpCode(HttpStatus.OK)
   async getJobsByCompany(@Req() req: RequestWithUser) {
     return this.jobService.getJobsByCompany(req);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getJobById(@Param('id') id: number) {
+    return this.jobService.getJobById(id);
   }
 
   @Put(':id')
@@ -101,9 +101,10 @@ export class JobController {
     await this.jobService.deleteJob(id, req);
   }
 
-  @Get('publications/search')
+  @Get('publications/student/search')
   @HttpCode(HttpStatus.OK)
   async searchJobPublications(
+    @Req() req: RequestWithUser,
     @Query('location') location?: string,
     @Query('type') type?: string,
     @Query('skills') skills?: string,
@@ -131,7 +132,13 @@ export class JobController {
 
     const pagination = { limit, offset };
 
-    return this.jobService.searchJobPublications(filters, pagination);
+    return this.jobService.getFilteredJobPublications(req, filters, pagination);
+  }
+
+  @Get('colleges/check/:jobId')
+  @HttpCode(HttpStatus.OK)
+  async checkIfJobIsPublishedOnAllColleges(@Param('jobId') jobId: number) {
+    return this.jobService.checkIfJobIsPublishedOnAllColleges(jobId);
   }
 
   @Get('colleges/:jobId')
@@ -163,8 +170,8 @@ export class JobController {
 
   @Get('publications/student')
   @HttpCode(HttpStatus.OK)
-  async getJobPublicationsByUserCollege(@Req() req: RequestWithUser) {
-    return this.jobService.getJobPublicationsByUserCollege(req);
+  async getJobPublicationsByUser(@Req() req: RequestWithUser) {
+    return this.jobService.getJobPublicationsByUser(req);
   }
 
   @Put('publications/:id')

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/cn";
 import { Label } from "./label";
 
 export interface TextareaProps
@@ -14,7 +14,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full">
         <Label
-          className="font-medium text-[14px] text-primary"
+          className="font-medium text-[14px] "
           htmlFor={props.id}
         >
           {label}

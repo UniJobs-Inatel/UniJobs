@@ -1,11 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, ManyToOne, PrimaryColumn, JoinColumn } from 'typeorm';
 import { JobPublication } from './job-publication.entity';
 import { Student } from './student.entity';
 
 @Entity('favorite_jobs')
 export class FavoriteJobs {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  job_publication_id: number;
+
+  @PrimaryColumn()
+  student_id: number;
 
   @ManyToOne(() => JobPublication, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'job_publication_id' })

@@ -10,4 +10,7 @@ export default defineConfig({
       "@pages": path.resolve(__dirname, "./src/pages/"),
      },
   },
+  build: {
+    outDir: 'dist',
+  },
 });

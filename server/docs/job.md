@@ -17,15 +17,16 @@
 
     ```json
     {
-      "company_id": 1,
       "field_id": 2,
-      "title": "Software Engineer",
+      "job_name": "Software Engineer",
       "description": "Develop and maintain web applications.",
       "location": "Remote",
-      "type": "Full-Time",
+      "type": "clt",
       "salary": 5000,
-      "mode": "Remote",
-      "weekly_hours": 40
+      "mode": "remote",
+      "weekly_hours": 40,
+      "requirements": "Experience with Node.js and React.",
+      "benefits": "Health insurance, Remote work allowance"
     }
     ```
 
@@ -36,13 +37,15 @@
       ```json
       {
         "id": 1,
-        "title": "Software Engineer",
+        "job_name": "Software Engineer",
         "description": "Develop and maintain web applications.",
         "location": "Remote",
-        "type": "Full-Time",
+        "type": "clt",
         "salary": 5000,
-        "mode": "Remote",
+        "mode": "remote",
         "weekly_hours": 40,
+        "requirements": "Experience with Node.js and React.",
+        "benefits": "Health insurance, Remote work allowance",
         "company": {
           "id": 1,
           "name": "Company Name"
@@ -57,7 +60,8 @@
   - **Errors**:
     - **404 Not Found**: "Empresa não encontrada."
     - **404 Not Found**: "Área de atuação não encontrada."
-    - **401 Unauthorized**: "Usuário não autorizado a criar uma vaga para esta empresa."
+
+---
 
 ### 2. Get All Jobs
 
@@ -72,9 +76,9 @@
       [
         {
           "id": 1,
-          "title": "Software Engineer",
+          "job_name": "Software Engineer",
           "location": "Remote",
-          "type": "Full-Time",
+          "type": "clt",
           "company": {
             "id": 1,
             "name": "Company Name"
@@ -87,6 +91,8 @@
       ]
       ```
 
+---
+
 ### 3. Search Jobs
 
 - **URL**: `/api/job/search`
@@ -94,11 +100,11 @@
 - **Description**: Searches for jobs based on various criteria.
 - **Query Parameters**:
   - `location` (string): Job location.
-  - `type` (string): Job type (e.g., Full-Time).
+  - `type` (string): Job type (e.g., clt, freelance).
   - `skills` (string): Comma-separated list of skill IDs.
   - `minSalary` (number): Minimum salary.
   - `maxSalary` (number): Maximum salary.
-  - `mode` (string): Mode (e.g., Remote).
+  - `mode` (string): Mode (e.g., remote, hybrid, on_site).
   - `weeklyHours` (number): Weekly working hours.
   - `fieldId` (number): Field ID.
   - `limit` (number): Number of results per page (default: 10).
@@ -112,9 +118,9 @@
         "jobs": [
           {
             "id": 1,
-            "title": "Software Engineer",
+            "job_name": "Software Engineer",
             "location": "Remote",
-            "type": "Full-Time",
+            "type": "clt",
             "company": {
               "id": 1,
               "name": "Company Name"
@@ -131,6 +137,8 @@
       }
       ```
 
+---
+
 ### 4. Get Job by ID
 
 - **URL**: `/api/job/:id`
@@ -145,13 +153,15 @@
       ```json
       {
         "id": 1,
-        "title": "Software Engineer",
+        "job_name": "Software Engineer",
         "description": "Develop and maintain web applications.",
         "location": "Remote",
-        "type": "Full-Time",
+        "type": "clt",
         "salary": 5000,
-        "mode": "Remote",
+        "mode": "remote",
         "weekly_hours": 40,
+        "requirements": "Experience with Node.js and React.",
+        "benefits": "Health insurance, Remote work allowance",
         "company": {
           "id": 1,
           "name": "Company Name"
@@ -166,6 +176,8 @@
   - **Errors**:
     - **404 Not Found**: "Vaga não encontrada."
 
+---
+
 ### 5. Update Job
 
 - **URL**: `/api/job/:id`
@@ -179,9 +191,10 @@
 
     ```json
     {
-      "title": "Updated Job Title",
+      "job_name": "Updated Job Title",
       "description": "Updated job description.",
       "field_id": 2,
+      "salary": 5500,
       ...
     }
     ```
@@ -193,7 +206,7 @@
       ```json
       {
         "id": 1,
-        "title": "Updated Job Title",
+        "job_name": "Updated Job Title",
         ...
       }
       ```
@@ -202,6 +215,8 @@
     - **404 Not Found**: "Vaga não encontrada."
     - **404 Not Found**: "Área de atuação não encontrada."
     - **401 Unauthorized**: "Usuário não autorizado a atualizar esta vaga."
+
+---
 
 ### 6. Delete Job
 
@@ -218,6 +233,8 @@
     - **404 Not Found**: "Vaga não encontrada."
     - **401 Unauthorized**: "Usuário não autorizado a deletar esta vaga."
 
+---
+
 ### 7. Publish Job
 
 - **URL**: `/api/job/publish`
@@ -230,7 +247,6 @@
     ```json
     {
       "job_id": 1,
-      "company_id": 1,
       "college_id": 1
     }
     ```
@@ -243,14 +259,10 @@
       {
         "id": 1,
         "status": "pending",
-        "publication_request_date": "2024-10-26T00:00:00.000Z",
+        "publication_request_date": "2024-11-26T00:00:00.000Z",
         "job": {
           "id": 1,
-          "title": "Software Engineer"
-        },
-        "company": {
-          "id": 1,
-          "name": "Company Name"
+          "job_name": "Software Engineer"
         },
         "college": {
           "id": 1,
@@ -263,8 +275,10 @@
     - **404 Not Found**: "Vaga ou empresa não encontrada."
     - **401 Unauthorized**: "Usuário não autorizado a criar esta publicação."
 
+---
+
 ## Notes
 
 - All endpoints require JWT authentication through the `JwtAuthGuard`.
-- For publishing and updating job publications, ensure the user has the appropriate permissions.
-- The `Authorization` header must be provided with a valid JWT token for every request.
+- Ensure the `Authorization` header contains a valid JWT token.
+- The `field_id` links the job to a specific area of expertise.

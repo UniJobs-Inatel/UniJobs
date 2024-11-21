@@ -16,7 +16,7 @@ export class College {
   id: number;
 
   @OneToOne(() => Company, { onDelete: 'CASCADE' })
-  @JoinColumn()
+  @JoinColumn({ name: 'company_id' })
   company: Company;
 
   @OneToMany(() => ValidEmail, (validEmail) => validEmail.college)

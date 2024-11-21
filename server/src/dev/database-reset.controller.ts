@@ -6,7 +6,7 @@ import { DatabaseResetService } from './database-reset.service';
 export class DatabaseResetController {
   constructor(private readonly databaseResetService: DatabaseResetService) {}
 
-  @Get('database-reset')
+  @Get('devRouteDatabaseReset-c121092u')
   async resetDatabase(@Res() res: Response): Promise<void> {
     await this.databaseResetService.resetDatabase();
     res.redirect('http://localhost:4000/api/');
