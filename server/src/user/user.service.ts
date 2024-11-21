@@ -33,6 +33,9 @@ export class UserService {
       const user = this.userRepository.create(userData);
       return await this.userRepository.save(user);
     } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Erro ao criar o usuário.');
     }
   }
@@ -53,6 +56,9 @@ export class UserService {
       }
       return user;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Erro ao buscar o usuário.');
     }
   }
