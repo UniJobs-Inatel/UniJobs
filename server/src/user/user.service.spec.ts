@@ -28,7 +28,7 @@ describe('UserService', () => {
     email: 'test@example.com',
     password: 'hashedpassword',
     type: 'student',
-    status: 'active',
+    status: 'created',
   };
 
   beforeEach(async () => {
@@ -44,6 +44,8 @@ describe('UserService', () => {
 
     service = module.get<UserService>(UserService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -70,6 +72,10 @@ describe('UserService', () => {
       await expect(
         service.create({ email: 'test@example.com', password: 'password' }),
       ).rejects.toThrow(ConflictException);
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
     });
 
     it('should throw InternalServerErrorException on error', async () => {
@@ -114,6 +120,10 @@ describe('UserService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.findOne(99)).rejects.toThrow(NotFoundException);
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 99 },
+      });
     });
 
     it('should throw InternalServerErrorException on error', async () => {

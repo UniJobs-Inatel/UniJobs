@@ -19,7 +19,7 @@ describe('UserController', () => {
     id: 1,
     email: 'test@example.com',
     type: 'student',
-    status: 'active',
+    status: 'created',
   };
 
   beforeEach(async () => {
@@ -66,7 +66,10 @@ describe('UserController', () => {
     it('should create a new user', async () => {
       jest.spyOn(service, 'create').mockResolvedValue(mockUser as User);
 
-      const createUserDto = { email: 'newuser@example.com', type: 'student' };
+      const createUserDto = {
+        email: 'newuser@example.com',
+        type: 'student' as const,
+      };
       const result = await controller.create(createUserDto);
       expect(result).toEqual(mockUser);
       expect(service.create).toHaveBeenCalledWith(createUserDto);
@@ -76,13 +79,12 @@ describe('UserController', () => {
   describe('update', () => {
     it('should update an existing user', async () => {
       const updateUserDto = { email: 'updateduser@example.com' };
-      jest.spyOn(service, 'update').mockResolvedValue({
-        ...mockUser,
-        ...updateUserDto,
-      } as User);
+      const updatedUser = { ...mockUser, ...updateUserDto };
+
+      jest.spyOn(service, 'update').mockResolvedValue(updatedUser as User);
 
       const result = await controller.update(1, updateUserDto);
-      expect(result).toEqual({ ...mockUser, ...updateUserDto });
+      expect(result).toEqual(updatedUser);
       expect(service.update).toHaveBeenCalledWith(1, updateUserDto);
     });
   });
