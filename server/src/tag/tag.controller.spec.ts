@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TagController } from './tag.controller';
 import { TagService } from './tag.service';
-import { Tag } from '../entities/tag.entity';
-import { RequestWithUser } from '../auth/request-with-user.interface';
+import { AdminGuard } from '../auth/admin.guard';
+import { ConfigService } from '@nestjs/config';
+import { Tag } from 'src/entities/tag.entity';
 
 describe('TagController', () => {
   let controller: TagController;
@@ -14,7 +15,7 @@ describe('TagController', () => {
       type: 'student',
       email: 'student@example.com',
     },
-  } as RequestWithUser;
+  } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,8 +38,19 @@ describe('TagController', () => {
             deleteJobTag: jest.fn(),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('mocked-value'),
+          },
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(AdminGuard)
+      .useValue({
+        canActivate: jest.fn().mockReturnValue(true),
+      })
+      .compile();
 
     controller = module.get<TagController>(TagController);
     service = module.get<TagService>(TagService);
@@ -47,7 +59,6 @@ describe('TagController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
-
   describe('getTags', () => {
     it('should return an array of tags', async () => {
       const tags: Partial<Tag>[] = [
@@ -196,8 +207,9 @@ describe('TagController', () => {
     it('should call the service to delete a student proficiency', async () => {
       jest.spyOn(service, 'deleteStudentProficiency').mockResolvedValue();
 
-      await controller.deleteStudentProficiency(1, mockRequest);
+      await controller.deleteStudentProficiency(1, 1, mockRequest);
       expect(service.deleteStudentProficiency).toHaveBeenCalledWith(
+        1,
         1,
         mockRequest,
       );
@@ -232,8 +244,9 @@ describe('TagController', () => {
     it('should call the service to delete a job tag', async () => {
       jest.spyOn(service, 'deleteJobTag').mockResolvedValue();
 
-      await controller.deleteJobTag(1, mockRequest);
-      expect(service.deleteJobTag).toHaveBeenCalledWith(1, mockRequest);
+      await controller.deleteJobTag(1, 1, mockRequest);
+
+      expect(service.deleteJobTag).toHaveBeenCalledWith(1, 1, mockRequest);
     });
   });
 });

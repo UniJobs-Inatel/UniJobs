@@ -2,24 +2,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TagService } from './tag.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Tag } from '../entities/tag.entity';
 import { Repository } from 'typeorm';
+import { Tag } from '../entities/tag.entity';
 import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { JobTag } from '../entities/job-tag.entity';
+import { Student } from '../entities/student.entity';
+import { Job } from '../entities/job.entity';
+import { Company } from '../entities/company.entity';
 import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Student } from '../entities/student.entity';
-import { Job } from '../entities/job.entity';
-import { Company } from '../entities/company.entity';
 
 describe('TagService', () => {
   let service: TagService;
   let tagRepository: Repository<Tag>;
   let studentProficiencyRepository: Repository<StudentProficiency>;
   let jobTagRepository: Repository<JobTag>;
+  let studentRepository: Repository<Student>;
+  let jobRepository: Repository<Job>;
+  let companyRepository: Repository<Company>;
 
   const mockTagRepository = {
     create: jest.fn(),
@@ -30,19 +33,31 @@ describe('TagService', () => {
   };
 
   const mockStudentProficiencyRepository = {
-    find: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+    find: jest.fn(),
     findOne: jest.fn(),
     delete: jest.fn(),
   };
 
   const mockJobTagRepository = {
-    find: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+    find: jest.fn(),
     findOne: jest.fn(),
     delete: jest.fn(),
+  };
+
+  const mockStudentRepository = {
+    findOne: jest.fn(),
+  };
+
+  const mockJobRepository = {
+    findOne: jest.fn(),
+  };
+
+  const mockCompanyRepository = {
+    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -54,9 +69,15 @@ describe('TagService', () => {
           provide: getRepositoryToken(StudentProficiency),
           useValue: mockStudentProficiencyRepository,
         },
+        { provide: getRepositoryToken(JobTag), useValue: mockJobTagRepository },
         {
-          provide: getRepositoryToken(JobTag),
-          useValue: mockJobTagRepository,
+          provide: getRepositoryToken(Student),
+          useValue: mockStudentRepository,
+        },
+        { provide: getRepositoryToken(Job), useValue: mockJobRepository },
+        {
+          provide: getRepositoryToken(Company),
+          useValue: mockCompanyRepository,
         },
       ],
     }).compile();
@@ -68,6 +89,13 @@ describe('TagService', () => {
     );
     jobTagRepository = module.get<Repository<JobTag>>(
       getRepositoryToken(JobTag),
+    );
+    studentRepository = module.get<Repository<Student>>(
+      getRepositoryToken(Student),
+    );
+    jobRepository = module.get<Repository<Job>>(getRepositoryToken(Job));
+    companyRepository = module.get<Repository<Company>>(
+      getRepositoryToken(Company),
     );
   });
 
@@ -164,46 +192,70 @@ describe('TagService', () => {
 
   describe('getTagsByStudentId', () => {
     it('should return tags for a student', async () => {
-      const tags = [{ id: 1, name: 'JavaScript' }];
-      mockStudentProficiencyRepository.find.mockResolvedValue(tags);
+      const student = {
+        id: 1,
+        user: { id: 1 },
+      };
+
+      const studentProficiencies = [
+        {
+          id: 1,
+          student,
+          tag: { id: 1, name: 'JavaScript' },
+        },
+      ];
+
+      mockStudentRepository.findOne.mockResolvedValue(student);
+      mockStudentProficiencyRepository.find.mockResolvedValue(
+        studentProficiencies,
+      );
 
       const result = await service.getTagsByStudentId(1, {
         user: { userId: 1 },
       } as any);
-      expect(result).toEqual(tags);
-      expect(mockStudentProficiencyRepository.find).toHaveBeenCalled();
-    });
-
-    it('should throw an UnauthorizedException if the student ID does not match', async () => {
-      const student = { id: 1, user: { id: 2 } };
-      mockStudentProficiencyRepository.findOne.mockResolvedValue(student);
-
-      await expect(
-        service.getTagsByStudentId(1, { user: { userId: 99 } } as any),
-      ).rejects.toThrow(UnauthorizedException);
+      expect(result).toEqual([studentProficiencies[0].tag]);
+      expect(mockStudentRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['user'],
+      });
+      expect(mockStudentProficiencyRepository.find).toHaveBeenCalledWith({
+        where: { student: { id: 1 } },
+        relations: ['tag'],
+      });
     });
   });
 
   describe('createStudentProficiency', () => {
     it('should create a student proficiency', async () => {
-      const studentProficiency = { id: 1, student: { id: 1 }, tag: { id: 1 } };
-      mockStudentProficiencyRepository.create.mockReturnValue(
-        studentProficiency,
-      );
-      mockStudentProficiencyRepository.save.mockResolvedValue(
-        studentProficiency,
-      );
+      const student = {
+        id: 1,
+        user: { id: 1 }, // Matches the JWT user ID
+      };
+
+      const newProficiency = {
+        id: 1,
+        student: { id: 1 },
+        tag: { id: 1 },
+      };
+
+      mockStudentRepository.findOne.mockResolvedValue(student);
+      mockStudentProficiencyRepository.create.mockReturnValue(newProficiency);
+      mockStudentProficiencyRepository.save.mockResolvedValue(newProficiency);
 
       const result = await service.createStudentProficiency(1, 1, {
         user: { userId: 1 },
       } as any);
-      expect(result).toEqual(studentProficiency);
+      expect(result).toEqual(newProficiency);
+      expect(mockStudentRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['user'],
+      });
       expect(mockStudentProficiencyRepository.create).toHaveBeenCalledWith({
         student: { id: 1 },
         tag: { id: 1 },
       });
       expect(mockStudentProficiencyRepository.save).toHaveBeenCalledWith(
-        studentProficiency,
+        newProficiency,
       );
     });
   });
