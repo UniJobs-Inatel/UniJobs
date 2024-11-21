@@ -14,10 +14,10 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobPublicationDto } from './dto/create-job-publication.dto';
 import { UpdateJobPublicationDto } from './dto/update-job-publication.dto';
 import { Company } from '../entities/company.entity';
-import { Student } from 'src/entities/student.entity';
+import { Student } from '../entities/student.entity';
 import { College } from '../entities/college.entity';
 import { Field } from '../entities/field.entity';
-import { FavoriteJobs } from 'src/entities/favorite-jobs.entity';
+import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { RequestWithUser } from '../auth/request-with-user.interface';
 
 @Injectable()
