@@ -20,8 +20,8 @@ export interface Job {
   salary: number;
   requirements: string;
   field_id?: number;
-  isPublishedOnAllColleges:boolean;
-  company:Partial<IGetCompanyResponse>
+  isPublishedOnAllColleges?:boolean;
+  company?:Partial<IGetCompanyResponse>
   field?: {
     id: number;
     field: string;
