@@ -133,14 +133,32 @@ cd server
 1. Create a `.env` file in the root directory of your project:
 
    ```plaintext
-   MYSQL_ROOT_PASSWORD=TCC_2024_INATEL@
-   MYSQL_DATABASE=unijobs
 
-   DATABASE_HOST=mysql
-   DATABASE_PORT=3306
-   DATABASE_USER=root
-   DATABASE_PASSWORD=TCC_2024_INATEL@  
-   DATABASE_NAME=unijobs
+# PostgreSQL Database Configuration
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=yourPassword
+POSTGRES_DB=yourDBName
+
+DATABASE_HOST=postgres
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=yourPassword
+DATABASE_NAME=yourDBName
+
+# Nodemailer Configuration for SMTPBucket
+
+EMAIL_HOST=sandbox.smtp.mailtrap.io
+EMAIL_PORT=2525
+EMAIL_USER=yourUser
+EMAIL_PASS=yourPass
+EMAIL_FROM=<email@no-reply.com>
+
+# Guard Tokens
+
+JWT_SECRET=yourJWTokenSecret
+ADMIN_TOKEN=yourAdminToken
+
    ```
 
 ### Running the Backend
@@ -155,8 +173,9 @@ cd server
    ```
 
    This command will:
-   - Build the Docker images for both the MySQL database and the NestJS application.
-   - Start the containers with the correct environment variables.
+
+- Build the Docker images for both the MySQL database and the NestJS application.
+- Start the containers with the correct environment variables.
 
 2. **Access the Application:**
 

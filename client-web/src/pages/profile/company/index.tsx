@@ -149,7 +149,6 @@ const CompanyProfile = () => {
         />
       ),
     });
-
   };
 
   const publishJob = ({ jobId }: { jobId: number }) => {
@@ -281,22 +280,24 @@ const CompanyProfile = () => {
             </div>
             <div className="flex flex-col gap-4">
               {jobs &&
-                jobs.map((job) => (
-                  <JobCard
-                    onDeleteClick={() =>
-                      openModal({
-                        children: (
-                          <ConfirmationModal
-                            onAgreeClick={() => removeJob(job.id)}
-                            title={"Deseja remover essa vaga?"}
-                          />
-                        ),
-                      })
-                    }
-                    publishJob={publishJob}
-                    key={job.id}
-                    job={job}
-                  />
+                jobs.map((job, index) => (
+                  <div data-cy={`publish-card-${index}`} >
+                    <JobCard
+                      onDeleteClick={() =>
+                        openModal({
+                          children: (
+                            <ConfirmationModal
+                              onAgreeClick={() => removeJob(job.id)}
+                              title={"Deseja remover essa vaga?"}
+                            />
+                          ),
+                        })
+                      }
+                      publishJob={publishJob}
+                      key={job.id}
+                      job={job}
+                    />
+                  </div>
                 ))}
             </div>
           </section>

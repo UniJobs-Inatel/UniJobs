@@ -20,13 +20,17 @@ const ConfirmationModal = ({  title, onAgreeClick, onDeclineClick }: Confirmatio
           {title && <h4 className=" text-[14px]">{title}</h4>}
      </div>
      <div className="flex gap-4" >
-      <Button onClick={() => {
+      <Button
+       data-cy='decline-button'
+       onClick={() => {
         closeModal();
         onDeclineClick && onDeclineClick();
       }} className= "text-white">
         Não
       </Button>
-      <Button onClick={() => {
+      <Button
+      data-cy='agree-button'
+      onClick={() => {
         closeModal();
         onAgreeClick && onAgreeClick();
         
