@@ -70,14 +70,15 @@ const JobCard: React.FC<{
   return (
     <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full" data-cy='jobcard' >
       <button
-        className={`absolute top-2 right-2 ${isFavorited ? "text-red-500" : "text-gray-400"}`}
+        className={`absolute top-2 right-2 ${isFavorited ? "text-primary" : "text-white"}`}
         onClick={toggleFavorite}
+        data-cy='favorite-button'
       >
-        {isFavorited ? <FaHeart onClick={handleUnfavoriteClick} /> : <FaRegHeart onClick={handleFavoriteClick} />}
+        {isFavorited ? <FaHeart onClick={handleUnfavoriteClick} /> : <FaRegHeart onClick={handleFavoriteClick}/>}
       </button>
 
       <div className="flex-grow mb-4 md:mb-0">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900" data-cy='job-title'>
           {job.job_name}
         </h2>
         <p className="text-xs md:text-sm text-gray-700" data-cy='job-location'>{job.location}</p>
@@ -234,7 +235,7 @@ const JobList: React.FC = () => {
           </button>
           <button className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center"
             onClick={handleShowFavoritesToggle}>
-            <FaHeart className={showOnlyFavorites ? 'fill-red-500' : 'fill-white'} />
+            <FaHeart className={showOnlyFavorites ? 'fill-red-500' : 'fill-white'} data-cy='favorites-button'/>
           </button>
           <button
             className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center"
