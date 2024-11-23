@@ -68,7 +68,7 @@ const JobCard: React.FC<{
   }
 
   return (
-    <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full">
+    <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full" data-cy='jobcard' >
       <button
         className={`absolute top-2 right-2 ${isFavorited ? "text-red-500" : "text-gray-400"}`}
         onClick={toggleFavorite}
@@ -80,8 +80,8 @@ const JobCard: React.FC<{
         <h2 className="text-lg md:text-xl font-semibold text-gray-900">
           {job.job_name}
         </h2>
-        <p className="text-xs md:text-sm text-gray-700">{job.location}</p>
-        <p className="text-xs md:text-sm text-gray-700">
+        <p className="text-xs md:text-sm text-gray-700" data-cy='job-location'>{job.location}</p>
+        <p className="text-xs md:text-sm text-gray-700" data-cy='job-type'>
           {getTranslatedValue(job.type, jobTypeMapping)} •{" "}
           {getTranslatedValue(job.mode, modalityMapping)} • R${" "}
           {job.salary.toLocaleString("pt-BR", {
@@ -240,7 +240,7 @@ const JobList: React.FC = () => {
             className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center"
             onClick={() => setIsFilterOpen(true)}
           >
-            <FaFilter className="fill-white" />
+            <FaFilter className="fill-white" data-cy='filter-button' />
           </button>
         </div>
 
@@ -272,6 +272,7 @@ const JobList: React.FC = () => {
                 <Select
                   value={filters.type}
                   onValueChange={(value) => handleFilterChange("type", value)}
+                  data-cy='type-select'
                 >
                   <SelectTrigger className="border p-2 w-full rounded">
                     <SelectValue placeholder="Todos" />
