@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,16 +15,24 @@ import {
 } from "@/components/ui/select";
 import { Job, JobFilters, JobPublication } from '@/domain/job'
 import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
-import { favoriteJob, unfavoriteJob, getFavoriteJobs, getJobPublicationsStudent } from '@/services';
+import { favoriteJob, unfavoriteJob, getJobPublicationsStudent } from '@/services';
 import JobDetailsModal from './jobDetailsModal';
 
+type OnFavoriteChangeProps = {
+  isFavorited: boolean, jobPublicationId: number
+}
 
-const JobCard: React.FC<{ jobPublication: JobPublication }> = ({ jobPublication: { job, id: jobPublicationId } }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
+const JobCard: React.FC<{
+  jobPublication: JobPublication, onFavoriteChange: (payload: OnFavoriteChangeProps) => void
+}> = ({ jobPublication: { job, id: jobPublicationId, isFavorite }, onFavoriteChange }) => {
+  const [isFavorited, setIsFavorited] = useState(isFavorite);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const toggleFavorite = () => setIsFavorited(!isFavorited);
+  const toggleFavorite = () => {
+    onFavoriteChange({ isFavorited: !isFavorited, jobPublicationId })
+    setIsFavorited(!isFavorited)
+  };
 
   const getTranslatedValue = (
     value: string,
@@ -129,7 +137,7 @@ const JobList: React.FC = () => {
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [jobPublications, setJobPublication] = useState<JobPublication[]>([]);
+  const [jobPublications, setJobPublications] = useState<JobPublication[]>([]);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
   const [totalPages, setTotalPages] = useState<number>(1);
   const [paginatedJobsPublications, setPaginatedJobsPublications] = useState<JobPublication[]>([]);
@@ -138,36 +146,27 @@ const JobList: React.FC = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
 
 
-  const fetchJobs = useCallback(async () => {
+  const fetchJobs = useCallback(async (filters?: JobFilters) => {
     try {
-      const jobData = await getJobPublicationsStudent();
+      const jobData = await getJobPublicationsStudent(filters);
+      setJobPublications(jobData.publications)
       const totalItems = jobData.publications.length || 0;
       const pages = Math.ceil(totalItems / itemsPerPage);
       setTotalPages(pages || 1);
       setPaginatedJobsPublications(jobData.publications.slice(startIndex, startIndex + itemsPerPage));
-      setJobPublication(jobData.publications);
     } catch (error) {
       console.error("Erro ao carregar as vagas:", error);
       setTotalPages(1);
     }
-  }, [startIndex, itemsPerPage]);
+  }, [startIndex, itemsPerPage, getJobPublicationsStudent]);
 
-  /*
-  const fetchJobs = useCallback(async () => {
-    try {
-      const jobData = await getJobPublicationsStudent();
-      setTotalPages(jobData.length / itemsPerPage);
-      setPaginatedJobsPublications(jobData.slice(startIndex, startIndex + itemsPerPage));
-      setJobPublication(jobData.publications);
-    } catch (error) {
-      console.error("Erro ao carregar as vagas:", error);
-    }
-  }, [getJobPublicationsStudent, setJobPublication]);*/
-
+  const favoriteJobs = useMemo(() => {
+    return jobPublications.filter(jobPublication => jobPublication.isFavorite)
+  }, [jobPublications])
 
   useEffect(() => {
     fetchJobs();
-  }, [fetchJobs, currentPage]);
+  }, []);
 
   useEffect(() => {
     if (user && user.status !== "complete") {
@@ -185,22 +184,7 @@ const JobList: React.FC = () => {
   };
 
   const handleShowFavoritesToggle = async () => {
-    try {
-      if (showOnlyFavorites) {
-        const jobData = await getJobPublicationsStudent();
-        setTotalPages(jobData.publications.length / itemsPerPage);
-        setPaginatedJobsPublications(jobData.publications.slice(startIndex, startIndex + itemsPerPage));
-        setJobPublication(jobData.publications);
-      } else {
-        const favoriteData = await getFavoriteJobs();
-        setTotalPages(favoriteData.length / itemsPerPage);
-        setPaginatedJobsPublications(favoriteData.slice(startIndex, startIndex + itemsPerPage));
-        setJobPublication(favoriteData.publications);
-      }
-      setShowOnlyFavorites(prev => !prev);
-    } catch (error) {
-      console.error("Erro ao alternar as vagas:", error);
-    }
+    setShowOnlyFavorites(prev => !prev);
   };
 
   const handleClearFilters = () => {
@@ -216,15 +200,23 @@ const JobList: React.FC = () => {
     });
   };
 
-  const handleApplyFiters = async () => {
-    const jobData = await getJobPublicationsStudent(filters);
-    setJobPublication(jobData.publications);
+  const handleApplyFilters = async () => {
+    await fetchJobs(filters);
     setIsFilterOpen(false)
   }
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= (totalPages ? totalPages : 1)) setCurrentPage(page);
   };
+
+  const handleOnFavoriteChange = ({ isFavorited, jobPublicationId }: OnFavoriteChangeProps) => {
+    const index = jobPublications.findIndex(job => job.id === jobPublicationId)
+    if (index !== -1) {
+      const auxJobPublicationList = [...jobPublications]
+      auxJobPublicationList[index].isFavorite = isFavorited
+      setJobPublications(auxJobPublicationList)
+    }
+  }
 
   return (
     <div className="p-4 max-w-2xl md:max-w-4xl mx-auto">
@@ -237,15 +229,15 @@ const JobList: React.FC = () => {
             onChange={handleSearchChange}
             className="border p-2 w-full rounded"
           />
-          <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center">
-            <FaSearch />
+          <button className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center">
+            <FaSearch className="fill-white" />
           </button>
-          <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
+          <button className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center"
             onClick={handleShowFavoritesToggle}>
-            <FaHeart className={showOnlyFavorites ? 'text-red-500' : 'text-gray-400'} />
+            <FaHeart className={showOnlyFavorites ? 'fill-red-500' : 'fill-white'} />
           </button>
           <button
-            className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
+            className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center"
             onClick={() => setIsFilterOpen(true)}
           >
             <FaFilter className="fill-white" />
@@ -390,7 +382,7 @@ const JobList: React.FC = () => {
                 >
                   Limpar Filtros
                 </Button>
-                <Button className="bg-primary text-white hover:bg-primary ml-2" onClick={handleApplyFiters}>
+                <Button className="bg-primary text-white hover:bg-primary ml-2" onClick={handleApplyFilters}>
                   Aplicar Filtros
                 </Button>
               </div>
@@ -400,8 +392,8 @@ const JobList: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {paginatedJobsPublications.map(jobPublication => (
-          <JobCard key={jobPublication.id} jobPublication={jobPublication} />
+        {(showOnlyFavorites ? favoriteJobs : paginatedJobsPublications).map(jobPublication => (
+          <JobCard key={jobPublication.id} jobPublication={jobPublication} onFavoriteChange={handleOnFavoriteChange} />
         ))}
       </div>
 

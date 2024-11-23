@@ -60,6 +60,7 @@ export const getAllJobs = async () => {
   }
 };
 
+/*
 export const getJobPublications = async (filters?: JobFilters) => {
   try {
     const params = new URLSearchParams();
@@ -81,7 +82,7 @@ export const getJobPublications = async (filters?: JobFilters) => {
     console.error("Erro ao buscar vagas:", error);
     throw error;
   }
-};
+};*/
 
 export const getJobPublicationsStudent = async (filters?: JobFilters) => {
   try {

@@ -6,6 +6,7 @@ export interface JobPublication {
   publication_date: string
   publication_request_date: string
   status: string
+  isFavorite: boolean
 }
 
 export interface Job {
