@@ -73,8 +73,8 @@ const JobForm = () => {
     <div className="max-w-5xl mx-auto pb-10 ">
       <h2 className="text-2xl font-bold mb-4">Cadastro de Vaga</h2>
       <form className="grid grid-cols-1 gap-x-2 gap-y-4 md:grid-cols-2" onSubmit={handleSubmit(onSubmit, (error) => console.error(error))}>
-        <Input label="Nome da Vaga:" {...register("job_name")} error={errors.job_name?.message} />
-        <Input label="Local:" {...register("location")} error={errors.location?.message} />
+        <Input placeholder="Exemplo: Desenvolvedor de Software Junior" label="Nome da Vaga:" {...register("job_name")} error={errors.job_name?.message} />
+        <Input placeholder="Exemplo: São Paulo, SP, Brasil" label="Local:" {...register("location")} error={errors.location?.message} />
 
         <Label className="">Tipo de vaga:
         <Controller
@@ -139,13 +139,22 @@ const JobForm = () => {
         />
         </Label>
 
-        <Input label="Carga Horária Semanal:" type="number" {...register("weekly_hours", { valueAsNumber: true })} error={errors.weekly_hours?.message} />
-        <Input label="Faixa Salarial:" type="number" {...register("salary", { valueAsNumber: true })} error={errors.salary?.message} />
+        <Input placeholder="Exemplo: 40" label="Carga Horária Semanal:" type="number" {...register("weekly_hours", { valueAsNumber: true })} error={errors.weekly_hours?.message} />
+        <Input placeholder="Exemplo: 2000" label="Salário:" type="number" {...register("salary", { valueAsNumber: true })} error={errors.salary?.message} />
 
         {/*<MultiSelectInput label="Tags" options={jobTags} selectedOptions={selectedTags} onChange={setSelectedTags} error={errors.tags?.message} />*/}
-        <Textarea label="Descrição:" {...register("description")} error={errors.description?.message} />
-        <Textarea label="Requisitos:" {...register("requirements")} error={errors.requirements?.message} />
-        <Textarea label="Benefícios:" {...register("benefits")} error={errors.benefits?.message} />
+        
+        <Textarea
+        placeholder="Coloque também na descrição a forma de candidatura, por exemplo: link para aplicar, e-mail de contato com qual deve ser o assunto, telefone para contato..."
+        label="Descrição:" {...register("description")} error={errors.description?.message} />
+        
+        
+        <Textarea
+        placeholder="Escreva aqui o que está procurando na pessoa que irá ocupar esta vaga, quais conhecimentos e skills ela precisa ter."
+        label="Requisitos:" {...register("requirements")} error={errors.requirements?.message} />
+        <Textarea 
+        placeholder="Escreva aqui quais os benefícios o candidato será se ocupar esta vaga, por exemplo: vale alimentação, vale transporte, plano de saúde..."
+        label="Benefícios:" {...register("benefits")} error={errors.benefits?.message} />
 
         <Button type="submit" className="w-full md:col-span-2" disabled={loading}>
           {loading ? "Cadastrando..." : "Cadastrar Vaga"}

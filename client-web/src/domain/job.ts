@@ -1,5 +1,13 @@
-import { IGetCompanyResponse } from "@/services/company/interface";
-import { JobStatus } from "@/utils/mappers";
+import { IGetCompanyResponse } from "@/services/company/interface"
+
+export interface JobPublication {
+  id: number
+  job: Job
+  publication_date: string
+  publication_request_date: string
+  status: string
+  isFavorite: boolean
+}
 
 export interface Job {
   id?: number;
@@ -22,8 +30,13 @@ export interface Job {
   //company_id: number;
 }
 
-export interface JobPublication {
-  id:number;
-  status:JobStatus;
-  job:Job;
+export interface JobFilters {
+  type: string
+  minSalary: string
+  maxSalary: string
+  requirements: string
+  mode: string
+  weekly_hours: string
+  field_id: string
+  location: string
 }

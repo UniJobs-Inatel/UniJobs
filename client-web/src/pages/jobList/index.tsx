@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { FaHeart, FaRegHeart, FaFilter, FaSearch } from "react-icons/fa";
 import useAuthStore from "@/stores/authStore";
 import { useNavigate } from "react-router-dom";
@@ -13,24 +13,26 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Job, JobPublication } from "@/domain/job";
-import {
-  jobTypeMapping,
-  modalityMapping,
-  fieldMaping,
-  jobTypes,
-  modalities,
-  fields,
-} from "@/utils/mappings";
-import {  getStudentsJobPublicationList } from "@/services";
-import JobDetailsModal from "./jobDetailsModal";
+import { Job, JobFilters, JobPublication } from '@/domain/job'
+import { jobTypeMapping, modalityMapping, fieldMaping, jobTypes, modalities, fields } from '@/utils/mappings';
+import { favoriteJob, unfavoriteJob, getJobPublicationsStudent } from '@/services';
+import JobDetailsModal from './jobDetailsModal';
 
-const JobCard: React.FC<{ job: Job }> = ({ job }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
+type OnFavoriteChangeProps = {
+  isFavorited: boolean, jobPublicationId: number
+}
+
+const JobCard: React.FC<{
+  jobPublication: JobPublication, onFavoriteChange: (payload: OnFavoriteChangeProps) => void
+}> = ({ jobPublication: { job, id: jobPublicationId, isFavorite }, onFavoriteChange }) => {
+  const [isFavorited, setIsFavorited] = useState(isFavorite);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const toggleFavorite = () => setIsFavorited(!isFavorited);
+  const toggleFavorite = () => {
+    onFavoriteChange({ isFavorited: !isFavorited, jobPublicationId })
+    setIsFavorited(!isFavorited)
+  };
 
   const getTranslatedValue = (
     value: string,
@@ -52,21 +54,35 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
     setSelectedJob(null);
   };
 
+  async function handleFavoriteClick() {
+    if (jobPublicationId) {
+      await favoriteJob(jobPublicationId)
+    }
+  }
+
+  async function handleUnfavoriteClick() {
+
+    if (jobPublicationId) {
+      await unfavoriteJob(jobPublicationId)
+    }
+  }
+
   return (
-    <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full">
+    <div className="relative flex flex-col items-start md:p-2 shadow-md bg-white rounded-lg mb-4 w-full" data-cy='jobcard' >
       <button
-        className={`absolute top-2 right-2 ${isFavorited ? "text-red-500" : "text-gray-400"}`}
+        className={`absolute top-2 right-2 ${isFavorited ? "text-primary" : "text-white"}`}
         onClick={toggleFavorite}
+        data-cy='favorite-button'
       >
-        {isFavorited ? <FaHeart /> : <FaRegHeart />}
+        {isFavorited ? <FaHeart onClick={handleUnfavoriteClick} /> : <FaRegHeart onClick={handleFavoriteClick}/>}
       </button>
 
       <div className="flex-grow mb-4 md:mb-0">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900" data-cy='job-title'>
           {job.job_name}
         </h2>
-        <p className="text-xs md:text-sm text-gray-700">{job.location}</p>
-        <p className="text-xs md:text-sm text-gray-700">
+        <p className="text-xs md:text-sm text-gray-700" data-cy='job-location'>{job.location}</p>
+        <p className="text-xs md:text-sm text-gray-700" data-cy='job-type'>
           {getTranslatedValue(job.type, jobTypeMapping)} •{" "}
           {getTranslatedValue(job.mode, modalityMapping)} • R${" "}
           {job.salary.toLocaleString("pt-BR", {
@@ -81,12 +97,8 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
           <p className="text-xs md:text-sm text-gray-500">{job.benefits}</p>
         </div>
         <div className="flex">
-          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">
-            Área de atuação:
-          </p>
-          <p className="text-xs md:text-sm text-gray-500">
-            {getTranslatedValue(job.field_id?.toString() || "", fieldMaping)}
-          </p>
+          <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">Área de atuação:</p>
+          <p className="text-xs md:text-sm text-gray-500">{getTranslatedValue(job.field?.id.toString() || '', fieldMaping)}</p>
         </div>
         <div className="flex mb-3">
           <p className="text-xs md:text-sm font-semibold text-gray-700 mr-1">
@@ -111,32 +123,49 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
 };
 
 const JobList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [locationTerm, setLocationTerm] = useState("");
-  const [filters, setFilters] = useState({
-    type: "todos",
-    salary: "",
-    requirements: "",
-    mode: "todos",
-    weekly_hours: "",
-    field_id: "todos",
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<JobFilters>({
+    type: 'todos',
+    minSalary: '',
+    maxSalary: '',
+    requirements: '',
+    mode: 'todos',
+    weekly_hours: '',
+    field_id: 'todos',
+    location: '',
   });
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [jobs, setJobs] = useState<JobPublication[]>([]);
+  const [jobPublications, setJobPublications] = useState<JobPublication[]>([]);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [paginatedJobsPublications, setPaginatedJobsPublications] = useState<JobPublication[]>([]);
+
+  const itemsPerPage = 5;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+
+
+  const fetchJobs = useCallback(async (filters?: JobFilters) => {
+    try {
+      const jobData = await getJobPublicationsStudent(filters);
+      setJobPublications(jobData.publications)
+      const totalItems = jobData.publications.length || 0;
+      const pages = Math.ceil(totalItems / itemsPerPage);
+      setTotalPages(pages || 1);
+      setPaginatedJobsPublications(jobData.publications.slice(startIndex, startIndex + itemsPerPage));
+    } catch (error) {
+      console.error("Erro ao carregar as vagas:", error);
+      setTotalPages(1);
+    }
+  }, [startIndex, itemsPerPage, getJobPublicationsStudent]);
+
+  const favoriteJobs = useMemo(() => {
+    return jobPublications.filter(jobPublication => jobPublication.isFavorite)
+  }, [jobPublications])
 
   useEffect(() => {
-    const fetchJobs = async () => {
-        const response = await getStudentsJobPublicationList();
-        if(!response.success){
-          return;
-        }
-        setJobs(response.jobPublications);
-      
-    };
-
     fetchJobs();
   }, []);
 
@@ -155,48 +184,40 @@ const JobList: React.FC = () => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocationTerm(e.target.value);
+  const handleShowFavoritesToggle = async () => {
+    setShowOnlyFavorites(prev => !prev);
   };
 
   const handleClearFilters = () => {
     setFilters({
-      type: "todos",
-      salary: "",
-      requirements: "",
-      mode: "todos",
-      weekly_hours: "",
-      field_id: "todos",
+      type: 'todos',
+      minSalary: '',
+      maxSalary: '',
+      requirements: '',
+      mode: 'todos',
+      weekly_hours: '',
+      field_id: 'todos',
+      location: '',
     });
-    setLocationTerm("");
   };
 
-  const filteredJobs = jobs.filter(
-    (publication) =>
-      publication.job.job_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      publication.job.location.toLowerCase().includes(locationTerm.toLowerCase()) &&
-      (filters.type === "todos" || publication.job.type === filters.type) &&
-      (filters.salary === "" || publication.job.salary?.toString() === filters.salary) &&
-      (filters.requirements === "" ||
-        filters.requirements === publication.job.requirements) &&
-      (filters.mode === "todos" || publication.job.mode === filters.mode) &&
-      (filters.weekly_hours === "" ||
-        publication.job.weekly_hours?.toString() === filters.weekly_hours) &&
-      (filters.field_id === "todos" ||
-        publication.job.field?.id?.toString() === filters.field_id)
-  );
-
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedJobs = filteredJobs.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const handleApplyFilters = async () => {
+    await fetchJobs(filters);
+    setIsFilterOpen(false)
+  }
 
   const handlePageChange = (page: number) => {
-    if (page > 0 && page <= totalPages) setCurrentPage(page);
+    if (page > 0 && page <= (totalPages ? totalPages : 1)) setCurrentPage(page);
   };
+
+  const handleOnFavoriteChange = ({ isFavorited, jobPublicationId }: OnFavoriteChangeProps) => {
+    const index = jobPublications.findIndex(job => job.id === jobPublicationId)
+    if (index !== -1) {
+      const auxJobPublicationList = [...jobPublications]
+      auxJobPublicationList[index].isFavorite = isFavorited
+      setJobPublications(auxJobPublicationList)
+    }
+  }
 
   return (
     <div className="p-4 max-w-2xl md:max-w-4xl mx-auto">
@@ -209,14 +230,18 @@ const JobList: React.FC = () => {
             onChange={handleSearchChange}
             className="border p-2 w-full rounded"
           />
-          <button className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center">
+          <button className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center">
             <FaSearch className="fill-white" />
           </button>
+          <button className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center"
+            onClick={handleShowFavoritesToggle}>
+            <FaHeart className={showOnlyFavorites ? 'fill-red-500' : 'fill-white'} data-cy='favorites-button'/>
+          </button>
           <button
-            className="bg-primary text-white p-2 rounded hover:bg-primary flex items-center justify-center"
+            className="bg-primary p-2 rounded hover:bg-primary flex items-center justify-center"
             onClick={() => setIsFilterOpen(true)}
           >
-            <FaFilter className="fill-white" />
+            <FaFilter className="fill-white" data-cy='filter-button' />
           </button>
         </div>
 
@@ -237,9 +262,9 @@ const JobList: React.FC = () => {
                   type="text"
                   placeholder="Localização..."
                   className="border p-2 w-full rounded"
-                  label="Localização:"
-                  value={locationTerm}
-                  onChange={handleLocationChange}
+                  label='Localização:'
+                  value={filters.location}
+                  onChange={(e) => handleFilterChange("location", e.target.value)}
                 />
               </div>
 
@@ -248,6 +273,7 @@ const JobList: React.FC = () => {
                 <Select
                   value={filters.type}
                   onValueChange={(value) => handleFilterChange("type", value)}
+                  data-cy='type-select'
                 >
                   <SelectTrigger className="border p-2 w-full rounded">
                     <SelectValue placeholder="Todos" />
@@ -270,13 +296,23 @@ const JobList: React.FC = () => {
                   <div className="flex gap-2">
                     <Input
                       type="number"
-                      label="Salário:"
-                      name="salary"
-                      value={filters.salary}
-                      placeholder="ex: 2000"
-                      onChange={(e) =>
-                        handleFilterChange("salary", e.target.value)
-                      }
+                      label="Salário mínimo:"
+                      name="minSalary"
+                      value={filters.minSalary}
+                      placeholder="ex: 1000"
+                      onChange={(e) => handleFilterChange("minSalary", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      label="Salário máximo:"
+                      name="maxSalary"
+                      value={filters.maxSalary}
+                      placeholder="ex: 3000"
+                      onChange={(e) => handleFilterChange("maxSalary", e.target.value)}
                     />
                   </div>
                 </div>
@@ -348,12 +384,7 @@ const JobList: React.FC = () => {
                 >
                   Limpar Filtros
                 </Button>
-                <Button
-                  className="bg-primary text-white hover:bg-primary ml-2"
-                  onClick={() => {
-                    setIsFilterOpen(false);
-                  }}
-                >
+                <Button className="bg-primary text-white hover:bg-primary ml-2" onClick={handleApplyFilters}>
                   Aplicar Filtros
                 </Button>
               </div>
@@ -363,8 +394,8 @@ const JobList: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {paginatedJobs.map((publication) => (
-          <JobCard key={publication.id} job={publication.job} />
+        {(showOnlyFavorites ? favoriteJobs : paginatedJobsPublications).map(jobPublication => (
+          <JobCard key={jobPublication.id} jobPublication={jobPublication} onFavoriteChange={handleOnFavoriteChange} />
         ))}
       </div>
 
@@ -376,9 +407,7 @@ const JobList: React.FC = () => {
         >
           Anterior
         </button>
-        <span className="h-fit" >
-          {currentPage} de {totalPages}
-        </span>
+        <span>{currentPage} de {totalPages || 1}</span>
         <button
           className="bg-primary text-white px-4 py-2 rounded mx-2"
           onClick={() => handlePageChange(currentPage + 1)}

@@ -1,4 +1,5 @@
-import { Job, JobPublication } from "@/domain/job";
+
+import { Job, JobFilters, JobPublication } from "@/domain/job";
 import instance from "@/lib/axios";
 import {
   AvailablesIesResponse,
@@ -13,26 +14,7 @@ import {
 } from "./interface";
 import { ApiResponse } from "../inteface";
 
-export const getJobsByCompany = async (): Promise<
-  ApiResponse<GetJobsByCompanyResponse>
-> => {
-  try {
-    const response = await instance.get<Job[]>(`/job/company`);
-    return {
-      jobs: response.data,
-      success: true,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: "Erro ao buscar vagas",
-    };
-  }
-};
-
-export const getStudentsJobPublicationList = async (): Promise<
-  ApiResponse<GetStudentsJobPublicationList>
-> => {
+export const getJobsByCompany = async (companyId: number) => {
   try {
     const response = await instance.get<JobPublication[]>(`/job/publications/student`);
     return {
@@ -71,6 +53,53 @@ export const createJob = async (jobData: Job) => {
 export const getAllJobs = async () => {
   try {
     const response = await instance.get(`/job`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar vagas:", error);
+    throw error;
+  }
+};
+
+/*
+export const getJobPublications = async (filters?: JobFilters) => {
+  try {
+    const params = new URLSearchParams();
+
+    if (filters) {
+      filters.field_id && filters.field_id !== 'todos' && params.append('fieldId', filters.field_id)
+      filters.mode && filters.mode !== 'todos' && params.append('mode', filters.mode)
+      filters.requirements && params.append('requirements', filters.requirements)
+      filters.minSalary && params.append('minSalary', filters.minSalary)
+      filters.maxSalary && params.append('maxSalary', filters.maxSalary)
+      filters.type && filters.type !== 'todos' && params.append('type', filters.type)
+      filters.weekly_hours && params.append('weeklyHours', filters.weekly_hours)
+      filters.location && params.append('location', filters.location)
+    }
+
+    const response = await instance.get(`/job/publications/search`, { params });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar vagas:", error);
+    throw error;
+  }
+};*/
+
+export const getJobPublicationsStudent = async (filters?: JobFilters) => {
+  try {
+    const params = new URLSearchParams();
+
+    if (filters) {
+      filters.field_id && filters.field_id !== 'todos' && params.append('fieldId', filters.field_id)
+      filters.mode && filters.mode !== 'todos' && params.append('mode', filters.mode)
+      filters.requirements && params.append('requirements', filters.requirements)
+      filters.minSalary && params.append('minSalary', filters.minSalary)
+      filters.maxSalary && params.append('maxSalary', filters.maxSalary)
+      filters.type && filters.type !== 'todos' && params.append('type', filters.type)
+      filters.weekly_hours && params.append('weeklyHours', filters.weekly_hours)
+      filters.location && params.append('location', filters.location)
+    }
+
+    const response = await instance.get(`/job/publications/student/search`, { params });
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar vagas:", error);
@@ -156,52 +185,32 @@ export const validateJob = async ({
     };
   } catch (error) {
     console.error("Erro ao publicar vaga:", error);
-
-    return {
-      success: false,
-      error: "Erro ao validar vaga",
-    };
+    throw error;
   }
 };
 
-export const unpublishJob = async ({
-  status,
-  jobPublicationId,
-}: UnpublishJobRequest): Promise<ApiResponse<JobPublicationResponse>> => {
+export const favoriteJob = async (jobId: number) => {
   try {
-    const response = await instance.put<JobPublicationResponse>(
-      `/job/publications/${jobPublicationId}`,
-      { status }
-    );
-    return {
-      ...response.data,
-      success: true,
-    };
+    const response = await instance.post(`/student/favorite-job/${jobId}`);
+    return response.data;
   } catch (error) {
-    console.error("Erro ao despublicar vaga:", error);
-
-    return {
-      success: false,
-      error: "Erro ao despublicar vaga",
-    };
+    throw error;
   }
 };
 
-export const getJobsPublicationByCompany = async (): Promise<
-  ApiResponse<GetCompanyJobPublicationList>
-> => {
+export const unfavoriteJob = async (jobId: number) => {
   try {
-    const response = await instance.get<JobPublication[]>(`/job/publications/company`);
-    return {
-      jobPublications: response.data,
-      success: true,
-    };
+    await instance.delete(`/student/favorite-job/${jobId}`);
   } catch (error) {
-    return {
-      success: false,
-      error: "Erro ao buscar vagas publicadas",
-    };
+    throw error;
   }
 };
 
-
+export const getFavoriteJobs = async () => {
+  try {
+    const response = await instance.get(`/student/favorite-jobs`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
