@@ -1,5 +1,7 @@
 // cypress/integration/login.spec.ts
 
+import { register } from "../helpers/auth";
+
 describe('Auth Test', () => {
   it('should log in successfully with valid credentials', () => {
     cy.visit('/');
@@ -26,6 +28,13 @@ describe('Auth Test', () => {
         expect(parsedData.user.email).to.equal(typedEmail); 
       }
     });
+  });
+  it('should log in successfully with valid credentials', () => {
+    
+    register('cyregistration@yopmail.com', 'Senh@123', 'company')
+    
+    cy.contains('Cadastro realizado com sucesso')
+    
   });
 
   it('should appear a error message with not valid password ', () => {

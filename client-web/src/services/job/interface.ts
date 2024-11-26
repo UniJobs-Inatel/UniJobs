@@ -29,3 +29,9 @@ export interface GetAllJobToValidateResponse{
 
 export interface GetStudentsJobPublicationList extends GetAllJobToValidateResponse{}
 export interface GetCompanyJobPublicationList extends GetAllJobToValidateResponse{}
+
+export interface GetFavoriteJobsResponse{
+  job_publication_id:number,
+  student_id:number,
+  jobPublication:JobPublication
+}
