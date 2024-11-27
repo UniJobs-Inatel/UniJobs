@@ -123,7 +123,7 @@ const ExperienceForm = ({addNewExperience, selectedExperience}:ExperienceFormPro
         {...register("description")}
       />
 
-      <Button className="w-full md:w-[120px] md:self-end_date ">Salvar</Button>
+      <Button data-cy='experience-button' className="w-full md:w-[120px] md:self-end_date ">Salvar</Button>
     </form>
   );
 };

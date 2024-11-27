@@ -4,7 +4,7 @@ import { login } from "../helpers/auth";
 describe('Filtragem de Vagas', () => {
 
     beforeEach(() => {
-        login('manu@gec.inatel.br', 'senha123')
+        login('manu@gec.inatel.br', 'Senh@123')
         cy.url().should('include', '/vagas');
     });
 

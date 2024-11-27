@@ -9,5 +9,6 @@ export const createStudentProfile = async (creationData: ICreateStudentProfileRe
     return response;
   } catch (error) {
     console.error(error);
+
   }
 };

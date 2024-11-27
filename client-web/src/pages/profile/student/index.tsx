@@ -206,6 +206,7 @@ const StudentProfile = () => {
         <div className="flex flex-col gap-4">
           {experiences.map((experience, index) => (
             <div
+            data-cy='experiences'
               className="flex flex-col justify-evenly w-full border border-primary-800 rounded-lg p-1 h-[120px]"
               key={`${experience.position} ${experience.company_name} ${Math.random()}`}
             >

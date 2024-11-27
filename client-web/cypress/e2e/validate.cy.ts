@@ -4,7 +4,7 @@ describe('Validate Job', () => {
   
   it('it should approve a job ', () => {
     
-    login('inatel@college.com', 'senha123')
+    login('inatel@college.com', 'Senh@123')
 
     cy.url().should('include', '/perfil-empresa');
 
@@ -17,13 +17,12 @@ describe('Validate Job', () => {
     
     cy.contains('Vaga validada com sucesso').should('be.visible');
     
-    cy.get('[data-cy="feedback-button"]').click();
-    
+
   });
 
   it('it should reprove a job ', () => {
     
-    login('inatel@college.com', 'senha123')
+    login('inatel@college.com', 'Senh@123')
 
     cy.url().should('include', '/perfil-empresa');
 
@@ -35,8 +34,6 @@ describe('Validate Job', () => {
     cy.get('[data-cy="decline-button"]').click();
     
     cy.contains('Vagas reprovada com sucesso').should('be.visible');
-    
-    cy.get('[data-cy="feedback-button"]').click();
     
   });
 

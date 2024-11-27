@@ -2,7 +2,7 @@ import { login } from "../helpers/auth";
 
 describe('Favoritar Vagas e Listar Favoritas', () => {
     beforeEach(() => {
-        login('manu@gec.inatel.br', 'senha123')
+        login('manu@gec.inatel.br', 'Senh@123')
         cy.url().should('include', '/vagas');
     });
 

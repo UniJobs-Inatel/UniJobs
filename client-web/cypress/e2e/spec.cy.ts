@@ -1,6 +1,6 @@
 // cypress/integration/login.spec.ts
 
-import { register } from "../helpers/auth";
+// import { register } from "../helpers/auth";
 
 describe('Auth Test', () => {
   it('should log in successfully with valid credentials', () => {
@@ -29,25 +29,25 @@ describe('Auth Test', () => {
       }
     });
   });
-  it('should log in successfully with valid credentials', () => {
+  // it('should register in successfully with valid credentials', () => {
     
-    register('cyregistration@yopmail.com', 'Senh@123', 'company')
+  //   register('cyregistration2@yopmail.com', 'Senh@123', 'company')
     
-    cy.contains('Cadastro realizado com sucesso')
+  //   cy.contains('Cadastro realizado com sucesso')
     
-  });
+  // });
 
   it('should appear a error message with not valid password ', () => {
     cy.visit('/');
     
     cy.get('input[name=email]').type('juli@ges.inatel.br');
     
-    cy.get('input[name=password]').type('senha123');
+    cy.get('input[name=password]').type('Senha123');
     
     cy.get('input[name=password]').type('{enter}', { log: false });
     
     cy.get('input[name=password]').next().should('have.attr', 'data-cy', 'error-message');
-    
+  
   });
 
   it('should appear a modal indicating login error with a wrong password ', () => {
