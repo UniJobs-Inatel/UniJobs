@@ -23,7 +23,7 @@ export class MailService {
     verificationUrl: string,
   ): Promise<void> {
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'no-reply@example.com',
+      from: process.env.EMAIL_FROM || 'no-reply@unijobs.com',
       to: 'unijobs@test.com',
       subject: 'Verify your account',
       text: `Please verify your account by clicking the following link: ${verificationUrl}`,

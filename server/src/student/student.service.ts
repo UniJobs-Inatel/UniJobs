@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +11,7 @@ import { Experience } from '../entities/experience.entity';
 import { StudentProficiency } from '../entities/student-proficiency.entity';
 import { ValidEmail } from '../entities/valid-email.entity';
 import { User } from '../entities/user.entity';
+import { Tag } from '../entities/tag.entity';
 import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { CreateStudentProfileDto } from './dto/create-student-profile.dto';
 import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
@@ -23,6 +25,8 @@ export class StudentService {
   constructor(
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
     @InjectRepository(Experience)
     private readonly experienceRepository: Repository<Experience>,
     @InjectRepository(StudentProficiency)
@@ -63,7 +67,9 @@ export class StudentService {
     if (validEmail && validEmail.college) {
       return validEmail.college.id;
     } else {
-      return 1;
+      throw new BadRequestException(
+        'Não foi encontrado uma faculdade associada ao domínio do e-mail.',
+      );
     }
   }
 
@@ -77,6 +83,13 @@ export class StudentService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    const existingCPF = await this.studentRepository.findOne({
+      where: { cpf: student.cpf },
+    });
+    if (existingCPF) {
+      throw new BadRequestException('CPF já cadastrado.');
     }
 
     if (user.type !== 'student') {
@@ -183,11 +196,23 @@ export class StudentService {
   }
 
   private async handleProficiencies(studentId: number, proficiencies) {
+    // Obtenha os IDs enviados
+    const proficiencyIds = proficiencies.map((tag) => tag.id);
+
+    // Valide se os IDs existem no banco de dados
+    const existingTags = await this.tagRepository.findByIds(proficiencyIds);
+    if (existingTags.length !== proficiencyIds.length) {
+      throw new BadRequestException(
+        'Um ou mais IDs de tags fornecidos são inválidos.',
+      );
+    }
+
+    // Obtenha as proficiências já existentes
     const existingProficiencies = await this.studentProficiencyRepository.find({
       where: { student: { id: studentId } },
     });
 
-    const proficiencyIdsToKeep = proficiencies.map((tag) => tag.id);
+    // Filtre as novas proficiências para adicionar
     const newProficiencies = proficiencies.filter(
       (tag) => !existingProficiencies.some((prof) => prof.tag.id === tag.id),
     );
@@ -197,8 +222,9 @@ export class StudentService {
     }));
     await this.studentProficiencyRepository.save(newProficienciesToSave);
 
+    // Filtre as proficiências a remover
     const proficienciesToDelete = existingProficiencies.filter(
-      (prof) => !proficiencyIdsToKeep.includes(prof.tag.id),
+      (prof) => !proficiencyIds.includes(prof.tag.id),
     );
     if (proficienciesToDelete.length > 0) {
       await this.studentProficiencyRepository.remove(proficienciesToDelete);
