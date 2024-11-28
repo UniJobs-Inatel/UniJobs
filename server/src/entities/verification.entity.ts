@@ -13,7 +13,7 @@ export class Verification {
   id: number;
 
   @Column({ unique: true })
-  verificationCode: string;
+  verification_code: string;
 
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

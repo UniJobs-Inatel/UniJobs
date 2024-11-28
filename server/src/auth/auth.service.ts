@@ -48,12 +48,12 @@ export class AuthService {
 
     const verificationCode = uuidv4();
     const verification = this.verificationRepository.create({
-      verificationCode,
+      verification_code: verificationCode,
       user,
     });
     await this.verificationRepository.save(verification);
 
-    const verificationUrl = `http://localhost:4000/api/auth/verify?code=${verificationCode}`;
+    const verificationUrl = `https://unijobs.onrender.com/api/auth/verify?code=${verificationCode}`;
 
     await this.mailService.sendVerificationEmail(user.email, verificationUrl);
 
@@ -65,7 +65,7 @@ export class AuthService {
 
   async verifyAccount(verificationCode: string): Promise<void> {
     const verification = await this.verificationRepository.findOne({
-      where: { verificationCode },
+      where: { verification_code: verificationCode },
       relations: ['user'],
     });
 
