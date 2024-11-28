@@ -10,6 +10,7 @@ import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { StudentService } from './student.service';
 import { StudentController } from './student.controller';
 import { AuthModule } from '../auth/auth.module';
+import { Tag } from '../entities/tag.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from '../auth/auth.module';
       StudentProficiency,
       ValidEmail,
       User,
+      Tag,
       JobPublication,
       FavoriteJobs,
     ]),
