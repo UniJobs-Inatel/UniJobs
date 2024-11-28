@@ -12,6 +12,7 @@ import { User } from '../entities/user.entity';
 import { Verification } from '../entities/verification.entity';
 import { MailService } from '../mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
+import { ValidEmail } from '../entities/valid-email.entity';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(Verification)
     private verificationRepository: Repository<Verification>,
+    @InjectRepository(ValidEmail)
+    private readonly validEmailRepository: Repository<ValidEmail>,
     private mailService: MailService,
     private jwtService: JwtService,
   ) {}
@@ -34,6 +37,21 @@ export class AuthService {
     });
     if (existingUser) {
       throw new ConflictException('E-mail já registrado.');
+    } else if (type !== 'student' && type !== 'college' && type !== 'company') {
+      throw new BadRequestException('Tipo de usuário inválido.');
+    }
+
+    const emailDomain = email.split('@')[1];
+
+    const validEmail = await this.validEmailRepository.findOne({
+      where: { domain: emailDomain },
+      relations: ['college'],
+    });
+
+    if (!validEmail) {
+      throw new BadRequestException(
+        'Não foi encontrado uma faculdade associada ao domínio do e-mail.',
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
