@@ -16,12 +16,18 @@ import { useEffect, useState } from "react";
 import { EditIcon, Trash2Icon, X } from "lucide-react";
 import { MultiSelectInput } from "@/components/ui/multiSelectInput";
 import { Tag } from "@/domain/tags";
-import { Experience} from "@/domain/student";
+import { Experience } from "@/domain/student";
 import useAuthStore from "@/stores/authStore";
 import { useNavigate } from "react-router-dom";
-import { isoFormatter } from "@/lib/cn";
+import { formatDate, isoFormatter } from "@/lib/cn";
 import { ICreateStudentProfileRequest } from "@/services/student/interface";
-import { createStudentProfile, getAllTags } from "@/services";
+import {
+  createStudentProfile,
+  getAllTags,
+  getStudentProfile,
+} from "@/services";
+import { useModalStore } from "@/stores/modalStore";
+import { FeedBackModal } from "@/components/ui/feedbackModal.";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -34,9 +40,9 @@ const StudentProfile = () => {
 
   const [tags, setTags] = useState<Tag[]>([]);
 
-  const {user} = useAuthStore()
-  const navigate = useNavigate()
-
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const { openModal } = useModalStore();
 
   const completeRegistrationSchema = z.object({
     first_name: requiredString(),
@@ -52,6 +58,7 @@ const StudentProfile = () => {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<CompleteRegistrationData>({
     resolver: zodResolver(completeRegistrationSchema),
@@ -62,8 +69,7 @@ const StudentProfile = () => {
     },
   });
 
-  const handleLogin = async (data: CompleteRegistrationData) => {
-
+  const handleCompleteRegistration = async (data: CompleteRegistrationData) => {
     const experiencesFormatted = experiences.map(
       (experience) =>
         ({
@@ -82,7 +88,7 @@ const StudentProfile = () => {
 
     const response = await createStudentProfile(creationData);
 
-    if (response?.status == 201) navigate('/vagas')
+    if (response?.status == 201) navigate("/vagas");
   };
 
   const closeModal = () => {
@@ -118,17 +124,61 @@ const StudentProfile = () => {
     );
   };
 
+  const getStudentInfo = async () => {
+    const response = await getStudentProfile();
+
+    if (!response.success) {
+      openModal({
+        children: <FeedBackModal variant={"error"} title={response.error} />,
+      });
+      return;
+    }
+
+    reset({
+      cpf: response.cpf,
+      first_name: response.first_name,
+      last_name: response.last_name,
+    });
+
+    console.log("Experiencias", response.experiences);
+
+    setExperiences(
+      response.experiences.map(
+        (experience) =>
+          ({
+            ...experience,
+            end_date: formatDate(experience.end_date ?? ""),
+            start_date: formatDate(experience.start_date ?? ""),
+          }) as ExperienceData
+      )
+    );
+
+    const tagsResponse = await getAllTags();
+
+    if(!tagsResponse.success){
+      openModal({
+        children: <FeedBackModal variant={"error"} title={tagsResponse.error} />,
+      });
+      return;
+    }
+
+    setTags(tagsResponse.tags)
+
+    setSelectedTags(tagsResponse.tags.filter(tag =>
+      response.proficiencies.some(proficiencie => proficiencie.tag_id === tag.id)
+    ) ?? [])
+
+  };
+
   useEffect(() => {
-    getAllTags().then((response) => response && setTags(response));
+    getStudentInfo();
   }, []);
 
   return (
     <div className="pb-5">
       <h3 className=" text-2xl font-bold mb-6">Meu perfil</h3>
       <section>
-        <h4 className=" text-[16px] font-bold mb-4">
-          Informações Pessoais
-        </h4>
+        <h4 className=" text-[16px] font-bold mb-4">Informações Pessoais</h4>
         <form className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Input
             label="Nome:"
@@ -189,9 +239,7 @@ const StudentProfile = () => {
           <DialogContent className="bg-white w-[96vw] max-w-[425px] max-h-[85vh] overflow-y-scroll rounded-lg">
             <DialogHeader>
               <X className="w-4 h-4 self-end" onClick={() => closeModal()} />
-              <DialogTitle className=" ">
-                Adicionar Experiência
-              </DialogTitle>
+              <DialogTitle className=" ">Adicionar Experiência</DialogTitle>
             </DialogHeader>
             {
               <ExperienceForm
@@ -206,7 +254,7 @@ const StudentProfile = () => {
         <div className="flex flex-col gap-4">
           {experiences.map((experience, index) => (
             <div
-            data-cy='experiences'
+              data-cy="experiences"
               className="flex flex-col justify-evenly w-full border border-primary-800 rounded-lg p-1 h-[120px]"
               key={`${experience.position} ${experience.company_name} ${Math.random()}`}
             >
@@ -238,7 +286,7 @@ const StudentProfile = () => {
         <Button
           className="w-[160px] h-10 text-white bg-primary"
           type="submit"
-          onClick={handleSubmit(handleLogin)}
+          onClick={handleSubmit(handleCompleteRegistration)}
         >
           Salvar
         </Button>
