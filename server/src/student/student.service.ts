@@ -196,10 +196,8 @@ export class StudentService {
   }
 
   private async handleProficiencies(studentId: number, proficiencies) {
-    // Obtenha os IDs enviados
     const proficiencyIds = proficiencies.map((tag) => tag.id);
 
-    // Valide se os IDs existem no banco de dados
     const existingTags = await this.tagRepository.findByIds(proficiencyIds);
     if (existingTags.length !== proficiencyIds.length) {
       throw new BadRequestException(
@@ -207,25 +205,35 @@ export class StudentService {
       );
     }
 
-    // Obtenha as proficiências já existentes
     const existingProficiencies = await this.studentProficiencyRepository.find({
       where: { student: { id: studentId } },
+      relations: ['tag'],
     });
 
-    // Filtre as novas proficiências para adicionar
-    const newProficiencies = proficiencies.filter(
-      (tag) => !existingProficiencies.some((prof) => prof.tag.id === tag.id),
-    );
+    const newProficiencies = proficiencies.filter((tag) => {
+      if (!tag || !tag.id) {
+        throw new BadRequestException(
+          'Proficiencies devem conter IDs válidos.',
+        );
+      }
+      return !existingProficiencies.some((prof) => prof.tag?.id === tag.id);
+    });
+
     const newProficienciesToSave = newProficiencies.map((tag) => ({
       student: { id: studentId },
       tag: { id: tag.id },
     }));
     await this.studentProficiencyRepository.save(newProficienciesToSave);
 
-    // Filtre as proficiências a remover
-    const proficienciesToDelete = existingProficiencies.filter(
-      (prof) => !proficiencyIds.includes(prof.tag.id),
-    );
+    const proficienciesToDelete = existingProficiencies.filter((prof) => {
+      if (!prof || !prof.tag) {
+        throw new BadRequestException(
+          'Proficiências existentes são inválidas.',
+        );
+      }
+      return !proficiencyIds.includes(prof.tag.id);
+    });
+
     if (proficienciesToDelete.length > 0) {
       await this.studentProficiencyRepository.remove(proficienciesToDelete);
     }
