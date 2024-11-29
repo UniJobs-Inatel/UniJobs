@@ -10,6 +10,7 @@ import { ValidEmail } from '../entities/valid-email.entity';
 import { User } from '../entities/user.entity';
 import { FavoriteJobs } from '../entities/favorite-jobs.entity';
 import { JobPublication } from '../entities/job-publication.entity';
+import { Tag } from '../entities/tag.entity';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { RequestWithUser } from 'src/auth/request-with-user.interface';
 
@@ -22,6 +23,7 @@ describe('StudentService', () => {
   let userRepository: Repository<User>;
   let jobPublicationRepository: Repository<JobPublication>;
   let favoriteJobsRepository: Repository<FavoriteJobs>;
+  let tagRepository: Repository<Tag>;
 
   const mockStudentRepository = {
     findOne: jest.fn(),
@@ -102,6 +104,10 @@ describe('StudentService', () => {
         {
           provide: getRepositoryToken(FavoriteJobs),
           useValue: mockFavoriteJobsRepository,
+        },
+        {
+          provide: getRepositoryToken(Tag),
+          useValue: tagRepository,
         },
       ],
     }).compile();
