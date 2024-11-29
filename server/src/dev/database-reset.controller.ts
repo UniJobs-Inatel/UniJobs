@@ -9,6 +9,6 @@ export class DatabaseResetController {
   @Get('devRouteDatabaseReset-c121092u')
   async resetDatabase(@Res() res: Response): Promise<void> {
     await this.databaseResetService.resetDatabase();
-    res.redirect('http://localhost:4000/api/');
+    res.redirect('/api');
   }
 }

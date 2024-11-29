@@ -63,7 +63,9 @@ describe('AuthController', () => {
 
       await controller.verifyAccount(code, res);
       expect(service.verifyAccount).toHaveBeenCalledWith(code);
-      expect(res.redirect).toHaveBeenCalledWith('http://localhost:4000/api');
+      expect(res.redirect).toHaveBeenCalledWith(
+        'https://main.d34x6e2xoqzvoz.amplifyapp.com/',
+      );
     });
 
     it('should return 400 status if the code is invalid', async () => {

@@ -45,7 +45,7 @@ export class AuthController {
   ): Promise<void> {
     try {
       await this.authService.verifyAccount(code);
-      res.redirect('http://localhost:4000/api');
+      res.redirect('https://main.d34x6e2xoqzvoz.amplifyapp.com/');
     } catch (error) {
       if (error instanceof BadRequestException) {
         res.status(400).send('Código de verificação inválido.');
