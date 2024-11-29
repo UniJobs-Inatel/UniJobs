@@ -34,7 +34,7 @@ const MultiSelectInput = ({
 
   const toggleOption = (value: Tag) => {
     const isSelected = selectedOptions.find((option) => option.id === value.id);
-    
+
     if (isSelected) {
       onChange(selectedOptions.filter((option) => option.id !== value.id));
     } else {
@@ -70,6 +70,7 @@ const MultiSelectInput = ({
       <Label className="font-medium text-[14px] ">{label}</Label>
       <div className="relative w-full">
         <div
+          data-cy="multiSelect"
           className={cn(
             "flex h-10 w-full items-center rounded-md border border-primary text-primary-900 px-3 py-2 text-sm cursor-pointer",
             selectedOptions.length === 0 && "text-muted-foreground"
@@ -116,15 +117,18 @@ const MultiSelectInput = ({
                   key={option.id}
                   className={cn(
                     "flex items-center cursor-pointer select-none px-3 py-2 text-sm hover:bg-gray-200",
-                    selectedOptions.find((option) => option.id )
+                    selectedOptions.find((option) => option.id)
                       ? "bg-gray-100 font-medium"
                       : ""
                   )}
                   onClick={() => toggleOption(option)}
                 >
                   <input
+                    data-cy="multiSelect-item"
                     type="checkbox"
-                    checked={selectedOptions.some((selectedOption) => option.id === selectedOption.id)} 
+                    checked={selectedOptions.some(
+                      (selectedOption) => option.id === selectedOption.id
+                    )}
                     onChange={() => toggleOption(option)}
                     className="mr-2"
                   />

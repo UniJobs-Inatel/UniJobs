@@ -1,12 +1,14 @@
 // cypress/integration/login.spec.ts
 
-describe('Login Test', () => {
+// import { register } from "../helpers/auth";
+
+describe('Auth Test', () => {
   it('should log in successfully with valid credentials', () => {
     cy.visit('/');
     
     cy.get('input[name=email]').type('juli@ges.inatel.br');
     
-    cy.get('input[name=password]').type('senha123');
+    cy.get('input[name=password]').type('Senh@123');
     
     cy.get('input[name=password]').type('{enter}', { log: false });
     
@@ -27,6 +29,40 @@ describe('Login Test', () => {
       }
     });
   });
+  // it('should register in successfully with valid credentials', () => {
+    
+  //   register('cyregistration2@yopmail.com', 'Senh@123', 'company')
+    
+  //   cy.contains('Cadastro realizado com sucesso')
+    
+  // });
+
+  it('should appear a error message with not valid password ', () => {
+    cy.visit('/');
+    
+    cy.get('input[name=email]').type('juli@ges.inatel.br');
+    
+    cy.get('input[name=password]').type('Senha123');
+    
+    cy.get('input[name=password]').type('{enter}', { log: false });
+    
+    cy.get('input[name=password]').next().should('have.attr', 'data-cy', 'error-message');
+  
+  });
+
+  it('should appear a modal indicating login error with a wrong password ', () => {
+    cy.visit('/');
+    
+    cy.get('input[name=email]').type('juli@ges.inatel.br');
+    
+    cy.get('input[name=password]').type('Senh@1234');
+    
+    cy.get('input[name=password]').type('{enter}', { log: false });
+    
+    cy.contains('ERRO')
+    
+  });
+
 });
 
 describe('Job Registration Test', () => {
@@ -34,10 +70,10 @@ describe('Job Registration Test', () => {
     // Faz login com um usuário do tipo "company"
     cy.visit('/');
     cy.get('input[name=email]').type('techcorp@company.com');
-    cy.get('input[name=password]').type('senha123{enter}', { log: false });
+    cy.get('input[name=password]').type('Senh@123{enter}', { log: false });
 
     // Verifica se o login foi bem-sucedido
-    cy.url().should('include', '/vagas');
+    cy.url().should('include', '/perfil-empresa');
   });
 
   it('should successfully register a new job', () => {

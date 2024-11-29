@@ -75,7 +75,7 @@ const JobCard = ({
                         publishJob &&
                           publishJob({
                             jobId: job.id ?? 0,
-                            companyId: job.company.id ?? 0,
+                            companyId: job.company?.id ?? 0,
                           });
                       }}
                       className="bg-primary py-1 px-4 text-white border-2 border-primary-300 rounded-md"

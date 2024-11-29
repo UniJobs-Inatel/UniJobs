@@ -1,6 +1,7 @@
 import instance from "@/lib/axios";
 import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from "./interface";
 import { ApiResponse } from "../inteface";
+import { AxiosError } from "axios";
 
 export const registerUser = async (data: RegisterRequest):Promise<ApiResponse<RegisterResponse>> => {
   try {
@@ -32,11 +33,10 @@ export const loginUser = async (
     });
 
     return { ...response.data, success: true };
-  } catch (e) {
-    console.error('Erro ao fazer login', e)
-
+  } catch (e:AxiosError | unknown) {
+    
     return{
-      error:'Erro ao fazer login',
+      error:e instanceof AxiosError && e.response ? e.response.data.message  :'Erro ao fazer login',
       success:false
     }
 

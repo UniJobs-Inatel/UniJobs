@@ -1,11 +1,12 @@
 import { IGetCompanyResponse } from "@/services/company/interface"
+import { JobStatus } from "@/utils/mappers"
 
 export interface JobPublication {
   id: number
   job: Job
   publication_date: string
   publication_request_date: string
-  status: string
+  status: JobStatus
   isFavorite: boolean
 }
 

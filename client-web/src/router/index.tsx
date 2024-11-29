@@ -9,7 +9,6 @@ import { Loader } from "lucide-react";
 const Login = lazy(() => import("@pages/login"));
 const JobList = lazy(() => import("@pages/jobList"));
 const PublishedJobs = lazy(() => import("@pages/publishedJobs"));
-const FavoriteJobs = lazy(() => import("@pages/favoriteJobs"));
 const JobForm = lazy(() => import("@pages/jobForm"));
 const StudentProfile = lazy(() => import("@/pages/profile/student"));
 const CompanyProfile = lazy(() => import("@/pages/profile/company"));
@@ -30,7 +29,6 @@ export const router = createBrowserRouter([
       {
         element: <PrivateRoute />, 
         children: [
-          { path: "/vagas-favoritadas", element: <FavoriteJobs /> },
           { path: "/vagas", element: <JobList /> },
           { path: "/perfil-estudante", element: <StudentProfile /> },
           { path: "/vagas-publicadas", element: <PublishedJobs /> },

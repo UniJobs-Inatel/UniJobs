@@ -9,7 +9,7 @@ describe('routing tests', () => {
 
   it('it should go to company profile when try to access no company routes ', () => {
     
-    login('techcorp@company.com', 'senha123')
+    login('techcorp@company.com', 'Senh@123')
 
     cy.url().should('include', '/perfil-empresa');
     

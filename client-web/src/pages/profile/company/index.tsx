@@ -216,7 +216,7 @@ const CompanyProfile = () => {
           <div className="flex flex-col gap-x-2 gap-y-4 md:flex-row">
             <Input
               label="Nome da Empresa:"
-              id="lastName"
+              id="name"
               {...register("name")}
               placeholder="Nome da empresa"
               error={errors.name?.message}
@@ -227,7 +227,7 @@ const CompanyProfile = () => {
               render={({ field }) => (
                 <Input
                   label="CNPJ:"
-                  mask=" 99.999.999/0001-99"
+                  mask=" 99.999.999/9999-99"
                   inputMode="numeric"
                   id="cnpj"
                   {...field}
