@@ -40,18 +40,19 @@ export class AuthService {
     } else if (type !== 'student' && type !== 'college' && type !== 'company') {
       throw new BadRequestException('Tipo de usuário inválido.');
     }
+    if (type === 'student') {
+      const emailDomain = email.split('@')[1];
 
-    const emailDomain = email.split('@')[1];
+      const validEmail = await this.validEmailRepository.findOne({
+        where: { domain: emailDomain },
+        relations: ['college'],
+      });
 
-    const validEmail = await this.validEmailRepository.findOne({
-      where: { domain: emailDomain },
-      relations: ['college'],
-    });
-
-    if (!validEmail) {
-      throw new BadRequestException(
-        'Não foi encontrado uma faculdade associada ao domínio do e-mail.',
-      );
+      if (!validEmail) {
+        throw new BadRequestException(
+          'Não foi encontrado uma faculdade associada ao domínio do e-mail.',
+        );
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
