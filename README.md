@@ -26,7 +26,7 @@ UniJobs é uma aplicação web desenvolvida para aproximar estudantes, empresas 
 
 ## Autores
 
-- **Amanda Silva Guimarães**:
-- **Manuela Gripp Silva**:
-- **Maria Luiza Silva Raimundo**:
-- **Matheus Henrique Braga Julidori**:
+- **Amanda Silva Guimarães**
+- **Manuela Gripp Silva**
+- **Maria Luiza Silva Raimundo**
+- **Matheus Henrique Braga Julidori**
