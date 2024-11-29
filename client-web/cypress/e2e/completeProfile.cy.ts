@@ -4,12 +4,12 @@ describe('CompanyProfile', () => {
   
   it('it should complete a company profile', () => {
     
-    login('cyCompany@yopmail.com', 'Senh@123')
+    login('companyReg@yopmail.com', 'Senh@123')
 
     cy.url().should('include', '/perfil-empresa');
 
     cy.get('input[name=name]').type('TechNova Solutions"');
-    cy.get('input[name=cnpj]').type('19293703000183');
+    cy.get('input[name=cnpj]').type('98198615000179');
     cy.get('input[name=description]').type('Empresa especializada em soluções de software sob medida para startups.');
     cy.get('input[name=field_of_activity]').type('Desenvolvimento de Software');
     cy.get('input[name=contact_website]').type('https://technova.com');

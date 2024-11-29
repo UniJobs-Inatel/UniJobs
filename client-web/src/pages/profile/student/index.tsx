@@ -25,9 +25,12 @@ import {
   createStudentProfile,
   getAllTags,
   getStudentProfile,
+  updateStudentProfile,
 } from "@/services";
 import { useModalStore } from "@/stores/modalStore";
 import { FeedBackModal } from "@/components/ui/feedbackModal.";
+import { AuthResponse, UserStatus } from "@/domain/user";
+import { getTypedLocalStorage } from "@/utils/typedLocalStorage";
 
 const StudentProfile = () => {
   const [experiences, setExperiences] = useState<ExperienceData[]>([]);
@@ -81,14 +84,63 @@ const StudentProfile = () => {
 
     const creationData: ICreateStudentProfileRequest = {
       student: { ...data, cpf: onlyNumbers(data.cpf) },
-      userId: 8,
       experiences: experiencesFormatted,
       proficiencies: selectedTags.map((tag) => ({ id: tag.id })),
     };
 
-    const response = await createStudentProfile(creationData);
+    if (user?.status == UserStatus.COMPLETE) {
+      delete creationData.student.cpf
+      const updateResponse = await updateStudentProfile(creationData);
+      if (!updateResponse.success) {
+        openModal({
+          children: (
+            <FeedBackModal title={updateResponse.error} variant={"error"} />
+          ),
+          contentClassName: "w-[86vw]",
+        });
+        return;
+      }
+    }
 
-    if (response?.status == 201) navigate("/vagas");
+    const creationResponse = await createStudentProfile(creationData);
+
+    if (!creationResponse.success) {
+      openModal({
+        children: (
+          <FeedBackModal title={creationResponse.error} variant={"error"} />
+        ),
+        contentClassName: "w-[86vw]",
+      });
+      return;
+    }
+
+    openModal({
+      children: (
+        <FeedBackModal
+          onOkayClick={() => {
+            const auth = getTypedLocalStorage<{
+              user: AuthResponse;
+              accessToken: string;
+              refreshToken: string;
+            }>("session");
+            if (auth) {
+              localStorage.setItem(
+                "session",
+                JSON.stringify({
+                  user: { ...auth.user, status: UserStatus.COMPLETE },
+                  accessToken: auth.accessToken,
+                  refreshToken: auth.refreshToken,
+                })
+              );
+            }
+          }}
+          title="Perfil salvo com sucesso"
+          variant={"success"}
+        />
+      ),
+      contentClassName: "w-[86vw]",
+    });
+    
   };
 
   const closeModal = () => {
@@ -125,49 +177,55 @@ const StudentProfile = () => {
   };
 
   const getStudentInfo = async () => {
-    const response = await getStudentProfile();
-
-    if (!response.success) {
-      openModal({
-        children: <FeedBackModal variant={"error"} title={response.error} />,
-      });
-      return;
-    }
-
-    reset({
-      cpf: response.cpf,
-      first_name: response.first_name,
-      last_name: response.last_name,
-    });
-
-    console.log("Experiencias", response.experiences);
-
-    setExperiences(
-      response.experiences.map(
-        (experience) =>
-          ({
-            ...experience,
-            end_date: formatDate(experience.end_date ?? ""),
-            start_date: formatDate(experience.start_date ?? ""),
-          }) as ExperienceData
-      )
-    );
-
     const tagsResponse = await getAllTags();
 
-    if(!tagsResponse.success){
+    if (!tagsResponse.success) {
       openModal({
-        children: <FeedBackModal variant={"error"} title={tagsResponse.error} />,
+        children: (
+          <FeedBackModal variant={"error"} title={tagsResponse.error} />
+        ),
       });
       return;
     }
 
-    setTags(tagsResponse.tags)
+    setTags(tagsResponse.tags);
 
-    setSelectedTags(tagsResponse.tags.filter(tag =>
-      response.proficiencies.some(proficiencie => proficiencie.tag_id === tag.id)
-    ) ?? [])
+    if (user?.status == UserStatus.COMPLETE) {
+      const response = await getStudentProfile();
 
+      if (!response.success) {
+        openModal({
+          children: <FeedBackModal variant={"error"} title={response.error} />,
+        });
+
+        return;
+      }
+
+      reset({
+        cpf: response.cpf,
+        first_name: response.first_name,
+        last_name: response.last_name,
+      });
+
+      setExperiences(
+        response.experiences.map(
+          (experience) =>
+            ({
+              ...experience,
+              end_date: formatDate(experience.end_date ?? ""),
+              start_date: formatDate(experience.start_date ?? ""),
+            }) as ExperienceData
+        )
+      );
+
+      setSelectedTags(
+        tagsResponse.tags.filter((tag) =>
+          response.proficiencies.some(
+            (proficiencie) => proficiencie.tag_id === tag.id
+          )
+        ) ?? []
+      );
+    }
   };
 
   useEffect(() => {
