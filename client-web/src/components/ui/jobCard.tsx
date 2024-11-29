@@ -66,7 +66,7 @@ const JobCard = ({
               />
             )}
                 <div className="flex items-center gap-2">
-                  {((!job.isPublishedOnAllColleges && publishJob ) || status == JobStatus.pending ) && (
+                  {((!job.isPublishedOnAllColleges && publishJob ) || (status == JobStatus.pending && validateJobFromCard ) ) && (
                     <div
                     data-cy='publish-validate-button'
                       onClick={() => {
