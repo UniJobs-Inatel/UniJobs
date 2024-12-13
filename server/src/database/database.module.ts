@@ -50,3 +50,4 @@ import { JobTag } from '../entities/job-tag.entity';
   ],
 })
 export class DatabaseModule {}
+
